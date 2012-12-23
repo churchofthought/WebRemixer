@@ -1,0 +1,72 @@
+box-sizing()
+  -webkit-box-sizing arguments
+  -moz-box-sizing arguments
+  box-sizing arguments
+
+
+.remixer
+  > .ruler
+    white-space: nowrap
+    > *
+      display: inline-block
+      width: 8em
+      text-align: center
+      position: relative
+      box-sizing: border-box
+      border-left: 1px solid #000
+      
+      &::before
+        box-sizing: border-box
+        position: absolute
+        left: 25%
+        top: 100%
+        width: 25%
+        height: 100%
+        content: ""
+        border-right: 1px solid #000
+        border-left: @border-right
+        
+      &::after
+        box-sizing: border-box
+        position: absolute
+        right: 25%
+        top: 100%
+        width: 25%
+        height: 100%
+        content: ""
+        border-right: 1px solid #000
+        border-left: @border-right
+        
+      > *
+        position: absolute
+        left: -1px
+        top: 100%
+        width: 100%
+        height: 100%
+        border-left: 1px solid #000
+        border-bottom: @border-left
+        
+        &::before
+          position: absolute
+          bottom: 0
+          left: 12.5%
+          width: 50%
+          height: 75%
+          border-left: 1px solid #000
+          border-right: @border-left
+          content: ""
+          box-sizing: border-box
+          
+         &::after
+          position: absolute
+          bottom: 0
+          right: 12.5%
+          width: 50%
+          height: 75%
+          border-left: 1px solid #000
+          border-right: @border-left
+          content: ""
+          box-sizing: border-box
+      
+    
+  
