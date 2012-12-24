@@ -1,19 +1,18 @@
-box-sizing()
-  -webkit-box-sizing arguments
-  -moz-box-sizing arguments
-  box-sizing arguments
-
-
 .remixer
+  $border-color = #000
+  $border = 1px solid $border-color
+
   > .ruler
     white-space: nowrap
+    padding-bottom: 1.5em
+    
     > *
       display: inline-block
       width: 8em
       text-align: center
       position: relative
       box-sizing: border-box
-      border-left: 1px solid #000
+      border-left: $border
       
       &::before
         box-sizing: border-box
@@ -23,7 +22,7 @@ box-sizing()
         width: 25%
         height: 100%
         content: ""
-        border-right: 1px solid #000
+        border-right: $border
         border-left: @border-right
         
       &::after
@@ -34,7 +33,7 @@ box-sizing()
         width: 25%
         height: 100%
         content: ""
-        border-right: 1px solid #000
+        border-right: $border
         border-left: @border-right
         
       > *
@@ -43,7 +42,7 @@ box-sizing()
         top: 100%
         width: 100%
         height: 100%
-        border-left: 1px solid #000
+        border-left: $border
         border-bottom: @border-left
         
         &::before
@@ -52,7 +51,7 @@ box-sizing()
           left: 12.5%
           width: 50%
           height: 75%
-          border-left: 1px solid #000
+          border-left: $border
           border-right: @border-left
           content: ""
           box-sizing: border-box
@@ -63,7 +62,7 @@ box-sizing()
           right: 12.5%
           width: 50%
           height: 75%
-          border-left: 1px solid #000
+          border-left: $border
           border-right: @border-left
           content: ""
           box-sizing: border-box
