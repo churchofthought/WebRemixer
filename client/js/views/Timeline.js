@@ -10,7 +10,7 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
       
     var self = this;
     
-    var timelines = $.single(".remixer[data-id='%s'] > .timelines".sprintf(this.model.get("remixerId")));
+    var timelines = $.single(".remix[data-id='%s'] > .timelines".sprintf(this.model.get("remix").id));
     
     //insert timeline in the correct position
     timelines.children().each(function(){

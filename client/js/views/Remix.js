@@ -1,5 +1,5 @@
-WebRemixer.Views.Remixer = Backbone.View.extend({
-  className: "remixer",
+WebRemixer.Views.Remix = Backbone.View.extend({
+  className: "remix",
 
   initialize: function() {
     this.$el.attr({

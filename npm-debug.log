@@ -1,0 +1,42 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'nodejs', '/usr/bin/npm', 'install', 'jquery-ui' ]
+2 info using npm@1.1.69
+3 info using node@v0.8.16
+4 verbose read json /home/andrew/WebRemixer/package.json
+5 verbose read json /home/andrew/WebRemixer/package.json
+6 verbose cache add [ 'jquery-ui', null ]
+7 silly cache add name=undefined spec="jquery-ui" args=["jquery-ui",null]
+8 verbose parsed url { pathname: 'jquery-ui', path: 'jquery-ui', href: 'jquery-ui' }
+9 silly lockFile 54d470e0-jquery-ui jquery-ui
+10 verbose lock jquery-ui /home/andrew/.npm/54d470e0-jquery-ui.lock
+11 silly lockFile 54d470e0-jquery-ui jquery-ui
+12 verbose addNamed [ 'jquery-ui', '' ]
+13 verbose addNamed [ null, '' ]
+14 silly lockFile b7077c0a-jquery-ui jquery-ui@
+15 verbose lock jquery-ui@ /home/andrew/.npm/b7077c0a-jquery-ui.lock
+16 silly addNameRange { name: 'jquery-ui', range: '', hasData: false }
+17 verbose url raw jquery-ui
+18 verbose url resolving [ 'https://registry.npmjs.org/', './jquery-ui' ]
+19 verbose url resolved https://registry.npmjs.org/jquery-ui
+20 info trying registry request attempt 1 at 00:07:30
+21 http GET https://registry.npmjs.org/jquery-ui
+22 http 404 https://registry.npmjs.org/jquery-ui
+23 silly registry.get cb [ 404,
+23 silly registry.get   { server: 'CouchDB/1.2.0 (Erlang OTP/R15B)',
+23 silly registry.get     date: 'Mon, 24 Dec 2012 05:06:27 GMT',
+23 silly registry.get     'content-type': 'application/json',
+23 silly registry.get     'content-length': '52',
+23 silly registry.get     'cache-control': 'must-revalidate' } ]
+24 silly lockFile b7077c0a-jquery-ui jquery-ui@
+25 error 404 'jquery-ui' is not in the npm registry.
+25 error 404 You should bug the author to publish it
+25 error 404
+25 error 404 Note that you can also install from a
+25 error 404 tarball, folder, or http url, or git url.
+26 error System Linux 3.5.2-linode45
+27 error command "nodejs" "/usr/bin/npm" "install" "jquery-ui"
+28 error cwd /home/andrew/WebRemixer
+29 error node -v v0.8.16
+30 error npm -v 1.1.69
+31 error code E404
+32 verbose exit [ 1, true ]

@@ -1,30 +1,47 @@
 (function(){
 
-  var remixer = new WebRemixer.Views.Remixer({
-    model: new WebRemixer.Models.Remixer({id: 57})
+  var remixerModel = new WebRemixer.Models.Remix({id: 57});
+
+  var remixer = new WebRemixer.Views.Remix({
+    model: remixerModel
   });
 
   $(function(){
     remixer.$el.appendTo(document.body);
     var timeline = new WebRemixer.Views.Timeline({
-      model: new WebRemixer.Models.Timeline({remixerId: 57, num: 1})
+      model: new WebRemixer.Models.Timeline({remix: remixerModel, num: 1})
     });
     var timeline = new WebRemixer.Views.Timeline({
-      model: new WebRemixer.Models.Timeline({remixerId: 57, num: 4})
+      model: new WebRemixer.Models.Timeline({remix: remixerModel, num: 4})
     });
     var timeline = new WebRemixer.Views.Timeline({
-      model: new WebRemixer.Models.Timeline({remixerId: 57, num: 3})
+      model: new WebRemixer.Models.Timeline({remix: remixerModel, num: 3})
     });
     var timeline = new WebRemixer.Views.Timeline({
-      model: new WebRemixer.Models.Timeline({remixerId: 57, num: 2})
+      model: new WebRemixer.Models.Timeline({remix: remixerModel, num: 2})
     });
     
     var video = new WebRemixer.Models.Video({
-      videoId: "OMhEbjZK3WM"
+      sourceId: "OMhEbjZK3WM"
     });
     
+    var clip = new WebRemixer.Models.Clip({
+      video: video,
+      cutDuration: 5,
+      cutStart: 10
+    });
+    
+    var clipview = new WebRemixer.Views.Clip({model:clip});
+    
     var videoView = new WebRemixer.Views.Video({model: video});
-    videoView.$el.appendTo(document.body);
+    clipview.$el.appendTo(document.body);
+    
+    var lineclipModel = new WebRemixer.Models.TimelineClip({
+      clip: clip,
+      timeline: timeline.model,
+      remix: remixerModel
+    });
+    var lineclip = new WebRemixer.Views.TimelineClip({model:lineclipModel});
   });
   
 })();
