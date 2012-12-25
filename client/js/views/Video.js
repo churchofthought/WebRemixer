@@ -1,5 +1,5 @@
 WebRemixer.Views.Video = Backbone.View.extend({
-  className: "video",
+  className: 'video',
   
   initialize: function(){
     this.$el.draggable({
@@ -13,15 +13,15 @@ WebRemixer.Views.Video = Backbone.View.extend({
   
   getFormattedDuration: function(){
     var duration = this.model.get('duration');
-    return "%d:%02d".sprintf(duration / 60, duration % 60);
+    return '%d:%02d'.sprintf(duration / 60, duration % 60);
   },
   
   render: function(){
     this.$el.css({
-      backgroundImage: "url(%s)".sprintf(this.model.get('thumbnail'))
+      backgroundImage: 'url("%s")'.sprintf(this.model.get('thumbnail'))
     }).attr({
-      "data-title": this.model.get('title'),
-      "data-duration": this.getFormattedDuration()
+      'data-title': this.model.get('title'),
+      'data-duration': this.getFormattedDuration()
     });
   }
 });

@@ -1,16 +1,19 @@
 WebRemixer.Views.Timeline = Backbone.View.extend({
-  className: "timeline",
+  className: 'timeline',
   
   initialize: function(){
+    _.bindAll(this);
+  
     this.$el
-      .attr({"data-num": this.model.get("num")})
+      .attr({'data-num': this.model.get('num')})
       .droppable({
-      
+        accept: '.video, .clip, .timeline-clip',
+        drop: this.onDrop
       });
       
     var self = this;
     
-    var timelines = $.single(".remix[data-id='%s'] > .timelines".sprintf(this.model.get("remix").id));
+    var timelines = $.single('.remix[data-id="%s"] > .timelines'.sprintf(this.model.get('remix').id));
     
     //insert timeline in the correct position
     timelines.children().each(function(){
@@ -24,6 +27,10 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
     if (!this.$el.parent().length){
       timelines.append(this.el);
     }
+  },
+  
+  onDrop: function(event, ui){
+    ui.draggable.data("view").model.set("timeline", this.model);
   },
   
   render: function(){

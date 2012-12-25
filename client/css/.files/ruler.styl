@@ -5,6 +5,7 @@
   > .ruler
     white-space: nowrap
     padding-bottom: 1.5em
+    margin-left: -4em
     
     > *
       display: inline-block
@@ -12,7 +13,7 @@
       text-align: center
       position: relative
       box-sizing: border-box
-      border-left: $border
+      //border-left: $border
       
       &::before
         box-sizing: border-box
@@ -39,9 +40,9 @@
       > *
         position: absolute
         left: -1px
-        top: 100%
+        top: 75%
         width: 100%
-        height: 100%
+        height: 125%
         border-left: $border
         border-bottom: @border-left
         
@@ -50,7 +51,7 @@
           bottom: 0
           left: 12.5%
           width: 50%
-          height: 75%
+          height: 50%
           border-left: $border
           border-right: @border-left
           content: ""
@@ -61,7 +62,7 @@
           bottom: 0
           right: 12.5%
           width: 50%
-          height: 75%
+          height: 50%
           border-left: $border
           border-right: @border-left
           content: ""

@@ -39,7 +39,9 @@
     var lineclipModel = new WebRemixer.Models.TimelineClip({
       clip: clip,
       timeline: timeline.model,
-      remix: remixerModel
+      remix: remixerModel,
+      startTime: 5,
+      duration: 5
     });
     var lineclip = new WebRemixer.Views.TimelineClip({model:lineclipModel});
   });

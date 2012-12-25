@@ -1,4 +1,7 @@
 .clip
+  $bg-color = rgba(255,255,255,0.75)
+  $border-color = rgba(0,0,0,0.5)
+
   width: 17.7777em
   height: 10em
   background: transparent no-repeat center center
@@ -6,7 +9,7 @@
   position: relative
   overflow: hidden
   box-sizing: border-box
-  border: 1px solid rgba(0,0,0,0.5)
+  border: 1px solid $border-color
   
   &::before
     position: absolute
@@ -14,15 +17,15 @@
     left: 0
     display: inline-block
     content: attr(data-title)
-    background: rgba(255,255,255,0.75)
+    background: $bg-color
     padding: .5em 1em
-    border-bottom: 1px solid rgba(0,0,0,0.5)
+    border-bottom: 1px solid $border-color
   
   &::after
     position: absolute
     bottom: 1em
     right: 0
     content: attr(data-duration)
-    background: rgba(255,255,255,0.75)
+    background: $bg-color
     padding: .5em 1em
-    box-shadow: 0 0 .5em rgba(0,0,0,0.5);
+    box-shadow: 0 0 .5em $border-color

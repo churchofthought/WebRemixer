@@ -8,7 +8,7 @@ WebRemixer.Views.Ruler = Backbone.View.extend({
   
   render: function() {
     this.$el.empty();
-    for (var i = 1, duration = this.model.get("duration"); i <= duration; ++i){
+    for (var i = 0, duration = this.model.get("duration"); i <= duration; ++i){
       this.$el.append($("<div/>").text(i).append("<div/>"));
     }
   }
