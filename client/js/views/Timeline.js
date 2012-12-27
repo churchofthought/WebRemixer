@@ -1,6 +1,6 @@
 WebRemixer.Views.Timeline = Backbone.View.extend({
   className: 'timeline',
-  
+
   initialize: function(){
     _.bindAll(this);
   
@@ -30,7 +30,9 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
   },
   
   onDrop: function(event, ui){
-    ui.draggable.data("view").model.set("timeline", this.model);
+    var view = ui.draggable.data("view");
+    view.onDragStop();
+    view.model.set("timeline", this.model);
   },
   
   render: function(){

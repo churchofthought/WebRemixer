@@ -4,10 +4,28 @@
 
   background: transparent repeat center center
   background-size: auto 100%
-  position: relative
   height: 100%
   min-height: @height
   max-height: @height
   box-sizing: border-box
   border: 1px solid $border-color
   overflow: hidden
+  position: absolute !important
+  transition: .25s all
+ 
+  &:hover
+    .buttons
+      visibility: visible
+      opacity: 1
+  
+  &.ui-selected
+    border: 1px solid #00FF00
+     
+  .buttons
+    transition: .25s all
+    visibility: hidden
+    opacity: 0
+    font-size: 80%
+    position: absolute
+    top: 0
+    right: 0

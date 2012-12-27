@@ -1,6 +1,14 @@
 WebRemixer.Views.TimelineClip = Backbone.View.extend({
   className: 'timeline-clip',
   
+  events: {
+    'dragstop': 'onDragStop',
+    'resizestop': 'onResizeStop',
+    'click .toggle-loop': 'toggleLoop',
+    'click .duplicate': 'duplicate',
+    'click .delete': 'del'
+  },
+  
   initialize: function(){
     _.bindAll(this);
   
@@ -11,16 +19,56 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
       containment: '.timelines',
       stack: '.' + this.className,
       snap: '.timeline',
-      grid: grid,
-      stop: this.onDragStop,
+      grid: grid
     }).resizable({
       containment: 'parent',
       handles: 'e,w',
-      grid: grid,
-      stop: this.onResizeStop
+      grid: grid
     });
     
+    /*var menu = $(
+      '<ul class="timeline-clip-menu">' +
+      '<li><a href="#">Item 1</a></li>' +
+      '<li><a href="#">Item 2</a></li>' +
+      '</ul>'
+    ).menu();*/
+    
+    var $buttons = $('<div class="buttons"/>');
+    
+    var $loopLabel = $('<label for="%s"/>'.sprintf(Math.random().toString(36))).appendTo($buttons);
+
+    $buttons.append(
+    
+      $('<input id="%s" type="checkbox" class="toggle-loop"/>'.sprintf($loopLabel.attr('for'))).appendTo($buttons).button({
+        icons: {
+          primary: 'ui-icon-refresh',
+        },
+        label: 'Loop',
+        text: false
+      }),
+      
+      $('<button class="duplicate"/>').button({
+        icons: {
+          primary: 'ui-icon-copy',
+        },
+        label: 'Duplicate',
+        text: false
+      }),
+      
+      $('<button class="delete"/>').button({
+        icons: {
+          primary: 'ui-icon-close',
+        },
+        label: 'Delete',
+        text: false
+      })
+      
+    ).appendTo(this.el);
+    
+    
+    
     this.listenTo(this.model, 'change', this.render);
+    this.listenTo(this.model, 'destroy', this.remove);
     
     this.render();
   },
@@ -32,6 +80,23 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
   onResizeStop: function(){
     this.model.set("duration", this.$el.width() / WebRemixer.PX_PER_SEC);
   },
+  
+  toggleLoop: function(){
+    this.model.set("loop", !this.model.get("loop"));
+  },
+  
+  duplicate: function(){
+    var clone = this.model.clone();
+    clone.set('startTime', this.model.get('startTime') + this.model.get('duration'));
+    new WebRemixer.Views.TimelineClip({
+      model: clone
+    });
+  },
+  
+  del: function(){
+    this.model.destroy();
+  },
+  
 
   render: function(){
     $.single('.remix[data-id="%s"] > .timelines > .timeline[data-num="%s"]'
