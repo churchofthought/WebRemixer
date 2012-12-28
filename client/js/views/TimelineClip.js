@@ -24,7 +24,10 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
       containment: 'parent',
       handles: 'e,w',
       grid: grid
+    }).css({
+      position: 'absolute'
     });
+    //set position to absolute, fix for draggable
     
     /*var menu = $(
       '<ul class="timeline-clip-menu">' +
@@ -85,9 +88,9 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
     this.model.set("loop", !this.model.get("loop"));
   },
   
-  duplicate: function(){
+  duplicate: function(timeDelta){
     var clone = this.model.clone();
-    clone.set('startTime', this.model.get('startTime') + this.model.get('duration'));
+    clone.set('startTime', this.model.get('startTime') + timeDelta || this.model.get('duration'));
     new WebRemixer.Views.TimelineClip({
       model: clone
     });
@@ -99,7 +102,7 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
   
 
   render: function(){
-    $.single('.remix[data-id="%s"] > .timelines > .timeline[data-num="%s"]'
+    $.single('.remix[data-id="%s"] > .timelines > .timeline[data-num="%s"] > .timeline-clips'
       .sprintf(this.model.get('remix').id, this.model.get('timeline').get('num')))
       .append(this.el);
   

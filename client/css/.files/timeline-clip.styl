@@ -10,8 +10,8 @@
   box-sizing: border-box
   border: 1px solid $border-color
   overflow: hidden
-  position: absolute !important
-  transition: .25s all
+  transition: .5s border
+  z-index: 1
  
   &:hover
     .buttons
@@ -21,7 +21,7 @@
   &.ui-selected
     border: 1px solid #00FF00
      
-  .buttons
+  > .buttons
     transition: .25s all
     visibility: hidden
     opacity: 0
