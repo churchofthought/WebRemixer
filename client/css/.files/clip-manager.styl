@@ -1,0 +1,29 @@
+.clip-manager
+  position: fixed;
+  right: 0
+  top: 0
+  width: 32em;
+  height: 100%;
+  background: #fff
+  z-index: 3
+  
+  border-left: 2px solid rgba(0,0,0,0.5)
+  
+  > .clips
+    width: 100%
+    height: 100%
+    
+    &::before
+      width: 100%;
+      padding: 1em
+      height: 3.5em
+      display: block
+      text-align: center
+      content: 'Clips'
+      box-sizing: border-box
+      background: rgba(0,0,0,0.25)
+      border-bottom: 2px solid rgba(0,0,0,0.5)
+      margin-bottom: 1em
+  
+    > .clip
+        cursor: pointer
