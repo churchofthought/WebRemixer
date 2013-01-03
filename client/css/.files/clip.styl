@@ -10,6 +10,21 @@
   overflow: hidden
   box-sizing: border-box
   border: 1px solid $border-color
+  margin: auto
+  
+  .buttons
+    visibility: hidden
+    opacity: 0
+    transition: .25s all
+    position: absolute
+    bottom: .25em
+    right: .25em
+    font-size: 80%
+    
+  &:hover
+    .buttons
+      visibility: visible
+      opacity: 1
   
   &::before
     position: absolute
@@ -24,7 +39,7 @@
   &::after
     position: absolute
     bottom: 1em
-    right: 0
+    left: 0
     content: attr(data-duration)
     background: $bg-color
     padding: .5em 1em

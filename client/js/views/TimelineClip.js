@@ -13,12 +13,13 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
     _.bindAll(this);
   
   
-    var grid = [parseFloat($(document.body).css('fontSize')), 1];
+    var grid = [WebRemixer.PX_PER_SEC / 8, 1];
     
     this.$el.data("view", this).draggable({
       containment: '.timelines',
       stack: '.' + this.className,
-      snap: '.timeline',
+//      snap: '.timeline',
+//      snapTolerance: WebRemixer.PX_PER_SEC / 16,
       grid: grid
     }).resizable({
       containment: 'parent',
@@ -71,51 +72,66 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
     
     
     this.listenTo(this.model, 'change', this.render);
+    this.listenTo(this.model, 'change:timeline', this.onTimelineChange);
     this.listenTo(this.model, 'destroy', this.remove);
     
+    //kickstart it
+    this.onTimelineChange();
     this.render();
   },
   
   onDragStop: function(){
-    this.model.set("startTime", this.$el.position().left / WebRemixer.PX_PER_SEC);
+    this.model.set('startTime', this.$el.position().left / WebRemixer.PX_PER_SEC);
   },
   
   onResizeStop: function(){
-    this.model.set("duration", this.$el.width() / WebRemixer.PX_PER_SEC);
+    this.model.set({
+      startTime: this.$el.position().left / WebRemixer.PX_PER_SEC,
+      duration: this.$el.width() / WebRemixer.PX_PER_SEC
+    });
   },
   
   toggleLoop: function(){
-    this.model.set("loop", !this.model.get("loop"));
+    this.model.set('loop', !this.model.get('loop'));
   },
   
   duplicate: function(timeDelta){
     var clone = this.model.clone();
-    clone.set('startTime', this.model.get('startTime') + timeDelta || this.model.get('duration'));
-    new WebRemixer.Views.TimelineClip({
+    clone.set('startTime', this.model.get('startTime') + (typeof timeDelta === 'number' && timeDelta || this.model.get('duration')));
+    var newView = new WebRemixer.Views.TimelineClip({
       model: clone
     });
+    if (this.$el.hasClass("ui-selected")){
+      newView.$el.addClass("ui-selected");
+      this.$el.removeClass("ui-selected");
+    }   
   },
   
   del: function(){
     this.model.destroy();
   },
   
-
-  render: function(){
+  onTimelineChange: function(){
     $.single('.remix[data-id="%s"] > .timelines > .timeline[data-num="%s"] > .timeline-clips'
       .sprintf(this.model.get('remix').id, this.model.get('timeline').get('num')))
       .append(this.el);
-  
+  },
+
+  render: function(){
     var clip = this.model.get('clip');
     var video = clip.get('video');
     
     this.$el.css({
       top: '',
       background: 'url("%s")'.sprintf(video.get('thumbnail')),
+      'background-size': WebRemixer.EMS_PER_SEC * (this.model.get('loop') ? 
+        clip.get('cutDuration') :  
+        video.get('duration')
+        ) + 'em' + ' 100%',
       left: WebRemixer.EMS_PER_SEC * this.model.get('startTime') + 'em',
       width: WebRemixer.EMS_PER_SEC * this.model.get('duration') + 'em'
     }).attr({
-      
+      'data-title': clip.get('title')
     });
   }
   

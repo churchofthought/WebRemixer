@@ -28,13 +28,13 @@
     var clip = new WebRemixer.Models.Clip({
       video: video,
       cutDuration: 5,
-      cutStart: 10
+      cutStart: 10,
+      remix: remixerModel
     });
     
     var clipview = new WebRemixer.Views.Clip({model:clip});
     
     var videoView = new WebRemixer.Views.Video({model: video});
-    clipview.$el.appendTo(document.body);
     
     var lineclipModel = new WebRemixer.Models.TimelineClip({
       clip: clip,

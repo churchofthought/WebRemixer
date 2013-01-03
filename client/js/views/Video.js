@@ -2,9 +2,8 @@ WebRemixer.Views.Video = Backbone.View.extend({
   className: 'video',
   
   initialize: function(){
-    this.$el.draggable({
-      
-    });
+  
+    this.$el.data('view', this);
   
     this.listenTo(this.model, 'change', this.render);
     

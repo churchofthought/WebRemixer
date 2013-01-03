@@ -6,15 +6,16 @@ WebRemixer.Models.Video = Backbone.Model.extend({
   initialize: function(){
     _.bindAll(this);
     
-
-    $.get('https://gdata.youtube.com/feeds/api/videos/%s'.sprintf(this.get('sourceId')), { 
-      v: 2.1,
-      alt: 'jsonc' 
-    }, this.gotVideoData);
+    
+    if (!this.get('title')){
+      $.get('https://gdata.youtube.com/feeds/api/videos/%s'.sprintf(this.get('sourceId')), { 
+        v: 2.1,
+        alt: 'jsonc' 
+      }, this.gotVideoData);
+    }
   },
   
   gotVideoData: function(res){
-    console.log(res);
     var data = res.data;
     
     this.set({
@@ -22,6 +23,5 @@ WebRemixer.Models.Video = Backbone.Model.extend({
       duration: data.duration,
       thumbnail: data.thumbnail.hqDefault
     });
-    
   }
 });

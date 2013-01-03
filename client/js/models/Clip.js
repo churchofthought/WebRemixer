@@ -7,8 +7,15 @@ WebRemixer.Models.Clip = Backbone.Model.extend({
   },
   
   initialize: function(){
-    // trigger a change event, everytime our video changes
-    this.listenTo(this.get('video'), 'change', _.bind(this.trigger, this, "change")); 
+    this.onVideoTitleChange();
+    this.listenTo(this.get('video'), 'change:title', this.onVideoTitleChange);
+    this.listenTo(this.get('video'), 'change', _.bind(this.trigger, this, "change"));
+  },
+  
+  onVideoTitleChange: function(){
+    if (!this.get('title')){
+      this.set('title', this.get('video').get('title'));
+    }
   }
   
 });
