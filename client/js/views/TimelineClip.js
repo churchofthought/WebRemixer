@@ -18,9 +18,10 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
     this.$el.data("view", this).draggable({
       containment: '.timelines',
       stack: '.' + this.className,
-//      snap: '.timeline',
+      snap: '.timeline',
 //      snapTolerance: WebRemixer.PX_PER_SEC / 16,
-      grid: grid
+      grid: grid,
+      helper: this.getDraggableHelper
     }).resizable({
       containment: 'parent',
       handles: 'e,w',
@@ -80,8 +81,20 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
     this.render();
   },
   
+  getDraggableHelper: function(){
+    this.origDraggableParent = this.$el.parent();
+    
+    var offset = this.$el.offset();
+    
+    return this.$el.appendTo(this.$el.closest('.timelines')).offset(offset);
+  },
+  
   onDragStop: function(){
-    this.model.set('startTime', this.$el.position().left / WebRemixer.PX_PER_SEC);
+    if (this.origDraggableParent){
+      this.$el.appendTo(this.origDraggableParent);
+      this.model.set('startTime', (this.$el.position().left - this.origDraggableParent.offset().left) / WebRemixer.PX_PER_SEC);
+      this.origDraggableParent = null;
+    }
   },
   
   onResizeStop: function(){
@@ -112,6 +125,7 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
   },
   
   onTimelineChange: function(){
+    this.onDragStop();
     $.single('.remix[data-id="%s"] > .timelines > .timeline[data-num="%s"] > .timeline-clips'
       .sprintf(this.model.get('remix').id, this.model.get('timeline').get('num')))
       .append(this.el);

@@ -83,11 +83,13 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
   },
   
   duplicateSelection: function(){
+    var duration = this.model.get('selection').duration;
+  
     var $selectedClips = this.getSelectedClips();
     if (!$selectedClips) return;
     
     $selectedClips.each(function(){
-      $(this).data('view').duplicate(selection.duration);
+      $(this).data('view').duplicate(duration);
     })
     
   },
@@ -144,7 +146,6 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
     var view = ui.draggable.data('view');
     
     if (view instanceof WebRemixer.Views.TimelineClip){
-      view.onDragStop();
       view.model.set('timeline', this.model);
     }else if (view instanceof WebRemixer.Views.Clip){
       new WebRemixer.Views.TimelineClip({
