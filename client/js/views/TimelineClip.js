@@ -72,12 +72,14 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
     
     
     
-    this.listenTo(this.model, 'change', this.render);
-    this.listenTo(this.model, 'change:timeline', this.onTimelineChange);
-    this.listenTo(this.model, 'destroy', this.remove);
+    this.listenTo(this.model, {
+       change: this.render,
+       destroy: this.remove,
+      'change:timeline': this.onTimelineChange
+    });
     
     //kickstart it
-    this.onTimelineChange();
+    $(this.onTimelineChange);
     this.render();
   },
   
@@ -126,6 +128,7 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
   
   onTimelineChange: function(){
     this.onDragStop();
+    this.render();
     $.single('.remix[data-id="%s"] > .timelines > .timeline[data-num="%s"] > .timeline-clips'
       .sprintf(this.model.get('remix').id, this.model.get('timeline').get('num')))
       .append(this.el);

@@ -7,17 +7,19 @@ WebRemixer.Views.Ruler = Backbone.View.extend({
     this.$markings = $('<div/>').addClass('markings').appendTo(this.el);
     this.$timeHand = $('<div/>').addClass('timeHand').appendTo(this.el);
   
-    this.listenTo(this.model.get('remix'), {
+    var remix = this.model.get('remix');
+    
+    this.listenTo(remix, {
       'change:duration' : this.render,
       'change:playTime' : this.onPlaytimeChange
     });
-    this.onPlaytimeChange();
+    this.onPlaytimeChange(remix, remix.get('playTime'));
     this.render();
   },
   
-  onPlaytimeChange: function(){
+  onPlaytimeChange: function(model, val){
     this.$timeHand.css({
-      left: WebRemixer.EMS_PER_SEC * this.model.get('remix').get('playTime') + 'em'
+      left: WebRemixer.EMS_PER_SEC * val + 'em'
     });
   },
   

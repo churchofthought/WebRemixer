@@ -43,8 +43,10 @@ WebRemixer.Views.ClipInspector = Backbone.View.extend({
     
     
     
-    this.listenTo(this.model, 'change:open', this.onVisibilityChange);
-    this.listenTo(this.model, 'change:clip', this.onClipChange);
+    this.listenTo(this.model, {
+      'change:open': this.onVisibilityChange,
+      'change:clip': this.onClipChange
+    });
     this.listenTo(this.model.get('videoFinder'), 'change:video', this.onVideoFinderVideoChanged);
     
     $(this.onLoad);

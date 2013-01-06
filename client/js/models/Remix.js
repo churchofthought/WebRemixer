@@ -10,6 +10,7 @@ WebRemixer.Models.Remix = Backbone.Model.extend({
     };
     
     this.set({
+       playControls: new WebRemixer.Models.PlayControls(opts),
               ruler: new WebRemixer.Models.Ruler(opts),
         clipManager: new WebRemixer.Models.ClipManager(opts),
       clipInspector: new WebRemixer.Models.ClipInspector(opts)

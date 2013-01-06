@@ -7,10 +7,7 @@ WebRemixer.Views.Remix = Backbone.View.extend({
     'menuselect' : 'onMenuSelect',
     'contextmenu .timeline-clips' : 'onContextMenu',
     'contextmenu .selection' : 'onContextMenu',
-    'mousedown .timelines' : 'onTimelinesMousedown',
-    'click .play' : 'onPlayClick',
-    'click .stop' : 'onStopClick',
-    'click .restart' : 'onRestartClick'
+    'mousedown .timelines' : 'onTimelinesMousedown'
   },
   
 
@@ -22,28 +19,10 @@ WebRemixer.Views.Remix = Backbone.View.extend({
       'data-id': this.model.id
     });
     
-    this.$playcontrols = $('<div/>').addClass('play-controls').appendTo(this.el);
-    
-    this.$play = $('<button class="play">Play</button>').button({
-    	text: false,
-    	icons: {
-    		primary: 'ui-icon-play'
-    	}
-    }).appendTo(this.$playcontrols);
-     
-    $('<button class="stop">Stop</button>').button({
-    	text: false,
-    	icons: {
-    		primary: 'ui-icon-stop'
-    	}
-    }).appendTo(this.$playcontrols);
-
-    $('<button class="restart">Restart</button>').button({
-  		text: false,
-  		icons: {
-  			primary: 'ui-icon-seek-start'
-  		}
-  	}).appendTo(this.$playcontrols);
+    this.playControls = new WebRemixer.Views.PlayControls({
+      model: this.model.get('playControls')
+    });
+    this.playControls.$el.appendTo(this.el);
   	
     
     this.$contextMenu = $('<ul/>')
@@ -78,30 +57,16 @@ WebRemixer.Views.Remix = Backbone.View.extend({
     this.render();
   },
   
-  onPlayClick: function(){
-    this.model.set('playing', true);
-  },
-  
-  onStopClick: function(){
-    this.model.set('playing', false);
-  },
-  
-  onRestartClick: function(){
-    
-  },
-  
   onPlayingChange: function(){
     if (this.model.get('playing')){
       this.play();
     }else{
-      this.stop();
+      this.pause();
     }
   },
   
   play: function(){
-    this.model.set('playTime', 0);
-    
-    this.playStartTime = new Date() * 1;
+    this.playStartTime = new Date() * 1 - this.model.get('playTime') * 1000;
     this.playInterval = setInterval(this.playProcedure, 0);
   },
   
@@ -109,7 +74,7 @@ WebRemixer.Views.Remix = Backbone.View.extend({
     this.model.set('playTime', ((new Date() * 1) - this.playStartTime) / 1000);
   },
   
-  stop: function(){
+  pause: function(){
     clearInterval(this.playInterval);
   },
   

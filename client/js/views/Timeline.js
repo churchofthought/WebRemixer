@@ -2,7 +2,8 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
   className: 'timeline',
   
   events: {
-    'click .toggle-height' : 'onToggleHeightClick'
+    'click .toggle-height' : 'onToggleHeightClick',
+    'drop .timeline-clips' : 'onDrop'
   },
 
   initialize: function(){
@@ -29,18 +30,25 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
       }).appendTo(this.$header);
       
     this.$clips = $('<div/>').addClass('timeline-clips').droppable({
-      accept: '.video, .clip, .timeline-clip',
-      drop: this.onDrop
+      accept: '.clip, .timeline-clip',
+      tolerance: 'pointer'
     }).appendTo(this.el);
       
     $('<div/>').addClass('selection').appendTo(this.el);
-      
-    var self = this;
     
+    $(this.appendToTimelines);
+    
+    this.listenTo(this.model, 'change:collapsed', this.onCollapsedChange);
+    this.listenTo(this.model.get('remix'), 'change:selection', this.onSelectionChange);
+  },
+  
+  appendToTimelines: function(){
+    var self = this;
+  
     var timelines = $.single('.remix[data-id="%s"] > .timelines'.sprintf(this.model.get('remix').id));
     
     //insert timeline in the correct position
-    timelines.children().each(function(){
+    timelines.children('.timeline').each(function(){
       if ($(this).attr('data-num') > self.model.get('num')){
         self.$el.insertBefore(this);
         return false;
@@ -51,9 +59,6 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
     if (!this.$el.parent().length){
       timelines.append(this.el);
     }
-    
-    this.listenTo(this.model, 'change:collapsed', this.onCollapsedChange);
-    this.listenTo(this.model.get('remix'), 'change:selection', this.onSelectionChange);
   },
   
   onToggleHeightClick: function(){
@@ -154,6 +159,7 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
             timeline: this.model,
             clip: view.model,
             startTime: (ui.offset.left - this.$clips.offset().left) / WebRemixer.PX_PER_SEC,
+            loop: true
           })
       });
     }

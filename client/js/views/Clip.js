@@ -3,6 +3,8 @@ WebRemixer.Views.Clip = Backbone.View.extend({
   className: 'clip',
   
   initialize: function(){
+    _.bindAll(this);
+  
     this.$el
       .data('view', this)
       .draggable({
@@ -22,11 +24,13 @@ WebRemixer.Views.Clip = Backbone.View.extend({
     ).appendTo(this.el);
       
     if (this.model.get('remix')){
-      this.onRemixChange();
+      $(this.onRemixChange);
     }
     
-    this.listenTo(this.model, 'change:remix', this.onRemixChange);
-    this.listenTo(this.model, 'change', this.render);
+    this.listenTo(this.model, {
+       change: this.render,
+      'change:remix': this.onRemixChange
+    });
     this.render();
   },
   

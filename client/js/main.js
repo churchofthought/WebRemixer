@@ -1,13 +1,16 @@
 (function(){
 
-  var remixerModel = new WebRemixer.Models.Remix({id: 57});
+  window.onYouTubeIframeAPIReady = function(){
+  var remixerModel = new WebRemixer.Models.Remix({id: 57, playTime: 0});
 
   var remixer = new WebRemixer.Views.Remix({
     model: remixerModel
   });
 
-  $(function(){
-    remixer.$el.appendTo(document.body);
+
+    $(function(){
+      remixer.$el.appendTo(document.body);
+    });
     var timeline = new WebRemixer.Views.Timeline({
       model: new WebRemixer.Models.Timeline({remix: remixerModel, num: 1})
     });
@@ -22,7 +25,16 @@
     });
     
     var video = new WebRemixer.Models.Video({
-      sourceId: "OMhEbjZK3WM"
+      ytVideoId: "OMhEbjZK3WM"
+    });
+    
+    var videoPlayer = new WebRemixer.Models.VideoPlayer({
+      video: video
+    });
+    
+    var videoPlayerView = new WebRemixer.Views.VideoPlayer({
+      el: $("<div/>").appendTo(document.body),
+      model: videoPlayer
     });
     
     var clip = new WebRemixer.Models.Clip({
@@ -44,6 +56,6 @@
       duration: 5
     });
     var lineclip = new WebRemixer.Views.TimelineClip({model:lineclipModel});
-  });
   
+  }
 })();
