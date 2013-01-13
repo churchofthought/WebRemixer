@@ -1,5 +1,6 @@
 var WebRemixer = {
   Util: {},
   Views: {},
-  Models: {}
+  Models: {},
+  Collections: {}
 };

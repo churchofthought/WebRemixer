@@ -10,7 +10,10 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
     _.bindAll(this);
   
     this.$el
-      .attr({'data-num': this.model.get('num')})
+      .attr({
+        id: this.model.cid,
+        'data-num': this.model.get('num')
+      })
       .data('view', this);
       
     this.$header = $('<div/>')
@@ -29,23 +32,35 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
         text: false
       }).appendTo(this.$header);
       
-    this.$clips = $('<div/>').addClass('timeline-clips').droppable({
+    this.$timelineClips = $('<div/>').addClass('timeline-clips').droppable({
       accept: '.clip, .timeline-clip',
       tolerance: 'pointer'
     }).appendTo(this.el);
       
     $('<div/>').addClass('selection').appendTo(this.el);
     
-    $(this.appendToTimelines);
+
+    this.listenTo(this.model, {
+      'change:collapsed': this.onCollapsedChange,
+      'change:remix': this.onRemixChange
+    });
     
-    this.listenTo(this.model, 'change:collapsed', this.onCollapsedChange);
     this.listenTo(this.model.get('remix'), 'change:selection', this.onSelectionChange);
+    
+    this.model.trigger('change:remix');
   },
   
-  appendToTimelines: function(){
+  onRemixChange: function(){
+    var remix = this.model.get('remix');
+    
+    if (!remix){
+      this.$el.remove();
+      return;
+    }
+  
     var self = this;
   
-    var timelines = $.single('.remix[data-id="%s"] > .timelines'.sprintf(this.model.get('remix').id));
+    var timelines = $.single('.remix#%s > .timelines'.sprintf(remix.cid));
     
     //insert timeline in the correct position
     timelines.children('.timeline').each(function(){
@@ -112,7 +127,7 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
     var selection = this.model.get('selection');
     if (!selection) return;
     
-    var $selectedClips = this.$clips.find('.timeline-clip.ui-selected');
+    var $selectedClips = this.$timelineClips.find('.timeline-clip.ui-selected');
 
     return $selectedClips.size() && $selectedClips;
   },
@@ -136,7 +151,7 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
         width: selection.width
       });
       this.model.set('selection', {
-        startTime: (selection.offset.left - this.$clips.offset().left) / WebRemixer.PX_PER_SEC,
+        startTime: (selection.offset.left - this.$timelineClips.offset().left) / WebRemixer.PX_PER_SEC,
         duration: selection.width / WebRemixer.PX_PER_SEC
       });
     }else{
@@ -158,7 +173,7 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
           new WebRemixer.Models.TimelineClip({
             timeline: this.model,
             clip: view.model,
-            startTime: (ui.offset.left - this.$clips.offset().left) / WebRemixer.PX_PER_SEC,
+            startTime: (ui.offset.left - this.$timelineClips.offset().left) / WebRemixer.PX_PER_SEC,
             loop: true
           })
       });

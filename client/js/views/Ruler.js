@@ -13,7 +13,7 @@ WebRemixer.Views.Ruler = Backbone.View.extend({
       'change:duration' : this.render,
       'change:playTime' : this.onPlaytimeChange
     });
-    this.onPlaytimeChange(remix, remix.get('playTime'));
+    remix.trigger('change:playTime', remix, remix.get('playTime'));
     this.render();
   },
   

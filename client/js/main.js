@@ -1,7 +1,7 @@
 (function(){
 
   window.onYouTubeIframeAPIReady = function(){
-  var remixerModel = new WebRemixer.Models.Remix({id: 57, playTime: 0});
+  var remixerModel = new WebRemixer.Models.Remix({id: 57, playTime: 7});
 
   var remixer = new WebRemixer.Views.Remix({
     model: remixerModel
@@ -14,18 +14,18 @@
     var timeline = new WebRemixer.Views.Timeline({
       model: new WebRemixer.Models.Timeline({remix: remixerModel, num: 1})
     });
-    var timeline = new WebRemixer.Views.Timeline({
+    var timeline2 = new WebRemixer.Views.Timeline({
       model: new WebRemixer.Models.Timeline({remix: remixerModel, num: 4})
     });
-    var timeline = new WebRemixer.Views.Timeline({
+    var timeline3 = new WebRemixer.Views.Timeline({
       model: new WebRemixer.Models.Timeline({remix: remixerModel, num: 3})
     });
-    var timeline = new WebRemixer.Views.Timeline({
+    var timeline4 = new WebRemixer.Views.Timeline({
       model: new WebRemixer.Models.Timeline({remix: remixerModel, num: 2})
     });
     
     var video = new WebRemixer.Models.Video({
-      ytVideoId: "OMhEbjZK3WM"
+      sourceVideoId: "OMhEbjZK3WM"
     });
     
     var videoPlayer = new WebRemixer.Models.VideoPlayer({
@@ -40,11 +40,10 @@
     var clip = new WebRemixer.Models.Clip({
       video: video,
       cutDuration: 5,
-      cutStart: 10,
-      remix: remixerModel
+      cutStart: 10
     });
     
-    var clipview = new WebRemixer.Views.Clip({model:clip});
+    remixerModel.get('clips').add(clip);
     
     var videoView = new WebRemixer.Views.Video({model: video});
     
@@ -56,6 +55,35 @@
       duration: 5
     });
     var lineclip = new WebRemixer.Views.TimelineClip({model:lineclipModel});
+    
+        var lineclipModel = new WebRemixer.Models.TimelineClip({
+      clip: clip,
+      timeline: timeline.model,
+      remix: remixerModel,
+      startTime: 10,
+      duration: 5
+    });
+    var lineclip = new WebRemixer.Views.TimelineClip({model:lineclipModel});
+    
+        var lineclipModel = new WebRemixer.Models.TimelineClip({
+      clip: clip,
+      timeline: timeline2.model,
+      remix: remixerModel,
+      startTime: 5,
+      duration: 5
+    });
+    var lineclip = new WebRemixer.Views.TimelineClip({model:lineclipModel});
+    
+        var lineclipModel = new WebRemixer.Models.TimelineClip({
+      clip: clip,
+      timeline: timeline4.model,
+      remix: remixerModel,
+      startTime: 5,
+      duration: 5
+    });
+    var lineclip = new WebRemixer.Views.TimelineClip({model:lineclipModel});
+    
+    
   
   }
 })();

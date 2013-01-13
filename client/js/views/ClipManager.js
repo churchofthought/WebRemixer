@@ -14,7 +14,23 @@ WebRemixer.Views.ClipManager = Backbone.View.extend({
     this.$clips = $('<div/>').addClass('clips').appendTo(this.el);
   
   
+    this.listenTo(this.model.get('remix').get('clips'), {
+      add: this.onClipsAdd,
+      remove: this.onClipsRemove
+    });
+  
     this.render();
+  },
+  
+  onClipsAdd: function(model){
+    var clip = new WebRemixer.Views.Clip({
+      model: model
+    });
+    this.$clips.append(clip.el);
+  },
+  
+  onClipsRemove: function(model){
+    this.$clips.single('#' + model.cid).data('view').remove();
   },
   
   inspect: function(event){

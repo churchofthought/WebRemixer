@@ -5,8 +5,8 @@ WebRemixer.Views.Remix = Backbone.View.extend({
     'selectablestart' : 'onSelectStart',
     'selectablestop' : 'onSelectStop',
     'menuselect' : 'onMenuSelect',
-    'contextmenu .timeline-clips' : 'onContextMenu',
-    'contextmenu .selection' : 'onContextMenu',
+    //'contextmenu .timeline-clips' : 'onContextMenu',
+    //'contextmenu .selection' : 'onContextMenu',
     'mousedown .timelines' : 'onTimelinesMousedown'
   },
   
@@ -16,7 +16,7 @@ WebRemixer.Views.Remix = Backbone.View.extend({
     _.bindAll(this);
   
     this.$el.attr({
-      'data-id': this.model.id
+      id: this.model.cid
     });
     
     this.playControls = new WebRemixer.Views.PlayControls({

@@ -6,6 +6,9 @@ WebRemixer.Views.Clip = Backbone.View.extend({
     _.bindAll(this);
   
     this.$el
+      .attr({
+        id: this.model.cid
+      })
       .data('view', this)
       .draggable({
         snap: '.timeline',
@@ -23,23 +26,13 @@ WebRemixer.Views.Clip = Backbone.View.extend({
       })
     ).appendTo(this.el);
       
-    if (this.model.get('remix')){
-      $(this.onRemixChange);
-    }
-    
     this.listenTo(this.model, {
-       change: this.render,
-      'change:remix': this.onRemixChange
+       change: this.render
     });
-    this.render();
+    
+    this.model.trigger('change');
   },
   
-  onRemixChange: function(){
-    $.single('.remix[data-id="%s"] > .clip-manager > .clips'
-      .sprintf(this.model.get('remix').id))
-      .append(this.el);
-  },
-
   render: function(){
     var video = this.model.get('video');
     

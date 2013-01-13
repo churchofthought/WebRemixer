@@ -11,7 +11,7 @@ WebRemixer.Views.VideoPlayer = Backbone.View.extend({
     
     this.$video = $('<iframe/>').attr({
       id: Math.random().toString(36),
-      src: 'http://www.youtube.com/embed/%s?origin=http://%s&enablejsapi=1&html5=1&autoplay=1&controls=0'.sprintf(this.model.get('video').get('ytVideoId'),location.host)
+      src: 'http://www.youtube.com/embed/%s?origin=http://%s&enablejsapi=1&html5=1&autoplay=1&controls=0'.sprintf(this.model.get('video').get('sourceVideoId'),location.host)
     }).appendTo(this.el);
     
     this.player = new YT.Player(this.$video.attr('id'), {

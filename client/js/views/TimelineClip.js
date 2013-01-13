@@ -14,8 +14,10 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
   
   
     var grid = [WebRemixer.PX_PER_SEC / 8, 1];
-    
-    this.$el.data("view", this).draggable({
+
+    this.$el.data("view", this).attr({
+      id: this.model.cid
+    }).draggable({
       containment: '.timelines',
       stack: '.' + this.className,
       snap: '.timeline',
@@ -78,9 +80,7 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
       'change:timeline': this.onTimelineChange
     });
     
-    //kickstart it
-    $(this.onTimelineChange);
-    this.render();
+    this.model.trigger('change:timeline');
   },
   
   getDraggableHelper: function(){
@@ -129,8 +129,8 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
   onTimelineChange: function(){
     this.onDragStop();
     this.render();
-    $.single('.remix[data-id="%s"] > .timelines > .timeline[data-num="%s"] > .timeline-clips'
-      .sprintf(this.model.get('remix').id, this.model.get('timeline').get('num')))
+    $.single('.timeline#%s > .timeline-clips'
+      .sprintf(this.model.get('timeline').cid))
       .append(this.el);
   },
 

@@ -14,6 +14,14 @@ WebRemixer.Views.PlayControls = Backbone.View.extend({
   
     this.$el.append(
     
+      $('<button class="restart"/>').button({
+    		text: false,
+    		icons: {
+    			primary: 'ui-icon-seek-start'
+    		},
+    		label: 'Restart'
+    	}),
+    	
       this.$play = $('<button class="play"/>').button({
       	text: false,
       	icons: {
@@ -28,15 +36,9 @@ WebRemixer.Views.PlayControls = Backbone.View.extend({
       		primary: 'ui-icon-stop'
       	},
       	label: 'Stop'
-      }),
+      })
 
-      $('<button class="restart"/>').button({
-    		text: false,
-    		icons: {
-    			primary: 'ui-icon-seek-start'
-    		},
-    		label: 'Restart'
-    	})
+      
     	
     );
     

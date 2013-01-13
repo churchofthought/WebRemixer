@@ -7,7 +7,7 @@ WebRemixer.Views.Video = Backbone.View.extend({
   
     this.listenTo(this.model, 'change', this.render);
     
-    this.render();
+    this.model.trigger('change');
   },
   
   getFormattedDuration: function(){
