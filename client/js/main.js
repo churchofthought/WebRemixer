@@ -28,15 +28,6 @@
       sourceVideoId: "OMhEbjZK3WM"
     });
     
-    var videoPlayer = new WebRemixer.Models.VideoPlayer({
-      video: video
-    });
-    
-    var videoPlayerView = new WebRemixer.Views.VideoPlayer({
-      el: $("<div/>").appendTo(document.body),
-      model: videoPlayer
-    });
-    
     var clip = new WebRemixer.Models.Clip({
       video: video,
       cutDuration: 5,

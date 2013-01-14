@@ -43,6 +43,7 @@ timelineClipsByVideo: {},
       var needed = 0;
       for (var i = timelineClips.length; i--; ){
         var curr = timelineClips.at(i);
+        console.log(curr.toJSON());
         var intersections = 0;
         for (var z = timelineClips.length; z--; ){
           var other = timelineClips.at(z);
@@ -58,6 +59,8 @@ timelineClipsByVideo: {},
   },
   
   allocatePlayersForVideo: function(video, needed){
+    console.log(video.toJSON(), "needed %s".sprintf(needed));
+  
     var videoPlayersByVideo = this.get('videoPlayersByVideo');
   
     var videoPlayers = videoPlayersByVideo[video.cid];
@@ -67,11 +70,15 @@ timelineClipsByVideo: {},
     }
     
     while (videoPlayers.length < needed){
-      videoPlayers.add(
+      var videoPlayer = 
         new WebRemixer.Models.VideoPlayer({
           video: video
-        })
-      );
+        });
+      videoPlayers.add(videoPlayer);
+      new WebRemixer.Views.VideoPlayer({
+        el: $("<div/>").appendTo(document.body),
+        model: videoPlayer
+      });
     }
   },
   

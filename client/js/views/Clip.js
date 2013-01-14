@@ -4,7 +4,7 @@ WebRemixer.Views.Clip = Backbone.View.extend({
   
   initialize: function(){
     _.bindAll(this);
-  
+    
     this.$el
       .attr({
         id: this.model.cid
@@ -36,9 +36,13 @@ WebRemixer.Views.Clip = Backbone.View.extend({
   render: function(){
     var video = this.model.get('video');
     
-    this.$el.css({
-      backgroundImage: 'url("%s")'.sprintf(video.get('thumbnail'))
-    }).attr({
+    if (video){
+      this.$el.css({
+        backgroundImage: 'url("%s")'.sprintf(video.get('thumbnail'))
+      });
+    }
+    
+    this.$el.attr({
       'data-title': this.model.get('title'),
       'data-duration': this.model.get('cutDuration') + 's'
     });

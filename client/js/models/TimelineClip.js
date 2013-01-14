@@ -21,14 +21,14 @@ WebRemixer.Models.TimelineClip = Backbone.Model.extend({
   
   onTimelineChange: function(){
     var timeline = this.get('timeline');
-  
-    timeline.get('timelineClips').add(this);
     
     var prevTimeline = this.previous('timeline');
     
     if (prevTimeline && prevTimeline != timeline){
       prevTimeline.get('timelineClips').remove([this]);
     }
+  
+    timeline.get('timelineClips').add(this);
   }
   
 });
