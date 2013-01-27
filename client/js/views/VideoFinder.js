@@ -19,8 +19,26 @@ WebRemixer.Views.VideoFinder = Backbone.View.extend({
     
     
     this.listenTo(this.model, 'change:open', this.onVisibilityChange);
+    this.listenTo(this.model.get('videos'), {
+        add: this.onVideosAdd,
+      reset: this.onVideosReset
+    });
     
     this.render();
+  },
+  
+  onVideosAdd: function(model){
+    this.$searchResults.append(
+      new WebRemixer.Views.Video({
+        model: model
+      }).el
+    );
+  },
+  
+  onVideosReset: function(){
+    this.$searchResults.children('.video').each(function(){
+      $(this).data('view').remove();
+    });
   },
   
   onOpen: function(){
@@ -47,7 +65,7 @@ WebRemixer.Views.VideoFinder = Backbone.View.extend({
     if (this.xhr){
       this.xhr.abort();
     }
-    this.$searchResults.empty();
+    this.model.get('videos').reset();
     this.xhr = $.get('http://gdata.youtube.com/feeds/api/videos', {
       v: 2.1,
       alt: 'jsonc',
@@ -56,18 +74,17 @@ WebRemixer.Views.VideoFinder = Backbone.View.extend({
   },
   
   onSearchLoad: function(res){
-    this.$searchResults.empty();
+    var videos = this.model.get('videos');
+    videos.reset();
     var items = res.data.items;
     for (var i = 0; i < items.length; ++i){
       var data = items[i];
-      this.$searchResults.append(
-        new WebRemixer.Views.Video({
-          model: new WebRemixer.Models.Video({
-            title: data.title,
-            duration: data.duration,
-            thumbnail: data.thumbnail.hqDefault
-          })
-        }).el
+      videos.add(
+        new WebRemixer.Models.Video({
+          title: data.title,
+          duration: data.duration,
+          thumbnail: data.thumbnail.hqDefault
+        })
       );
     }
   },

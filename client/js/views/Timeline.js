@@ -41,41 +41,28 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
     
 
     this.listenTo(this.model, {
-      'change:collapsed': this.onCollapsedChange,
-      'change:remix': this.onRemixChange
+      'change:collapsed': this.onCollapsedChange
     });
     
     this.listenTo(this.model.get('remix'), 'change:selection', this.onSelectionChange);
-    
-    this.model.trigger('change:remix');
-  },
-  
-  onRemixChange: function(){
-    var remix = this.model.get('remix');
-    
-    if (!remix){
-      this.$el.remove();
-      return;
-    }
-  
-    var self = this;
-  
-    var timelines = $.single('.remix#%s > .timelines'.sprintf(remix.cid));
-    
-    //insert timeline in the correct position
-    timelines.children('.timeline').each(function(){
-      if ($(this).attr('data-num') > self.model.get('num')){
-        self.$el.insertBefore(this);
-        return false;
-      }
+    this.listenTo(this.model.get('timelineClips'), {
+      add: this.onTimelineClipsAdd,
+      remove: this.onTimelineClipsRemove
     });
-    
-    //if not inserted, insert the timeline
-    if (!this.$el.parent().length){
-      timelines.append(this.el);
-    }
   },
   
+  onTimelineClipsAdd: function(model){
+    this.$timelineClips.append(
+      new WebRemixer.Views.TimelineClip({
+        model: model
+      }).el
+    );
+  },
+  
+  onTimelineClipsRemove: function(model){
+    this.$timelineClips.single('#' + model.cid).data('view').remove();
+  },
+
   onToggleHeightClick: function(){
     this.model.set('collapsed', !this.model.get('collapsed'));
   },
@@ -166,17 +153,19 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
     var view = ui.draggable.data('view');
     
     if (view instanceof WebRemixer.Views.TimelineClip){
-      view.model.set('timeline', this.model);
+      var curTimeline = view.model.get('timeline');
+      if (curTimeline !== this.model){
+        curTimeline.get('timelineClips').remove(view.model);
+        this.model.get('timelineClips').add(view.model);
+      }
     }else if (view instanceof WebRemixer.Views.Clip){
-      new WebRemixer.Views.TimelineClip({
-        model: 
+      this.get('timelineClips').add(
           new WebRemixer.Models.TimelineClip({
-            timeline: this.model,
             clip: view.model,
             startTime: (ui.offset.left - this.$timelineClips.offset().left) / WebRemixer.PX_PER_SEC,
             loop: true
           })
-      });
+      );
     }
   },
   

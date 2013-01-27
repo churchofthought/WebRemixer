@@ -2,7 +2,8 @@ WebRemixer.Models.Clip = Backbone.Model.extend({
 
   defaults: {
     cutStart: 0,
-    cutDuration: 5
+    cutDuration: 5,
+    title: 'New Clip'
   },
 
   initialize: function(){
@@ -14,20 +15,23 @@ WebRemixer.Models.Clip = Backbone.Model.extend({
     var video = this.get('video');
     
     var previousVideo = this.previous('video');
-    this.stopListening(previousVideo);
+    if (previousVideo){
+      this.stopListening(previousVideo);
+    }
     
-    if (!video) return;
-    
-    this.listenTo(video, {
-       change: _.bind(this.trigger, this, "change"),
-      'change:title': this.onVideoTitleChange
-    });
-    
-    video.trigger('change:title');
+    if (video){
+      this.listenTo(video, {
+         change: _.bind(this.trigger, this, 'change'),
+        'change:title': this.onVideoTitleChange
+      });
+      
+      video.trigger('change:title');
+    }
   },
   
   onVideoTitleChange: function(){
-    if (!this.get('title')){
+    var title = this.get('title');
+    if (!title || title == this.defaults.title){
       this.set('title', this.get('video').get('title'));
     }
   }

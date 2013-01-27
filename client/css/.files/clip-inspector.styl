@@ -20,7 +20,26 @@
   .clip-title
     width: 75%
     
-  .video
+  .clip-video
+    position: relative
+    display: inline-block
     vertical-align: top
     margin: 0 2em
     cursor: pointer
+    
+    width: $video-width
+    height: $video-height
+    
+    &:empty
+      background: rgba(255,255,255,0.25)
+      
+      &::before
+        position: absolute
+        top: 50%
+        left: 0
+        width: 100%
+        text-align: center
+        margin-top: -.5em
+        font-size: 200%
+        content: 'Select Video'
+        

@@ -3,6 +3,10 @@ WebRemixer.Views.Remix = Backbone.View.extend({
     
   events: {
     'selectablestart' : 'onSelectStart',
+    'selectableselecting' : 'onSelecting',
+    'selectableunselecting' : 'onUnselecting',
+    'selectableselected' : 'onSelected',
+    'selectableunselected' : 'onUnselected',
     'selectablestop' : 'onSelectStop',
     'menuselect' : 'onMenuSelect',
     'contextmenu .timeline-clips' : 'onContextMenu',
@@ -52,30 +56,35 @@ WebRemixer.Views.Remix = Backbone.View.extend({
         filter: '.timeline-clip'
       }).appendTo(this.el);
       
-    this.listenTo(this.model, 'change:playing', this.onPlayingChange);
+    this.listenTo(this.model.get('timelines'), {
+      add: this.onTimelinesAdd,
+      remove: this.onTimelinesRemove
+    });
     
     this.render();
   },
   
-  onPlayingChange: function(){
-    if (this.model.get('playing')){
-      this.play();
-    }else{
-      this.pause();
+  onTimelinesAdd: function(model){
+    var view = new WebRemixer.Views.Timeline({
+      model: model
+    });
+  
+    //insert timeline in the correct position
+    this.$timelines.children('.timeline').each(function(){
+      if ($(this).attr('data-num') > model.get('num')){
+        view.$el.insertBefore(this);
+        return false;
+      }
+    });
+    
+    //if not inserted, insert the timeline
+    if (!view.$el.parent().length){
+      this.$timelines.append(view.el);
     }
   },
   
-  play: function(){
-    this.playStartTime = new Date() * 1 - this.model.get('playTime') * 1000;
-    this.playInterval = setInterval(this.playProcedure, 0);
-  },
-  
-  playProcedure: function(){
-    this.model.set('playTime', ((new Date() * 1) - this.playStartTime) / 1000);
-  },
-  
-  pause: function(){
-    clearInterval(this.playInterval);
+  onTimelinesRemove: function(model){
+    this.$timelines.single('#' + model.cid).data('view').remove();
   },
   
   onContextMenu: function(event){
@@ -117,6 +126,22 @@ WebRemixer.Views.Remix = Backbone.View.extend({
   
   onTimelinesMousedown: function(){
     this.$contextMenu.removeClass('show');
+  },
+  
+  onSelecting: function(event, ui){
+    $(ui.selecting).data('view').model.set('selected', true);
+  },
+  
+  onSelected: function(event, ui){
+    $(ui.selected).data('view').model.set('selected', true);
+  },
+  
+  onUnselecting: function(event, ui){
+    $(ui.unselecting).data('view').model.set('selected', false);
+  },
+  
+  onUnselected: function(event, ui){
+    $(ui.unselected).data('view').model.set('selected', false);
   },
   
   onSelectStart: function(){

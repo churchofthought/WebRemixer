@@ -2,6 +2,10 @@ WebRemixer.Views.Clip = Backbone.View.extend({
   
   className: 'clip',
   
+  events: {
+    'dragstart': 'onDragStart'
+  },
+  
   initialize: function(){
     _.bindAll(this);
     
@@ -31,6 +35,12 @@ WebRemixer.Views.Clip = Backbone.View.extend({
     });
     
     this.model.trigger('change');
+  },
+  
+  onDragStart: function(){
+    if (!this.model.get('video')){
+      return false;
+    }
   },
   
   render: function(){

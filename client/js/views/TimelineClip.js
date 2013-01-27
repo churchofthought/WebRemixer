@@ -15,7 +15,7 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
   
     var grid = [WebRemixer.PX_PER_SEC / 8, 1];
 
-    this.$el.data("view", this).attr({
+    this.$el.data('view', this).attr({
       id: this.model.cid
     }).draggable({
       containment: '.timelines',
@@ -75,12 +75,20 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
     
     
     this.listenTo(this.model, {
-       change: this.render,
-       destroy: this.remove,
-      'change:timeline': this.onTimelineChange
+                 change: this.render,
+      'change:timeline': this.onTimelineChange,
+      'change:selected': this.onSelectedChange
     });
     
-    this.model.trigger('change:timeline');
+    this.model.trigger('change change:selected');
+  },
+  
+  onSelectedChange: function(){
+    if (this.model.get('selected')){
+      this.$el.addClass('ui-selected');
+    }else{
+      this.$el.removeClass('ui-selected');
+    }
   },
   
   getDraggableHelper: function(){
@@ -113,12 +121,10 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
   duplicate: function(timeDelta){
     var clone = this.model.clone();
     clone.set('startTime', this.model.get('startTime') + (typeof timeDelta === 'number' && timeDelta || this.model.get('duration')));
-    var newView = new WebRemixer.Views.TimelineClip({
-      model: clone
-    });
-    if (this.$el.hasClass("ui-selected")){
-      newView.$el.addClass("ui-selected");
-      this.$el.removeClass("ui-selected");
+    clone.get('timeline').get('timelineClips').add(clone);
+
+    if (clone.get('selected')){
+      this.model.set('selected', false);
     }   
   },
   
@@ -129,9 +135,6 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
   onTimelineChange: function(){
     this.onDragStop();
     this.render();
-    $.single('.timeline#%s > .timeline-clips'
-      .sprintf(this.model.get('timeline').cid))
-      .append(this.el);
   },
 
   render: function(){

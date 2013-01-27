@@ -11,18 +11,13 @@
     $(function(){
       remixer.$el.appendTo(document.body);
     });
-    var timeline = new WebRemixer.Views.Timeline({
-      model: new WebRemixer.Models.Timeline({remix: remixerModel, num: 1})
-    });
-    var timeline2 = new WebRemixer.Views.Timeline({
-      model: new WebRemixer.Models.Timeline({remix: remixerModel, num: 4})
-    });
-    var timeline3 = new WebRemixer.Views.Timeline({
-      model: new WebRemixer.Models.Timeline({remix: remixerModel, num: 3})
-    });
-    var timeline4 = new WebRemixer.Views.Timeline({
-      model: new WebRemixer.Models.Timeline({remix: remixerModel, num: 2})
-    });
+    remixerModel.get('timelines').add([
+      new WebRemixer.Models.Timeline({num: 1}),
+      new WebRemixer.Models.Timeline({num: 3}),
+      new WebRemixer.Models.Timeline({num: 4}),
+      new WebRemixer.Models.Timeline({num: 2})
+    ]);
+    
     
     var video = new WebRemixer.Models.Video({
       sourceVideoId: "OMhEbjZK3WM"
@@ -38,41 +33,33 @@
     
     var videoView = new WebRemixer.Views.Video({model: video});
     
-    var lineclipModel = new WebRemixer.Models.TimelineClip({
+    var lineclipModel1 = new WebRemixer.Models.TimelineClip({
       clip: clip,
-      timeline: timeline.model,
-      remix: remixerModel,
-      startTime: 5,
+      startTime: 4,
       duration: 5
     });
-    var lineclip = new WebRemixer.Views.TimelineClip({model:lineclipModel});
     
-        var lineclipModel = new WebRemixer.Models.TimelineClip({
+    var lineclipModel2 = new WebRemixer.Models.TimelineClip({
       clip: clip,
-      timeline: timeline.model,
-      remix: remixerModel,
-      startTime: 10,
+      startTime: 3,
       duration: 5
     });
-    var lineclip = new WebRemixer.Views.TimelineClip({model:lineclipModel});
     
-        var lineclipModel = new WebRemixer.Models.TimelineClip({
+        var lineclipModel3 = new WebRemixer.Models.TimelineClip({
       clip: clip,
-      timeline: timeline2.model,
-      remix: remixerModel,
-      startTime: 5,
+      startTime: 1,
       duration: 5
     });
-    var lineclip = new WebRemixer.Views.TimelineClip({model:lineclipModel});
     
-        var lineclipModel = new WebRemixer.Models.TimelineClip({
+        var lineclipModel4 = new WebRemixer.Models.TimelineClip({
       clip: clip,
-      timeline: timeline4.model,
-      remix: remixerModel,
-      startTime: 5,
+      startTime: 2,
       duration: 5
     });
-    var lineclip = new WebRemixer.Views.TimelineClip({model:lineclipModel});
+    remixerModel.get('timelines').at(0).get('timelineClips').add(lineclipModel1);
+    remixerModel.get('timelines').at(1).get('timelineClips').add(lineclipModel2);
+    remixerModel.get('timelines').at(2).get('timelineClips').add(lineclipModel3);
+    remixerModel.get('timelines').at(3).get('timelineClips').add(lineclipModel4);
     
     
   

@@ -6,7 +6,7 @@ WebRemixer.Models.Remix = Backbone.Model.extend({
 
   initialize: function(){
   
-    window.mix = this;
+    _.bindAll(this);
   
     var opts = {
       remix: this
@@ -18,88 +18,74 @@ WebRemixer.Models.Remix = Backbone.Model.extend({
          clipManager: new WebRemixer.Models.ClipManager(opts),
        clipInspector: new WebRemixer.Models.ClipInspector(opts),
            timelines: new WebRemixer.Collections.Timelines(),
-               clips: new WebRemixer.Collections.Clips(),
- videoPlayersByVideo: {},
-timelineClipsByVideo: {},
+               clips: new WebRemixer.Collections.Clips()
+    });
+    
+    this.set({
+       playerManager: new WebRemixer.Models.PlayerManager(opts)
+    });
+    
+    this.listenTo(this.get('clips'), {
+      add: this.onClipsAdd,
+      remove: this.onClipsRemove
     });
     
     this.listenTo(this.get('timelines'), {
-      add: this.onTimelinesAdd
+      add: this.onTimelinesAdd,
+      remove: this.onTimelinesRemove
     });
+    
+    this.listenTo(this, {
+      'change:playing': this.onPlayingChange,
+      'change:realTimeNeeded': this.onRealTimeNeededChange
+    });
+  },
+  
+  onRealTimeNeededChange: function(){
+    if (this.get('realTimeNeeded')){
+      this.playProcedure();
+      this.set('realTimeNeeded', false, {silent: true});
+    }
+  },
+  
+  onClipsAdd: function(model){
+    model.set('remix', this);
+  },
+  
+  onClipsRemove: function(model){
+    model.set('remix', undefined);
   },
   
   onTimelinesAdd: function(model){
-    this.listenTo(model.get('timelineClips'), {
-      add: this.onTimelineClipsAdd,
-      remove: this.onTimelineClipsRemove
-    });
+    model.set('remix', this);
   },
   
-  allocatePlayers: function(){
-    var timelineClipsByVideo = this.get('timelineClipsByVideo');
-    for (var cid in timelineClipsByVideo){
-      var timelineClips = timelineClipsByVideo[cid];
-      
-      var needed = 0;
-      for (var i = timelineClips.length; i--; ){
-        var curr = timelineClips.at(i);
-        console.log(curr.toJSON());
-        var intersections = 0;
-        for (var z = timelineClips.length; z--; ){
-          var other = timelineClips.at(z);
-          if (WebRemixer.Util.intersects(curr, other)){
-            intersections += other.get('loop') ? 2 : 1;
-          }
-        }
-        needed = Math.max(needed, intersections);
-      }
-      
-      this.allocatePlayersForVideo(timelineClips.video, needed);
+  onTimelinesRemove: function(model){
+    model.set('remix', undefined);
+  },
+  
+  onPlayingChange: function(){
+    if (this.get('playing')){
+      this.play();
+    }else{
+      this.pause();
     }
   },
   
-  allocatePlayersForVideo: function(video, needed){
-    console.log(video.toJSON(), "needed %s".sprintf(needed));
+  play: function(){
+    this.playStartTime = new Date() * 1 - this.get('playTime') * 1000;
+    this.playInterval = setInterval(this.playProcedure, 0);
+  },
   
-    var videoPlayersByVideo = this.get('videoPlayersByVideo');
+  playProcedure: function(){
+    this.set('playTime', ((new Date() * 1) - this.playStartTime) / 1000);
+  },
   
-    var videoPlayers = videoPlayersByVideo[video.cid];
-    
-    if (!videoPlayers){
-      videoPlayers = videoPlayersByVideo[video.cid] = new WebRemixer.Collections.VideoPlayers();
-    }
-    
-    while (videoPlayers.length < needed){
-      var videoPlayer = 
-        new WebRemixer.Models.VideoPlayer({
-          video: video
-        });
-      videoPlayers.add(videoPlayer);
-      new WebRemixer.Views.VideoPlayer({
-        el: $("<div/>").appendTo(document.body),
-        model: videoPlayer
-      });
+  pause: function(){
+    if (this.playInterval){
+      clearInterval(this.playInterval);
+      this.playInterval = undefined;
     }
   },
   
-  onTimelineClipsAdd: function(model){
-    var video = model.get('clip').get('video');
-    var timelineClipsByVideo = this.get('timelineClipsByVideo');
-  
-    var timelineClips = timelineClipsByVideo[video.cid];
-    if (!timelineClips){
-      timelineClips = timelineClipsByVideo[video.cid] = new WebRemixer.Collections.TimelineClips();
-      timelineClips.video = video;
-    }
-    
-    timelineClips.add(model);
-    
-    this.allocatePlayers();
-  },
-  
-  onTimelineClipsRemove: function(model){
-    this.get('timelineClipsByVideo')[model.get('clip').get('video').cid].remove(model);
-    
-    this.allocatePlayers();
-  }
 });

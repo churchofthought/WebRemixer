@@ -7,14 +7,14 @@ WebRemixer.Views.ClipInspector = Backbone.View.extend({
     'change .clip-title' : 'onTitleInputChange',
     'slide .cut' : 'onCutSlide',
     'slidestop .cut' : 'onCutSlide',
-    'click .video' : 'onVideoClick'
+    'click .clip-video' : 'onVideoClick'
   },
   
   initialize: function(){
     _.bindAll(this);
     
     new WebRemixer.Views.VideoFinder({
-        model: this.model.get('videoFinder')
+      model: this.model.get('videoFinder')
     });
     
     this.$title = $('<input class="clip-title" type="text"/>')
@@ -35,7 +35,7 @@ WebRemixer.Views.ClipInspector = Backbone.View.extend({
     this.$cutEnd = $('<span class="cut-end"/>').appendTo($cutContainer);
     
     
-    this.$video = $('<div class="video"/>').appendTo(
+    this.$video = $('<div class="clip-video"/>').appendTo(
       $('<div data-label="Video"/>').appendTo(this.el)
     );
     
@@ -79,16 +79,20 @@ WebRemixer.Views.ClipInspector = Backbone.View.extend({
     }
   
     var clip = this.model.get('clip');
-  
-    var duration = clip.get('video').get('duration');
-  
-    this.$cutStart.css({
-      left: (start / duration) * 100 + "%"
-    }).text('%d:%02d'.sprintf(start / 60, start % 60));
     
-    this.$cutEnd.css({
-      left: (end / duration) * 100 + "%"
-    }).text('%d:%02d'.sprintf(end / 60, end % 60));
+    var video = clip.get('video');
+    
+    if (video){
+      var duration = video.get('duration');
+    
+      this.$cutStart.css({
+        left: (start / duration) * 100 + "%"
+      }).text('%d:%02d'.sprintf(start / 60, start % 60));
+      
+      this.$cutEnd.css({
+        left: (end / duration) * 100 + "%"
+      }).text('%d:%02d'.sprintf(end / 60, end % 60));
+    }
     
     clip.set({
       cutStart: start,
@@ -127,34 +131,54 @@ WebRemixer.Views.ClipInspector = Backbone.View.extend({
     var cutStart = clip.get('cutStart');
   
     this.$title.val(clip.get('title'));
+    var video = clip.get('video');
+    
     this.$cutSlider.slider('option', {
-      max: clip.get('video').get('duration'),
       values: [cutStart, cutStart + clip.get('cutDuration')]
     });
-    //kickstart it
-    this.onCutSlide();
-    this.onClipVideoChange();
-    
-    this.listenTo(clip, 'change:title', this.onClipTitleChange);
-    this.listenTo(clip, 'change:video', this.onClipVideoChange);
     
     var previousClip = this.model.previous('clip');
     if (previousClip){
       this.stopListening(previousClip);
     }
+    
+    this.listenTo(clip, 'change:title', this.onClipTitleChange);
+    this.listenTo(clip, 'change:video', this.onClipVideoChange);
+    
+    //kickstart it
+    this.onCutSlide();
+    clip.trigger('change:video');
   },
   
   onClipVideoChange: function(){
     var clip = this.model.get('clip');
     var video = clip.get('video');
-  
-    var videoView = new WebRemixer.Views.Video({
-      model: video,
-      el: this.$video
-    });
     
-    if (clip.get('title') == clip.previous('video').get('title')){
-      clip.set('title', video.get('title'));
+    var oldView = this.$video.children().data('view');
+    if (oldView){
+      oldView.remove();
+    }
+
+    if (video){
+      this.$video.append(
+        new WebRemixer.Views.Video({
+          model: video
+        }).el
+      );
+      
+      var previousVideo = clip.previous('video');
+    
+      if (previousVideo && clip.get('title') == previousVideo.get('title')){
+        clip.set('title', video.get('title'));
+      }
+    
+      this.$cutSlider.slider('option', {
+        max: video.get('duration')
+      });
+      
+      this.onCutSlide();
+    }else{
+      this.model.get('videoFinder').set('open', true);
     }
   },
   
