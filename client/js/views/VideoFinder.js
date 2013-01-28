@@ -81,6 +81,7 @@ WebRemixer.Views.VideoFinder = Backbone.View.extend({
       var data = items[i];
       videos.add(
         new WebRemixer.Models.Video({
+          sourceVideoId: data.id,
           title: data.title,
           duration: data.duration,
           thumbnail: data.thumbnail.hqDefault

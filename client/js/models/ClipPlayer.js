@@ -24,22 +24,26 @@ WebRemixer.Models.ClipPlayer = Backbone.Model.extend({
   },
   
   play: function(){
-    this.clearTimeouts();
+    this.pause();
   
     var videoPlayer = this.get('videoPlayer2') || this.getFreePlayer();
     
     var clip = this.get('clip');
     
+    var clipDuration = clip.get('cutDuration');
+    
+    var playTime = (this.get('playTime') || 0) % clipDuration;
+    
     videoPlayer.set({
       owner: this,
-      playTime: clip.get('cutStart') + (this.get('playTime') || 0),
+      playTime: clip.get('cutStart') + playTime,
       playing: true
     });
     
     if (this.get('loop')){
-      var clipDuration = clip.get('duration');
-      this.prepTimeout = setTimeout(this.prepareToLoop, (clipDuration - .5 ) * 1000);
-      this.playTimeout = setTimeout(this.play, clipDuration * 1000);
+      var timeTillLoop = clipDuration - playTime;
+      this.loopTime = new Date() * 1 + timeTillLoop * 1000;
+      this.loopTimeout = setTimeout(this.prepareToLoop, (timeTillLoop - .5) * 1000);
     }
     
     this.set({
@@ -57,22 +61,19 @@ WebRemixer.Models.ClipPlayer = Backbone.Model.extend({
       playTime: this.get('clip').get('cutStart')
     });
     this.set('videoPlayer2', videoPlayer);
-  },
-  
-  clearTimeouts: function(){
-    if (this.prepTimeout){
-      clearTimeout(this.prepTimeout);
-      this.prepTimeout = undefined;
-    }
     
-    if (this.playTimeout){
-      clearTimeout(this.playTimeout);
-      this.playTimeout = undefined;
+    if (this.loopTimeout){
+      clearTimeout(this.loopTimeout);
+      this.loopTimeout = undefined;
     }
+    this.loopTimeout = setTimeout(this.play, this.loopTime - new Date() * 1);
   },
   
   pause: function(){
-    this.clearTimeouts();
+    if (this.loopTimeout){
+      clearTimeout(this.loopTimeout);
+      this.loopTimeout = undefined;
+    }
   
     var videoPlayer = this.get('videoPlayer');
     if (videoPlayer){

@@ -32,7 +32,7 @@
     remixerModel.get('clips').add(clip);
     
     var videoView = new WebRemixer.Views.Video({model: video});
-    
+    /*
     var lineclipModel1 = new WebRemixer.Models.TimelineClip({
       clip: clip,
       startTime: 4,
@@ -59,7 +59,7 @@
     remixerModel.get('timelines').at(0).get('timelineClips').add(lineclipModel1);
     remixerModel.get('timelines').at(1).get('timelineClips').add(lineclipModel2);
     remixerModel.get('timelines').at(2).get('timelineClips').add(lineclipModel3);
-    remixerModel.get('timelines').at(3).get('timelineClips').add(lineclipModel4);
+    remixerModel.get('timelines').at(3).get('timelineClips').add(lineclipModel4);*/
     
     
   

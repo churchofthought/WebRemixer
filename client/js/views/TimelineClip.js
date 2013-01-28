@@ -15,9 +15,9 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
   
     var grid = [WebRemixer.PX_PER_SEC / 8, 1];
 
-    this.$el.data('view', this).attr({
-      id: this.model.cid
-    }).draggable({
+    this.$el.data('view', this).prop(
+      'id', this.model.cid
+    ).draggable({
       containment: '.timelines',
       stack: '.' + this.className,
       snap: '.timeline',
@@ -25,12 +25,12 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
       grid: grid,
       helper: this.getDraggableHelper
     }).resizable({
-      containment: 'parent',
+     // containment: 'parent',
       handles: 'e,w',
       grid: grid
-    }).css({
-      position: 'absolute'
-    });
+    }).css(
+      'position', 'absolute'
+    );
     //set position to absolute, fix for draggable
     
     /*var menu = $(
@@ -142,7 +142,6 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
     var video = clip.get('video');
     
     this.$el.css({
-      top: '',
       background: 'url("%s")'.sprintf(video.get('thumbnail')),
       'background-size': WebRemixer.EMS_PER_SEC * (this.model.get('loop') ? 
         clip.get('cutDuration') :  

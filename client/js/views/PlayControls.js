@@ -80,10 +80,15 @@ WebRemixer.Views.PlayControls = Backbone.View.extend({
   },
   
   onRestartClick: function(){
-    this.model.get('remix').set({
-      playing: false,
-      playTime: 0
-    }).set('playing', true);
+    var remix = this.model.get('remix');
+    if (remix.get('playing')){
+      remix.set({
+        playing: false,
+        playTime: 0
+      }).set('playing', true);
+    }else{
+      remix.set('playTime', 0);
+    }
   }
   
 });

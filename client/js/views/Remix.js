@@ -9,8 +9,8 @@ WebRemixer.Views.Remix = Backbone.View.extend({
     'selectableunselected' : 'onUnselected',
     'selectablestop' : 'onSelectStop',
     'menuselect' : 'onMenuSelect',
-    'contextmenu .timeline-clips' : 'onContextMenu',
-    'contextmenu .selection' : 'onContextMenu',
+    //'contextmenu .timeline-clips' : 'onContextMenu',
+    //'contextmenu .selection' : 'onContextMenu',
     'mousedown .timelines' : 'onTimelinesMousedown'
   },
   

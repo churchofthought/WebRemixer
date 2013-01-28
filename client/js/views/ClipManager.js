@@ -2,9 +2,9 @@ WebRemixer.Views.ClipManager = Backbone.View.extend({
   className: 'clip-manager',
     
   events: {
-    'click .clip .inspect': 'onInspectClick',
-    'click .clip' : 'onInspectClick',
-    'click .new-clip' : 'createNewClip'
+    'click .clip .inspect' : 'onInspectClick',
+             'click .clip' : 'onInspectClick',
+         'click .new-clip' : 'createNewClip'
   },
   
   initialize: function(){

@@ -39,15 +39,15 @@ WebRemixer.Views.Ruler = Backbone.View.extend({
   },
   
   onPlaytimeChange: function(model, val){
-    this.$timeHand.css({
-      left: WebRemixer.EMS_PER_SEC * val + 'em'
-    });
+    this.$timeHand.css(
+      'left', WebRemixer.EMS_PER_SEC * val + 'em'
+    );
   },
   
   render: function() {
     this.$markings.empty();
     for (var i = 0, duration = this.model.get('remix').get('duration'); i <= duration; ++i){
-      this.$markings.append($('<div/>').text(i || '|').append('<div/>'));
+      this.$markings.append($('<div/>').text(i).append('<div/>'));
     }
   }
 });

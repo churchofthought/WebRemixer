@@ -10,17 +10,18 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
     _.bindAll(this);
   
     this.$el
-      .attr({
-        id: this.model.cid,
-        'data-num': this.model.get('num')
-      })
+      .prop(
+        'id', this.model.cid
+      ).attr(
+        'data-num', this.model.get('num')
+      )
       .data('view', this);
       
     this.$header = $('<div/>')
       .addClass('header')
-      .attr({
-        'data-title': 'Timeline %s'.sprintf(this.model.get('num'))
-      })
+      .attr(
+        'data-title', 'Timeline %s'.sprintf(this.model.get('num'))
+      )
       .appendTo(this.el);
       
     this.$toggleHeight = $('<button class="toggle-height"/>')
@@ -142,9 +143,9 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
         duration: selection.width / WebRemixer.PX_PER_SEC
       });
     }else{
-      $selection.css({
-        width: 0
-      });
+      $selection.css(
+        'width', 0
+      );
       this.model.set('selection', null);
     }
   },
@@ -159,7 +160,7 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
         this.model.get('timelineClips').add(view.model);
       }
     }else if (view instanceof WebRemixer.Views.Clip){
-      this.get('timelineClips').add(
+      this.model.get('timelineClips').add(
           new WebRemixer.Models.TimelineClip({
             clip: view.model,
             startTime: (ui.offset.left - this.$timelineClips.offset().left) / WebRemixer.PX_PER_SEC,

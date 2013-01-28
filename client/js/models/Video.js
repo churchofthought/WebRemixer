@@ -3,6 +3,8 @@ WebRemixer.Models.Video = Backbone.Model.extend({
   initialize: function(){
     _.bindAll(this);
     
+    window.v = this;
+    
     
     if (!this.get('title')){
       $.get('https://gdata.youtube.com/feeds/api/videos/%s'.sprintf(this.get('sourceVideoId')), { 

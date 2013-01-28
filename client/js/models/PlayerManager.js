@@ -5,11 +5,14 @@ WebRemixer.Models.PlayerManager = Backbone.Model.extend({
   },
 
   initialize: function(){
+    _.bindAll(this);
+    
+    this.allocatePlayers = _.debounce(this.allocatePlayers, 250);
+  
     this.set({
       videoPlayersByVideo: {},
      timelineClipsByVideo: {},
     });
-    
         
     this.listenTo(this.get('remix').get('timelines'), {
       add: this.onTimelinesAdd
@@ -54,18 +57,24 @@ WebRemixer.Models.PlayerManager = Backbone.Model.extend({
       videoPlayers = videoPlayersByVideo[video.cid] = new WebRemixer.Collections.VideoPlayers();
     }
     
-    while (videoPlayers.length < needed){
-      var videoPlayer = 
-        new WebRemixer.Models.VideoPlayer({
-          video: video
+    if (videoPlayers.length < needed){
+      do {
+        var videoPlayer = 
+          new WebRemixer.Models.VideoPlayer({
+            video: video
+          });
+        videoPlayers.add(videoPlayer);
+        
+        //instantiate view so flash/html5 videoPlayer gets appended to dom
+        new WebRemixer.Views.VideoPlayer({
+          el: $("<div/>").appendTo(document.body),
+          model: videoPlayer
         });
-      videoPlayers.add(videoPlayer);
-      
-      //instantiate view so flash/html5 videoPlayer gets appended to dom
-      new WebRemixer.Views.VideoPlayer({
-        el: $("<div/>").appendTo(document.body),
-        model: videoPlayer
-      });
+      } while (videoPlayers.length < needed);
+    }else if (videoPlayers.length > needed){
+      do {
+        videoPlayers.pop().destroy();
+      } while (videoPlayers.length > needed);
     }
   },
   
@@ -81,10 +90,16 @@ WebRemixer.Models.PlayerManager = Backbone.Model.extend({
     
     timelineClips.add(model);
     
+    this.listenTo(model, {
+     'change destroy' : this.allocatePlayers
+    });
+    
     this.allocatePlayers();
   },
   
   onTimelineClipsRemove: function(model){
+    this.stopListening(model);
+  
     this.get('timelineClipsByVideo')[model.get('clip').get('video').cid].remove(model);
     
     this.allocatePlayers();
