@@ -12,7 +12,7 @@
   border: 1px solid $border-color
   margin: auto
   
-  .buttons
+  > .buttons
     visibility: hidden
     opacity: 0
     transition: .25s all
@@ -20,6 +20,10 @@
     bottom: .25em
     right: .25em
     font-size: 80%
+    
+    > *
+      margin: .25em
+      box-shadow: 0 0 4px #000 !important
     
   &:hover
     .buttons

@@ -9,8 +9,8 @@ WebRemixer.Views.Remix = Backbone.View.extend({
     'selectableunselected' : 'onUnselected',
     'selectablestop' : 'onSelectStop',
     'menuselect' : 'onMenuSelect',
-    //'contextmenu .timeline-clips' : 'onContextMenu',
-    //'contextmenu .selection' : 'onContextMenu',
+    'contextmenu .timeline-clips' : 'onContextMenu',
+    'contextmenu .selection' : 'onContextMenu',
     'mousedown .timelines' : 'onTimelinesMousedown'
   },
   
@@ -22,11 +22,6 @@ WebRemixer.Views.Remix = Backbone.View.extend({
     this.$el.attr({
       id: this.model.cid
     });
-    
-    this.playControls = new WebRemixer.Views.PlayControls({
-      model: this.model.get('playControls')
-    });
-    this.playControls.$el.appendTo(this.el);
   	
     
     this.$contextMenu = $('<ul/>')
@@ -35,6 +30,17 @@ WebRemixer.Views.Remix = Backbone.View.extend({
       .append('<li data-cmd="delete"><a><span class="ui-icon ui-icon-close"></span>Delete</a></li>')
       .menu()
       .appendTo(this.el);
+      
+    this.mainMenu = new WebRemixer.Views.MainMenu({
+      model: this.model.get('mainMenu')
+    });
+    this.mainMenu.$el.appendTo(this.el);
+    
+    this.playControls = new WebRemixer.Views.PlayControls({
+      model: this.model.get('playControls')
+    });
+    this.playControls.$el.appendTo(this.el);
+    
   
     this.ruler = new WebRemixer.Views.Ruler({
       model: this.model.get('ruler')

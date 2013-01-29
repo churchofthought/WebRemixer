@@ -3,7 +3,8 @@ WebRemixer.Views.Clip = Backbone.View.extend({
   className: 'clip',
   
   events: {
-    'dragstart': 'onDragStart'
+    'dragstart'     : 'onDragStart',
+    'click .delete' : 'onDeleteClick'
   },
   
   initialize: function(){
@@ -27,6 +28,13 @@ WebRemixer.Views.Clip = Backbone.View.extend({
         },
         label: 'Inspect',
         text: false
+      }),
+      $('<button class="delete"/>').button({
+        icons: {
+          primary: 'ui-icon-close',
+        },
+        label: 'Delete',
+        text: false
       })
     ).appendTo(this.el);
       
@@ -35,6 +43,10 @@ WebRemixer.Views.Clip = Backbone.View.extend({
     });
     
     this.model.trigger('change');
+  },
+  
+  onDeleteClick: function(){
+    this.model.destroy();
   },
   
   onDragStart: function(){

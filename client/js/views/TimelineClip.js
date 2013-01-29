@@ -25,7 +25,7 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
       grid: grid,
       helper: this.getDraggableHelper
     }).resizable({
-     // containment: 'parent',
+      //containment: 'parent',
       handles: 'e,w',
       grid: grid
     }).css(
@@ -119,11 +119,19 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
   },
   
   duplicate: function(timeDelta){
-    var clone = this.model.clone();
-    clone.set('startTime', this.model.get('startTime') + (typeof timeDelta === 'number' && timeDelta || this.model.get('duration')));
-    clone.get('timeline').get('timelineClips').add(clone);
+    var selected = this.model.get('selected');
+  
+    var clone = new WebRemixer.Models.TimelineClip({
+      clip: this.model.get('clip'),
+      startTime: this.model.get('startTime') + (typeof timeDelta === 'number' && timeDelta || this.model.get('duration')),
+      duration: this.model.get('duration'),
+      loop: this.model.get('loop'),
+      selected: selected,
+    })
+    
+    this.model.get('timeline').get('timelineClips').add(clone);
 
-    if (clone.get('selected')){
+    if (selected){
       this.model.set('selected', false);
     }   
   },

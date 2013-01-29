@@ -42,14 +42,14 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
     
 
     this.listenTo(this.model, {
-      'change:collapsed': this.onCollapsedChange
+      'change:collapsed': this.onCollapsedChange,
+      'change:remix': this.onRemixChange
     });
-    
-    this.listenTo(this.model.get('remix'), 'change:selection', this.onSelectionChange);
     this.listenTo(this.model.get('timelineClips'), {
       add: this.onTimelineClipsAdd,
       remove: this.onTimelineClipsRemove
     });
+    this.listenTo(this.model.get('remix'), 'change:selection', this.onSelectionChange);
   },
   
   onTimelineClipsAdd: function(model){
@@ -91,10 +91,10 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
   },
   
   duplicateSelection: function(){
-    var duration = this.model.get('selection').duration;
-  
     var $selectedClips = this.getSelectedClips();
     if (!$selectedClips) return;
+    
+    var duration = this.model.get('selection').duration;
     
     $selectedClips.each(function(){
       $(this).data('view').duplicate(duration);
@@ -128,7 +128,7 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
     var height = this.$el.height();
     
     var $selection = this.$el.single('.selection');
-    
+
     //make sure selection is at least 1x1 and check for the 3 types of intersections
     if (selection.width >= 1 && selection.height >= 1 &&
         ((selection.offset.top >= offset.top && selection.offset.top <= offset.top + height)
@@ -146,7 +146,10 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
       $selection.css(
         'width', 0
       );
-      this.model.set('selection', null);
+      this.model.set('selection', {
+        startTime: 0,
+        duration: 0
+      });
     }
   },
   

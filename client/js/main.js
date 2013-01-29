@@ -1,9 +1,9 @@
 (function(){
 
   window.onYouTubeIframeAPIReady = function(){
-  var remixerModel = new WebRemixer.Models.Remix({id: 57, playTime: 7});
+  var remixerModel = new WebRemixer.Models.Remix({id: 57});
 
-  var remixer = new WebRemixer.Views.Remix({
+  remixer = new WebRemixer.Views.Remix({
     model: remixerModel
   });
 

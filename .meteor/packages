@@ -3,9 +3,10 @@
 # 'meteor add' and 'meteor remove' will edit this file for you,
 # but you can also edit it by hand.
 
-autopublish
-insecure
 preserve-inputs
 stylus
 underscore
+jquery-ui-bootstrap
+accounts-password
+accounts-ui
 jquery
