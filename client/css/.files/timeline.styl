@@ -3,8 +3,7 @@
   
   box-sizing: border-box
   height: $timeline-height
-  border: 0 solid #000
-  border-width: 0 0 1px 0
+  border-top: 1px solid #000
   position: relative
   background: #fff
   
@@ -20,6 +19,9 @@
     background: #ccc
     overflow: hidden
     transition: .25s all
+    border-top: 1px solid #000
+    box-sizing: border-box
+    margin-top: -1px
     
     > .toggle-height
       position: absolute

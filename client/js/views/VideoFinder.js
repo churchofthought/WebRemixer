@@ -66,7 +66,7 @@ WebRemixer.Views.VideoFinder = Backbone.View.extend({
       this.xhr.abort();
     }
     this.model.get('videos').reset();
-    this.xhr = $.get('http://gdata.youtube.com/feeds/api/videos', {
+    this.xhr = $.getJSON('http://gdata.youtube.com/feeds/api/videos', {
       v: 2.1,
       alt: 'jsonc',
       q: this.$search.val()

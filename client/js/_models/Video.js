@@ -5,7 +5,7 @@ WebRemixer.Models.Video = Backbone.Model.extend({
     
     
     if (!this.get('title')){
-      $.get('https://gdata.youtube.com/feeds/api/videos/%s'.sprintf(this.get('sourceVideoId')), { 
+      $.getJSON('https://gdata.youtube.com/feeds/api/videos/%s'.sprintf(this.get('sourceVideoId')), { 
         v: 2.1,
         alt: 'jsonc' 
       }, this.gotVideoData);
@@ -14,7 +14,6 @@ WebRemixer.Models.Video = Backbone.Model.extend({
   
   gotVideoData: function(res){
     var data = res.data;
-    
     this.set({
       title: data.title,
       duration: data.duration,

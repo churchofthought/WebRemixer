@@ -21,13 +21,23 @@ WebRemixer.Views.ClipManager = Backbone.View.extend({
       
     this.$clips = $('<div/>').addClass('clips').appendTo(this.el);
   
-  
+    this.listenTo(this.model, 'change:open', this.onVisibilityChange);  
     this.listenTo(this.model.get('remix').get('clips'), {
       add: this.onClipsAdd,
       remove: this.onClipsRemove
     });
+    
+    this.model.trigger('change:open');
   
     this.render();
+  },
+  
+  onVisibilityChange: function(){
+    if (this.model.get('open')){
+      this.$el.addClass('open');
+    }else{
+      this.$el.removeClass('open');
+    }
   },
   
   createNewClip: function(){

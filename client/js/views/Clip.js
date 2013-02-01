@@ -18,7 +18,8 @@ WebRemixer.Views.Clip = Backbone.View.extend({
       .draggable({
         snap: '.timeline',
         grid: [WebRemixer.PX_PER_SEC / 8, 1],
-        helper: 'clone'
+        helper: 'clone',
+        appendTo: document.body
       });
       
     $('<div/>').addClass('buttons').append(

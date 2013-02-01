@@ -40,7 +40,9 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
       '</ul>'
     ).menu();*/
     
-    var $buttons = $('<div class="buttons"/>');
+    this.$loopIndicator = $('<div/>').addClass('loop-indicator').appendTo(this.el);
+    
+    var $buttons = $('<div/>').addClass('buttons');
     
     var $loopLabel = $('<label for="%s"/>'.sprintf(Math.random().toString(36))).appendTo($buttons);
 
@@ -75,7 +77,7 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
     
     
     this.listenTo(this.model, {
-                 change: this.render,
+                change : this.render,
       'change:timeline': this.onTimelineChange,
       'change:selected': this.onSelectedChange
     });
@@ -149,12 +151,15 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
     var clip = this.model.get('clip');
     var video = clip.get('video');
     
-    this.$el.css({
-      background: 'url("%s")'.sprintf(video.get('thumbnail')),
+    this.$loopIndicator.css({
       'background-size': WebRemixer.EMS_PER_SEC * (this.model.get('loop') ? 
         clip.get('cutDuration') :  
         video.get('duration')
-        ) + 'em' + ' 100%',
+        ) + 'em' + ' 100%'
+    });
+    
+    this.$el.css({
+      background: 'url("%s")'.sprintf(video.get('thumbnail')),
       left: WebRemixer.EMS_PER_SEC * this.model.get('startTime') + 'em',
       width: WebRemixer.EMS_PER_SEC * this.model.get('duration') + 'em'
     }).attr({

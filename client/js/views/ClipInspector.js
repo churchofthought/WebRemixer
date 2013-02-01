@@ -106,7 +106,10 @@ WebRemixer.Views.ClipInspector = Backbone.View.extend({
       autoOpen: false,
       modal: true,
       width: 600,
-      height: 500
+      height: 500,
+      buttons: { 
+        Okay: _.bind(this.$el.dialog, this.$el, 'close')
+      } 
     });
   },
   
@@ -115,6 +118,14 @@ WebRemixer.Views.ClipInspector = Backbone.View.extend({
       this.$el.dialog('open');
     }else{
       this.$el.dialog('close');
+      this.removeBlankClips();
+    }
+  },
+  
+  removeBlankClips: function(){
+    var clip = this.model.get('clip');
+    if (!clip.get('video')){
+      clip.destroy();
     }
   },
   

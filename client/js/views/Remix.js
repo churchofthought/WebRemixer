@@ -11,7 +11,8 @@ WebRemixer.Views.Remix = Backbone.View.extend({
     'menuselect' : 'onMenuSelect',
     'contextmenu .timeline-clips' : 'onContextMenu',
     'contextmenu .selection' : 'onContextMenu',
-    'mousedown .timelines' : 'onTimelinesMousedown'
+    'mousedown .timelines' : 'onTimelinesMousedown',
+    'click .toggle-clip-manager': 'onToggleClipManagerClick'
   },
   
 
@@ -50,11 +51,21 @@ WebRemixer.Views.Remix = Backbone.View.extend({
     this.clipManager = new WebRemixer.Views.ClipManager({
       model: this.model.get('clipManager')
     });
+    this.clipManager.model.set('open', true);
     this.clipManager.$el.appendTo(this.el);
     
     this.clipInspector = new WebRemixer.Views.ClipInspector({
       model: this.model.get('clipInspector')
     });
+    
+    this.$toggleClipManager = $('<button class="toggle-clip-manager"/>')
+      .button({
+        icons: {
+          primary: 'ui-icon-video',
+        },
+        label: 'Clip Manager',
+        text: false
+      }).appendTo(this.el);
     
     this.$timelines = $('<div/>')
       .addClass('timelines')
@@ -68,6 +79,11 @@ WebRemixer.Views.Remix = Backbone.View.extend({
     });
     
     this.render();
+  },
+  
+  onToggleClipManagerClick: function(){
+    var cm = this.model.get('clipManager');
+    cm.set('open', !cm.get('open'));
   },
   
   onTimelinesAdd: function(model){

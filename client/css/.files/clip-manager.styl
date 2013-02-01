@@ -1,33 +1,29 @@
 .clip-manager
   position: fixed
-  right: 0
-  top: 0
-  width: 32em
-  height: 100%
+  left: 0
+  bottom: 0
+  margin: 0 2.5%
+  width: 95%
+  height: 14em
   background: #fff
   z-index: 3
+  overflow: auto
+  transition: .2s all ease-out
+  box-shadow: 0 0 4px #555
+  border-radius: 1.25em 1.25em 0 0
   
-  &::before
-    width: 100%
-    padding: (($ruler-height - 1.25em) / 2)
-    height: $ruler-height
-    display: block
-    text-align: center
-    content: 'Clips'
-    box-sizing: border-box
-    background: rgba(0,0,0,0.25)
-    border-bottom: 2px solid rgba(0,0,0,0.5)
-    margin-bottom: 1em
-  
-  border-left: 2px solid rgba(0,0,0,0.5)
+  &:not(.open)
+    bottom: -@height
+    opacity: 0
   
   > .new-clip
-    margin: 1em
-    margin-bottom: 0
+    vertical-align: top
+    margin: 1.5em
   
   > .clips
-    width: 100%
+    display: inline-block
+    margin-top: 2em
     
     > .clip
-        cursor: pointer
-        margin-top: 2em
+      cursor: pointer
+      margin-left: 2em
