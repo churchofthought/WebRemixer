@@ -13,7 +13,7 @@ WebRemixer.Views.ClipManager = Backbone.View.extend({
     
     this.$newClip = $('<button class="new-clip"/>').button({
       icons: {
-        primary: 'ui-icon-plus',
+        primary: 'ui-icon-plus'
       },
       label: 'New Clip',
       text: false

@@ -25,14 +25,14 @@ WebRemixer.Views.Clip = Backbone.View.extend({
     $('<div/>').addClass('buttons').append(
       $('<button class="inspect"/>').button({
         icons: {
-          primary: 'ui-icon-pencil',
+          primary: 'ui-icon-pencil'
         },
         label: 'Inspect',
         text: false
       }),
       $('<button class="delete"/>').button({
         icons: {
-          primary: 'ui-icon-close',
+          primary: 'ui-icon-close'
         },
         label: 'Delete',
         text: false

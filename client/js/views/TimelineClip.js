@@ -50,7 +50,7 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
     
       $('<input id="%s" type="checkbox" class="toggle-loop"/>'.sprintf($loopLabel.attr('for'))).appendTo($buttons).button({
         icons: {
-          primary: 'ui-icon-refresh',
+          primary: 'ui-icon-refresh'
         },
         label: 'Loop',
         text: false
@@ -58,7 +58,7 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
       
       $('<button class="duplicate"/>').button({
         icons: {
-          primary: 'ui-icon-copy',
+          primary: 'ui-icon-copy'
         },
         label: 'Duplicate',
         text: false
@@ -66,7 +66,7 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
       
       $('<button class="delete"/>').button({
         icons: {
-          primary: 'ui-icon-close',
+          primary: 'ui-icon-close'
         },
         label: 'Delete',
         text: false
@@ -128,7 +128,7 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
       startTime: this.model.get('startTime') + (typeof timeDelta === 'number' && timeDelta || this.model.get('duration')),
       duration: this.model.get('duration'),
       loop: this.model.get('loop'),
-      selected: selected,
+      selected: selected
     })
     
     this.model.get('timeline').get('timelineClips').add(clone);

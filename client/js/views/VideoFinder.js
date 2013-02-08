@@ -25,6 +25,8 @@ WebRemixer.Views.VideoFinder = Backbone.View.extend({
     });
     
     this.render();
+    this.$search.val('kaskade');
+    this.onSearchChange();
   },
   
   onVideosAdd: function(model){

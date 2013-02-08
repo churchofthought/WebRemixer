@@ -1,0 +1,13 @@
+{
+  "name": "Web-Remixer",
+  "description": "HTML5 YouTube/SoundCloud Remixer",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+        "express" : "*",
+         "stylus" : "*",
+            "nib" : "*",
+       "mongoose" : "*",
+          "grunt" : "*"
+  }
+}

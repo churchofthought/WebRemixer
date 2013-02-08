@@ -1,8 +1,24 @@
-WebRemixer.Models.Remix = Backbone.Model.extend({
+WebRemixer.Models.Remix = Backbone.RelationalModel.extend({
+  urlRoot: '/remixes',
+  
+  relations: [{
+    type: Backbone.HasMany,
+    key: 'clips',
+    relatedModel: WebRemixer.Models.Clip,
+    collectionType: WebRemixer.Collections.Clips,
+    reverseRelation: {
+      key: 'remix',
+      includeInJSON: 'id'
+    }
+  }],
 
   defaults: {
     duration: 200,
     playTime: 0
+  },
+  
+  toJSON: function() {
+    return _.pick(this.attributes, "id", "name" );
   },
 
   initialize: function(){
@@ -88,6 +104,6 @@ WebRemixer.Models.Remix = Backbone.Model.extend({
       clearInterval(this.playInterval);
       this.playInterval = undefined;
     }
-  },
+  }
   
 });

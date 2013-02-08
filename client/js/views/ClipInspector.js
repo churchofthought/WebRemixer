@@ -17,9 +17,9 @@ WebRemixer.Views.ClipInspector = Backbone.View.extend({
       model: this.model.get('videoFinder')
     });
     
-    this.$title = $('<input class="clip-title" type="text"/>')
+    this.$title = $('<input class="clip-title" type="text" placeholder="Title"/>')
       .appendTo(
-        $('<div data-label="Title"/>').appendTo(this.el)
+        this.el
       );
       
       
@@ -102,7 +102,7 @@ WebRemixer.Views.ClipInspector = Backbone.View.extend({
   
   onLoad: function(){
     this.$el.appendTo(document.body).dialog({
-      title: 'Inspect Clip',
+      title: 'Edit Clip',
       autoOpen: false,
       modal: true,
       width: 600,

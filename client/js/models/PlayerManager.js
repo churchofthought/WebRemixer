@@ -11,7 +11,7 @@ WebRemixer.Models.PlayerManager = Backbone.Model.extend({
   
     this.set({
       videoPlayersByVideo: {},
-     timelineClipsByVideo: {},
+     timelineClipsByVideo: {}
     });
         
     this.listenTo(this.get('remix').get('timelines'), {

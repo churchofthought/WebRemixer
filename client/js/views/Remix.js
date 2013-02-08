@@ -61,7 +61,7 @@ WebRemixer.Views.Remix = Backbone.View.extend({
     this.$toggleClipManager = $('<button class="toggle-clip-manager"/>')
       .button({
         icons: {
-          primary: 'ui-icon-video',
+          primary: 'ui-icon-video'
         },
         label: 'Clip Manager',
         text: false

@@ -27,7 +27,7 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
     this.$toggleHeight = $('<button class="toggle-height"/>')
       .button({
         icons: {
-          primary: 'ui-icon-circle-triangle-s',
+          primary: 'ui-icon-circle-triangle-s'
         },
         label: 'Collapse',
         text: false

@@ -1,4 +1,4 @@
-WebRemixer.Models.Clip = Backbone.Model.extend({
+WebRemixer.Models.Clip = Backbone.RelationModel.extend({
 
   defaults: {
     cutStart: 0,

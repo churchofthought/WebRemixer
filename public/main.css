@@ -1,0 +1,555 @@
+.ui-dialog {
+  position: fixed !important;
+}
+* {
+  outline: none;
+}
+.ui-button {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  text-decoration: none;
+}
+div[data-label] {
+  padding: 1.75em 0;
+  position: relative;
+}
+div[data-label] input[type='text'] {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding-left: 1em;
+}
+div[data-label]::before {
+  padding: 0.5em;
+  border: 1px dotted rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.1);
+  -webkit-border-radius: 4px;
+  border-radius: 4px;
+  content: attr(data-label);
+}
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+body {
+  font-size: 14px;
+  font-family: Monaco, sans-serif;
+}
+.remix {
+  display: inline-block;
+  position: relative;
+  white-space: nowrap;
+  z-index: 0;
+  overflow: hidden;
+}
+.remix > .toggle-clip-manager {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  margin: 1em;
+  z-index: 3;
+}
+.remix > .context-menu {
+  position: absolute;
+  display: inline-block;
+  visibility: hidden;
+  opacity: 0;
+  filter: alpha(opacity=0);
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+  -webkit-transition: 0.25s opacity, visibility;
+  -moz-transition: 0.25s opacity, visibility;
+  -o-transition: 0.25s opacity, visibility;
+  -ms-transition: 0.25s opacity, visibility;
+  transition: 0.25s opacity, visibility;
+  z-index: 2;
+}
+.remix > .context-menu a {
+  cursor: pointer;
+}
+.remix > .context-menu.show {
+  visibility: visible;
+  opacity: 1;
+  -ms-filter: none;
+  filter: none;
+}
+.main-menu {
+  padding: 0.15em;
+  height: 2em;
+  background: #eee;
+}
+.main-menu > .ui-menubar {
+  position: fixed;
+  z-index: 3;
+}
+.play-controls {
+  position: fixed;
+  display: inline-block;
+  width: 10em;
+  background: #ccc;
+  z-index: 1;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  text-align: center;
+  padding: 1em;
+  height: 4em;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  border-bottom: 1px solid #000;
+}
+.play-controls button {
+  font-size: 12px;
+}
+.ruler {
+  display: inline-block;
+  vertical-align: top;
+  white-space: nowrap;
+  padding-top: 1.2em;
+  height: 4em;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  overflow: visible;
+  position: relative;
+  left: 10em;
+}
+.ruler > .timeHand {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 9999px;
+  background: #f00;
+  z-index: 2;
+  margin-left: -$timeline-header-width;
+  -webkit-box-shadow: 0 0 1px #000;
+  box-shadow: 0 0 1px #000;
+}
+.ruler > .markings {
+  margin-left: -4em;
+}
+.ruler > .markings > * {
+  display: inline-block;
+  width: 8em;
+  text-align: center;
+  position: relative;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.ruler > .markings > *::before {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  position: absolute;
+  left: 25%;
+  top: 100%;
+  width: 25%;
+  height: 100%;
+  content: "";
+  border-right: 1px solid #000;
+  border-left: 1px solid #000;
+}
+.ruler > .markings > *::after {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  position: absolute;
+  right: 25%;
+  top: 100%;
+  width: 25%;
+  height: 100%;
+  content: "";
+  border-right: 1px solid #000;
+  border-left: 1px solid #000;
+}
+.ruler > .markings > *:first-child {
+  color: transparent;
+}
+.ruler > .markings > *:first-child::after {
+  border-left: none;
+}
+.ruler > .markings > * > * {
+  position: absolute;
+  left: -1px;
+  top: 75%;
+  width: 100%;
+  height: 125%;
+  border-left: 1px solid #000;
+  border-bottom: 1px solid #000;
+}
+.ruler > .markings > * > *::before {
+  position: absolute;
+  bottom: 0;
+  left: 12.5%;
+  width: 50%;
+  height: 50%;
+  border-left: 1px solid #000;
+  border-right: 1px solid #000;
+  content: "";
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.ruler > .markings > * > *::after {
+  position: absolute;
+  bottom: 0;
+  right: 12.5%;
+  width: 50%;
+  height: 50%;
+  border-left: 1px solid #000;
+  border-right: 1px solid #000;
+  content: "";
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.timeline {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  height: 10em;
+  border-top: 1px solid #000;
+  position: relative;
+  background: #fff;
+  overflow: hidden;
+  -webkit-transition: 0.25s all;
+  -moz-transition: 0.25s all;
+  -o-transition: 0.25s all;
+  -ms-transition: 0.25s all;
+  transition: 0.25s all;
+}
+.timeline > .header {
+  position: fixed;
+  z-index: 2;
+  width: 10em;
+  height: 10em;
+  background: #ccc;
+  overflow: hidden;
+  -webkit-transition: 0.25s all;
+  -moz-transition: 0.25s all;
+  -o-transition: 0.25s all;
+  -ms-transition: 0.25s all;
+  transition: 0.25s all;
+  border-top: 1px solid #000;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  margin-top: -1px;
+}
+.timeline > .header > .toggle-height {
+  position: absolute;
+  top: 1.5em;
+  right: 0.5em;
+  font-size: 60%;
+}
+.timeline > .header::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 1em;
+  height: 3.5em;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  content: attr(data-title);
+  background: #ccc;
+}
+.timeline.collapsed,
+.timeline.collapsed > .header {
+  height: 3.5em;
+}
+.timeline > .timeline-clips {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+  left: 10em;
+}
+.timeline > .selection {
+  background: #ccc;
+  position: absolute;
+  top: 0;
+  height: 100%;
+}
+.video {
+  width: 17.7777em;
+  height: 10em;
+  background: transparent no-repeat center center;
+  -webkit-background-size: 100% auto;
+  -moz-background-size: 100% auto;
+  background-size: 100% auto;
+  position: relative;
+  overflow: hidden;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  border: 1px solid rgba(0,0,0,0.5);
+  color: #000;
+  display: inline-block;
+}
+.video::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-block;
+  content: attr(data-title);
+  background: rgba(255,255,255,0.75);
+  padding: 0.5em 1em;
+  border-bottom: 1px solid rgba(0,0,0,0.5);
+}
+.video::after {
+  position: absolute;
+  bottom: 1em;
+  right: 0;
+  content: attr(data-duration);
+  background: rgba(255,255,255,0.75);
+  padding: 0.5em 1em;
+  -webkit-box-shadow: 0 0 0.5em rgba(0,0,0,0.5);
+  box-shadow: 0 0 0.5em rgba(0,0,0,0.5);
+}
+.clip {
+  width: 17.7777em;
+  height: 10em;
+  background: #000 no-repeat center center;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+  position: relative;
+  overflow: hidden;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  border: 1px solid rgba(0,0,0,0.5);
+  margin: auto;
+  display: inline-block;
+}
+.clip > .buttons {
+  visibility: hidden;
+  opacity: 0;
+  filter: alpha(opacity=0);
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+  -webkit-transition: 0.25s all;
+  -moz-transition: 0.25s all;
+  -o-transition: 0.25s all;
+  -ms-transition: 0.25s all;
+  transition: 0.25s all;
+  position: absolute;
+  bottom: 0.25em;
+  right: 0.25em;
+  font-size: 80%;
+}
+.clip > .buttons > * {
+  margin: 0.25em;
+  -webkit-box-shadow: 0 0 4px #000 !important;
+  box-shadow: 0 0 4px #000 !important;
+}
+.clip:hover .buttons {
+  visibility: visible;
+  opacity: 1;
+  -ms-filter: none;
+  filter: none;
+}
+.clip::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-block;
+  content: attr(data-title);
+  background: rgba(255,255,255,0.75);
+  padding: 0.5em 1em;
+  border-bottom: 1px solid rgba(0,0,0,0.5);
+}
+.clip::after {
+  position: absolute;
+  bottom: 1em;
+  left: 0;
+  content: attr(data-duration);
+  background: rgba(255,255,255,0.75);
+  padding: 0.5em 1em;
+  -webkit-box-shadow: 0 0 0.5em rgba(0,0,0,0.5);
+  box-shadow: 0 0 0.5em rgba(0,0,0,0.5);
+}
+.timeline-clip {
+  -webkit-background-size: contain !important;
+  -moz-background-size: contain !important;
+  background-size: contain !important;
+  height: 10em;
+  min-height: 10em;
+  max-height: 10em;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  border: 1px solid rgba(0,0,0,0.5);
+  overflow: hidden;
+  -webkit-transition: 0.5s border;
+  -moz-transition: 0.5s border;
+  -o-transition: 0.5s border;
+  -ms-transition: 0.5s border;
+  transition: 0.5s border;
+}
+.timeline-clip > .loop-indicator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-background-size: 0;
+  -moz-background-size: 0;
+  background-size: 0;
+  background: -webkit-gradient(linear, left top, right top, color-stop(0.9, transparent), color-stop(1, #0f0));
+  background: -webkit-linear-gradient(left, transparent 90%, #0f0 100%);
+  background: -moz-linear-gradient(left, transparent 90%, #0f0 100%);
+  background: -o-linear-gradient(left, transparent 90%, #0f0 100%);
+  background: -ms-linear-gradient(left, transparent 90%, #0f0 100%);
+  background: linear-gradient(left, transparent 90%, #0f0 100%);
+}
+.timeline-clips > .timeline-clip {
+  top: 0 !important;
+}
+.timeline-clip::before {
+  position: absolute;
+  width: 100%;
+  height: 2em;
+  padding: 1em;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  content: attr(data-title);
+  color: #fff;
+  background: rgba(0,0,0,0.5);
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.timeline-clip:hover .buttons {
+  visibility: visible;
+  opacity: 1;
+  -ms-filter: none;
+  filter: none;
+}
+.timeline-clip.ui-selected {
+  border: 1px solid #0f0;
+}
+.timeline-clip > .buttons {
+  -webkit-transition: 0.25s all;
+  -moz-transition: 0.25s all;
+  -o-transition: 0.25s all;
+  -ms-transition: 0.25s all;
+  transition: 0.25s all;
+  visibility: hidden;
+  opacity: 0;
+  filter: alpha(opacity=0);
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+  font-size: 80%;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+.clip-manager {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  margin: 0 2.5%;
+  width: 95%;
+  height: 14em;
+  background: #fff;
+  z-index: 3;
+  overflow: auto;
+  -webkit-transition: 0.2s all ease-out;
+  -moz-transition: 0.2s all ease-out;
+  -o-transition: 0.2s all ease-out;
+  -ms-transition: 0.2s all ease-out;
+  transition: 0.2s all ease-out;
+  -webkit-box-shadow: 0 0 4px #555;
+  box-shadow: 0 0 4px #555;
+  -webkit-border-radius: 1.25em 1.25em 0 0;
+  border-radius: 1.25em 1.25em 0 0;
+}
+.clip-manager:not(.open) {
+  bottom: -14em;
+  opacity: 0;
+  filter: alpha(opacity=0);
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+}
+.clip-manager > .new-clip {
+  vertical-align: top;
+  margin: 1.5em;
+}
+.clip-manager > .clips {
+  display: inline-block;
+  margin-top: 2em;
+}
+.clip-manager > .clips > .clip {
+  cursor: pointer;
+  margin-left: 2em;
+}
+.clip-inspector .cut {
+  position: relative;
+  margin: 0 4em;
+}
+.clip-inspector .cut .ui-slider-handle:focus {
+  outline: none;
+}
+.clip-inspector .cut-start {
+  position: absolute;
+  bottom: 100%;
+  margin-bottom: 0.5em;
+}
+.clip-inspector .cut-end {
+  position: absolute;
+  top: 100%;
+  margin-top: 0.5em;
+}
+.clip-inspector .clip-title {
+  margin: 0.5em;
+  padding-left: 2.5%;
+  padding-right: 2.5%;
+  width: 95%;
+}
+.clip-inspector .clip-video {
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+  margin: 0 2em;
+  cursor: pointer;
+  width: 17.7777em;
+  height: 10em;
+}
+.clip-inspector .clip-video:empty {
+  background: rgba(255,255,255,0.25);
+}
+.clip-inspector .clip-video:empty::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  margin-top: -0.5em;
+  font-size: 200%;
+  content: 'Select Video';
+}
+.video-finder {
+  position: relative;
+  overflow: hidden !important;
+}
+.video-finder .search {
+  width: 50%;
+}
+.video-finder .search-results {
+  height: 100%;
+  padding-bottom: 6em;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  overflow: auto;
+}
+.video-finder .video {
+  cursor: pointer;
+  margin: 1em;
+}
