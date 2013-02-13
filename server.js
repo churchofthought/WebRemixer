@@ -1,17 +1,49 @@
-var mongoose = require('mongoose');
+var    async = require('async'),
+    mongoose = require('mongoose'),
      express = require('express'),
       stylus = require('stylus'),
          nib = require('nib');
 
 var Schemas = {};
 
-Schemas.Remix = mongoose.Schema({
-  name: String
+Schemas.Clip = mongoose.Schema({
+        remix: {ref: 'Remix', type: mongoose.Schema.Types.ObjectId},
+        title: String,
+     cutStart: Number,
+  cutDuration: Number,
+        video: {
+          source: String,
+          sourceVideoId: String
+        }
 });
 
-var Models = {};
+Schemas.TimelineClip    = mongoose.Schema({
+  remix:      {ref: 'Remix', type: mongoose.Schema.Types.ObjectId},
+  timeline:   {ref: 'Timeline', type: mongoose.Schema.Types.ObjectId},
+  clip:       {ref: 'Clip', type: mongoose.Schema.Types.ObjectId},
+  title:      String,
+  startTime:  Number,
+  duration:   Number,
+  loop:       Boolean
+});
 
-Models.Remix = mongoose.model('Remix', Schemas.Remix);
+Schemas.Timeline = mongoose.Schema({
+  remix: {ref: 'Remix', type: mongoose.Schema.Types.ObjectId},
+  order: Number
+});
+
+Schemas.Remix = mongoose.Schema({
+  title:  String
+});
+
+
+
+var Models = {
+  Remix         : mongoose.model('Remix',         Schemas.Remix),
+  Timeline      : mongoose.model('Timeline',      Schemas.Timeline),
+  TimelineClip  : mongoose.model('TimelineClip',  Schemas.TimelineClip),
+  Clip          : mongoose.model('Clip',          Schemas.Clip)
+};
 
 
 
@@ -39,51 +71,90 @@ db.once('open', function callback () {
  
 var app = express();
  
- 
-app.configure(function(){
-  app.use(stylus.middleware({
-    debug: true,
-    src: 'client/css',
-    dest: 'public',
-    compile: function(str, path) {
-      return stylus(str)
-      .set('filename', path)
-      .set('warn', true)
-      //.set('compress', true)
-      .use(nib());
-    }
-  }));
-  app.use(express.static('public'));
-});
+app.use(express.bodyParser());
+
+app.use(express.static('public'));
+
+app.use(stylus.middleware({
+  debug: true,
+  src: 'client/css',
+  dest: 'public',
+  compile: function(str, path) {
+    return stylus(str)
+    .set('filename', path)
+    .set('warn', true)
+    //.set('compress', true)
+    .use(nib());
+  }
+}));
 
 
+function addCRUDMethods(url, model){
+    app.post(url, function (req, res){
+      var m = new model(req.body);
+      m.save();
+      return res.send(m);
+    });
+    
+    app.put(url + '/:id', function (req, res){
+      model.findByIdAndUpdate(req.params.id, {$set: req.body}, function (err, m) {
+        res.send(m);
+      });
+    });
+    
+    app.patch(url + '/:id', function (req, res){
+      model.findByIdAndUpdate(req.params.id, {$set: req.body}, function (err, m) {
+        res.send(m);
+      });
+    });
+    
+    app.get(url + '/:id', function (req, res){
+      return model.findById(req.params.id, function (err, m) {
+        return res.send(m);
+      });
+    });
+}
 
+app.get('/remixes/:id/children', function (req, res){ 
 
-// create
-app.post('/remixes', function (req, res){
-  var remix = new Models.Remix(req.body);
-  remix.save();
-  return res.send(remix);
-});
-
-// update
-app.put('/remixes', function (req, res){
-  Models.Remix.findByIdAndUpdate(res.params.id, {$set: res.params}, function (err, remix) {
-    res.send(remix);
+  var query = {
+    remix: req.params.id
+  };
+  
+  async.parallel({
+    timelines: function (callback){
+      Models.Timeline.find(query, callback);
+    },
+    timelineClips: function (callback){
+      Models.TimelineClip.find(query, callback);
+    },
+    clips: function(callback){
+      Models.Clip.find(query, callback);
+    },
+  },
+  
+  function (err, results){
+    res.send(results);
   });
+
+
 });
 
-// get existing
-app.get('/remixes/:id', function (req, res){
-  return Models.Remix.findById(req.params.id, function (err, remix) {
-    return res.send(remix);
-  });
-});
+
+addCRUDMethods('/remixes',       Models.Remix);
+addCRUDMethods('/timelines',     Models.Timeline);
+addCRUDMethods('/timeline-clips', Models.TimelineClip);
+addCRUDMethods('/clips',         Models.Clip);
+
+
 
 app.get('/new', function (req, res){
   res.sendfile('public/main.html');
 });
 
+app.get('/:id', function (req, res){
+  res.sendfile('public/main.html');
+});
 
 
 app.listen(3000);

@@ -8,6 +8,7 @@
          "stylus" : "*",
             "nib" : "*",
        "mongoose" : "*",
-          "grunt" : "*"
+          "grunt" : "*",
+          "async" : "*"
   }
 }

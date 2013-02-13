@@ -25,8 +25,8 @@ WebRemixer.Views.VideoFinder = Backbone.View.extend({
     });
     
     this.render();
-    this.$search.val('kaskade');
-    this.onSearchChange();
+    //this.$search.val('kaskade');
+    //this.onSearchChange();
   },
   
   onVideosAdd: function(model){
@@ -98,7 +98,10 @@ WebRemixer.Views.VideoFinder = Backbone.View.extend({
       autoOpen: false,
       modal: true,
       width: 960,
-      height: 600
+      height: 600,
+      buttons: { 
+        Okay: _.bind(this.$el.dialog, this.$el, 'close')
+      } 
     });
   },
   

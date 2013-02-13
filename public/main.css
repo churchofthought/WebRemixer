@@ -74,6 +74,20 @@ body {
   -ms-filter: none;
   filter: none;
 }
+.remix > input.title {
+  position: fixed;
+  left: 50%;
+  top: 0;
+  width: 50%;
+  margin: 0 0 0 -25%;
+  background: none;
+  border: none;
+  font-weight: bold;
+  font-size: 200%;
+  text-align: center;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
 .main-menu {
   padding: 0.15em;
   height: 2em;

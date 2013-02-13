@@ -6,7 +6,8 @@ WebRemixer.Routers.Remix = Backbone.Router.extend({
   },
 
   newRemix: function() {
-    var remixModel = new WebRemixer.Models.Remix({name: 'New Remix'});
+    
+    var remixModel = new WebRemixer.Models.Remix();
     
     var remixView = new WebRemixer.Views.Remix({
       model: remixModel
@@ -17,15 +18,23 @@ WebRemixer.Routers.Remix = Backbone.Router.extend({
     var timelines = remixModel.get('timelines');
     
     // add some timelines to begin
-    for (var num = 1; num < 5; ++num){
-      timelines.add(new WebRemixer.Models.Timeline({num: num}))
+    for (var count = 5; count--;){
+      timelines.add(new WebRemixer.Models.Timeline());
     }
-  
-    remixModel.save();
   },
 
-  getRemix: function() {
-    console.log('getRemix~!');
+  getRemix: function(id) {
+    var attrs = {};
+    attrs[Backbone.Model.prototype.idAttribute] = id;
+    var remixModel = new WebRemixer.Models.Remix(attrs);
+    
+    var remixView = new WebRemixer.Views.Remix({
+      model: remixModel
+    });
+    
+    remixView.$el.appendTo(document.body);
+    
+    remixModel.fetch();
   }
 
 });

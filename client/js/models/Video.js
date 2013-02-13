@@ -1,7 +1,15 @@
 WebRemixer.Models.Video = Backbone.Model.extend({
 
+  urlRoot: 'videos',
+  
+  defaults: {
+    source: 'youtube'
+  },
+  
+  includeInJSON: ['source', 'sourceVideoId'],
+
   initialize: function(){
-    _.bindAll(this);
+    _.bindAll(this, 'gotVideoData');
     
     
     if (!this.get('title')){

@@ -1,7 +1,8 @@
 WebRemixer.Views.Remix = Backbone.View.extend({
-  className: "remix",
+  className: 'remix',
     
   events: {
+    'change .title' : 'onTitleInputChange',
     'selectablestart' : 'onSelectStart',
     'selectableselecting' : 'onSelecting',
     'selectableunselecting' : 'onUnselecting',
@@ -23,7 +24,8 @@ WebRemixer.Views.Remix = Backbone.View.extend({
     this.$el.attr({
       id: this.model.cid
     });
-  	
+    
+    this.$title = $('<input/>').addClass('title').attr('placeholder', 'Title Your Remix').appendTo(this.el);
     
     this.$contextMenu = $('<ul/>')
       .addClass('context-menu')
@@ -78,7 +80,20 @@ WebRemixer.Views.Remix = Backbone.View.extend({
       remove: this.onTimelinesRemove
     });
     
+    this.listenTo(this.model, 'change:title', this.onTitleChange);
+    this.model.trigger('change:title');
+    
     this.render();
+  },
+  
+  onTitleInputChange: function(){
+    this.model.set('title', this.$title.val());
+    
+    this.$title.blur();
+  },
+  
+  onTitleChange: function(){
+    this.$title.val(this.model.get('title'));
   },
   
   onToggleClipManagerClick: function(){
@@ -93,7 +108,7 @@ WebRemixer.Views.Remix = Backbone.View.extend({
   
     //insert timeline in the correct position
     this.$timelines.children('.timeline').each(function(){
-      if ($(this).attr('data-num') > model.get('num')){
+      if ($(this).attr('data-order') > model.get('order')){
         view.$el.insertBefore(this);
         return false;
       }

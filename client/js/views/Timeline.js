@@ -13,14 +13,14 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
       .prop(
         'id', this.model.cid
       ).attr(
-        'data-num', this.model.get('num')
+        'data-order', this.model.get('order')
       )
       .data('view', this);
       
     this.$header = $('<div/>')
       .addClass('header')
       .attr(
-        'data-title', 'Timeline %s'.sprintf(this.model.get('num'))
+        'data-title', 'Timeline %s'.sprintf(this.model.get('order'))
       )
       .appendTo(this.el);
       
@@ -43,13 +43,38 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
 
     this.listenTo(this.model, {
       'change:collapsed': this.onCollapsedChange,
-      'change:remix': this.onRemixChange
+      'change:remix': this.onRemixChange,
+      'change:order': this.onOrderChange
     });
     this.listenTo(this.model.get('timelineClips'), {
       add: this.onTimelineClipsAdd,
       remove: this.onTimelineClipsRemove
     });
-    this.listenTo(this.model.get('remix'), 'change:selection', this.onSelectionChange);
+  },
+  
+  onOrderChange: function(){
+    var order = this.model.get('order');
+  
+    this.$el.attr(
+      'data-order', order
+    );
+    
+    this.$header.attr(
+      'data-title', 'Timeline %s'.sprintf(order)
+    );
+  },
+  
+  onRemixChange: function(){
+    var prevRemix = this.model.previous('remix');
+    if (prevRemix){
+      this.stopListening(prevRemix);
+    }
+    
+    var remix = this.model.get('remix');
+  
+    if (remix){
+      this.listenTo(remix, 'change:selection', this.onSelectionChange);
+    }
   },
   
   onTimelineClipsAdd: function(model){

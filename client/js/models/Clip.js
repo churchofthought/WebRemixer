@@ -1,15 +1,27 @@
-WebRemixer.Models.Clip = Backbone.RelationModel.extend({
+WebRemixer.Models.Clip = Backbone.Model.extend({
+
+  urlRoot: 'clips',
 
   defaults: {
     cutStart: 0,
     cutDuration: 5,
     title: 'New Clip'
   },
+  
+  shouldBeIdRefInJSON: true,
+  
+  includeInJSON: ['remix', 'title', 'video', 'cutStart', 'cutDuration'],
 
   initialize: function(){
-    this.listenTo(this, 'change:video', this.onVideoChange);
+    this.listenTo(this, {
+      change: this.onChange,
+      'change:video': this.onVideoChange 
+    });
+    
     this.trigger('change:video');
   },
+  
+  onChange: WebRemixer.Util.Model.saveChanged,
   
   onVideoChange: function(){
     var video = this.get('video');

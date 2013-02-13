@@ -1,30 +1,19 @@
-WebRemixer.Models.Remix = Backbone.RelationalModel.extend({
-  urlRoot: '/remixes',
+WebRemixer.Models.Remix = Backbone.Model.extend({
+  urlRoot: 'remixes',
   
-  relations: [{
-    type: Backbone.HasMany,
-    key: 'clips',
-    relatedModel: WebRemixer.Models.Clip,
-    collectionType: WebRemixer.Collections.Clips,
-    reverseRelation: {
-      key: 'remix',
-      includeInJSON: 'id'
-    }
-  }],
+  includeInJSON: ['title'],
 
   defaults: {
     duration: 200,
     playTime: 0
   },
   
-  toJSON: function() {
-    return _.pick(this.attributes, "id", "name" );
-  },
+  shouldBeIdRefInJSON: true,
 
   initialize: function(){
   
-    _.bindAll(this);
-  
+    _.bindAll(this, 'playProcedure', 'onGotChildren');
+
     var opts = {
       remix: this
     };
@@ -54,10 +43,42 @@ WebRemixer.Models.Remix = Backbone.RelationalModel.extend({
     });
     
     this.listenTo(this, {
+      change: this.onChange,
       'change:playing': this.onPlayingChange,
       'change:realTimeNeeded': this.onRealTimeNeededChange
     });
+    
+    this.listenTo(this.get('clips'), 'change', this.onClipsChange);
+    this.listenTo(this.get('timelines'), 'change', this.onTimelinesChange);
+    
+    if (this.id) {
+      this.fetchChildren();
+    }else{
+      this.save();
+    }
   },
+  
+  fetchChildren: function(){
+    if (!this.id) return;
+    
+    $.get('%s/children'.sprintf(this.url()), this.onGotChildren);
+  },
+  
+  onGotChildren: function(res){
+    console.log(res);
+  },
+  
+  onChange: WebRemixer.Util.Model.saveChanged,
+  
+  /*
+  onTimelinesChange: function(){
+    this.save(undefined, {
+      attrs: {
+        clips: this.get('timelines').pluck(Backbone.Model.prototype.idAttribute)
+      }
+    }, {patch: true});
+  },
+  */
   
   onRealTimeNeededChange: function(){
     if (this.get('realTimeNeeded')){

@@ -40,10 +40,10 @@ WebRemixer.Views.Clip = Backbone.View.extend({
     ).appendTo(this.el);
       
     this.listenTo(this.model, {
-       change: this.render
+      change: this.render
     });
     
-    this.model.trigger('change');
+    this.render();
   },
   
   onDeleteClick: function(){
