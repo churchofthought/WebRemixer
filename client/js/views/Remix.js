@@ -108,7 +108,7 @@ WebRemixer.Views.Remix = Backbone.View.extend({
   
     //insert timeline in the correct position
     this.$timelines.children('.timeline').each(function(){
-      if ($(this).attr('data-order') > model.get('order')){
+      if ($(this).data('view').model.get('order') > model.get('order')){
         view.$el.insertBefore(this);
         return false;
       }

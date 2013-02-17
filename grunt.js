@@ -6,14 +6,16 @@ module.exports = function(grunt) {
     concat: {
       dist: {
         src: [
+          'client/js/namespaces.js',
           'client/js/{' +
-            '{namespaces,constants,util,main}.js,' + 
+            '{constants,util,main}.js,' + 
             '{lib,views,routers}/*,' +
           '}',
+          'client/js/models/Remix.js',
+          'client/js/models/Timeline.js',
           'client/js/models/Video.js',
           'client/js/models/Clip.js',
           'client/js/models/TimelineClip.js',
-          'client/js/models/Timeline.js',
           'client/js/models/*.js',
           'client/js/collections/*'
         ],

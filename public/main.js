@@ -1,3 +1,10 @@
+var WebRemixer = {
+  Util: {},
+  Routers: {},
+  Views: {},
+  Models: {},
+  Collections: {}
+};
 /**
  * Copyright (c) 2010 Jakob Westhoff
  *
@@ -207,21 +214,153 @@
         return sprintf.apply( undefined, newArguments );
     }
 })( window );
-Backbone.Model.prototype.idAttribute = '_id';
+// mongodb uses _id
+Backbone.Model.prototype.idAttribute = WebRemixer.Models.idAttribute = '_id';
+
+// model cache
+WebRemixer.Models.all = new Backbone.Collection();
+
+
+
+// global model cache, by overriding backbone model constructor
+// backbone code uses Backbone.Model (itself) instead of BackBone.Model.prototype.constructor
+// this makes the code a little fatter, but we get it done nonetheless
+(function(){
+  var origClass = Backbone.Model;
+  Backbone.Model = function(){
+    WebRemixer.Models.all.add(this);
+
+    origClass.apply(this, arguments);
+
+    if (this.isNew()){
+      this.prevJSON = {};
+    }else{
+      this.prevJSON = this.toJSON();
+    }
+  };
+
+  // copy over backbone.model methods
+  for (var prop in origClass){
+    if (origClass.hasOwnProperty(prop)){
+      Backbone.Model[prop] = origClass[prop];
+    }
+  }
+  Backbone.Model.prototype = origClass.prototype;
+  
+})();
+
+// toJSON looks at AttrType attribute
+// determines which attributes to include
+// model references in includeById are replaced with their id
 Backbone.Model.prototype.toJSON = function() {
-  if (this.includeInJSON){
-    var attributes = _.pick(this.attributes, this.includeInJSON);
-    for (attr in attributes){
-      var val = attributes[attr];
-      if (val instanceof Backbone.Model && val.shouldBeIdRefInJSON){
-        attributes[attr] = val.id;
+  var attributes = {};
+
+  for (var attr in this.attributes){
+    var AttrType = this.includeInJSON[attr];
+    if (AttrType){
+      var attrVal = this.attributes[attr];
+      if (attrVal instanceof Backbone.Model && AttrType.prototype instanceof Backbone.Model && !AttrType.prototype.includedAsObject){
+        attributes[attr] = attrVal.id;
+      }else{
+        attributes[attr] = attrVal;
       }
     }
-    return attributes;
-  }else{
-    return this.attributes;
   }
+
+  return attributes;
 };
+
+
+// server sends back id strings, we need a model instead
+// parse takes care of this
+
+// server also sends back nested model contents
+// we should set the nested models attributes and replace Object with the Model
+// parse takes care of this
+Backbone.Model.prototype.parse = function(response){
+  
+  // check to see if we have id references
+  // we can pull the models from the model cache
+
+  for (var attr in response){
+    var AttrType = this.includeInJSON[attr];
+    if (AttrType){
+      var attrVal = response[attr];
+      if (AttrType.prototype instanceof Backbone.Model){
+        var existing;
+        if (AttrType.prototype.includedAsObject){
+          existing = this.get(attr);
+          if (existing && existing instanceof Backbone.Model){
+            existing.set(attrVal);
+          }else{
+            existing = new AttrType(attrVal);
+          }
+        }else{
+          existing = WebRemixer.Models.all.get(attrVal);
+          if (!existing){
+            var attrs = {};
+            attrs[AttrType.prototype.idAttribute] = attrVal;
+            existing = new AttrType(attrs);
+            existing.fetch();
+          }
+        }
+        response[attr] = existing;
+      }
+    }
+  }
+
+  return response;
+
+};
+
+
+
+
+
+(function(){
+  var originalSave = Backbone.Model.prototype.save;
+
+  var onSave = function(model){
+    model.beingCreated = false;
+    if (model.deferredSave){
+      model.deferredSave = false;
+      model.save();
+    }
+  };
+
+  Backbone.Model.prototype.save = function(){
+    if (this.beingCreated){
+      this.deferredSave = true;
+      return;
+    }
+
+    var curAttrs = this.toJSON();
+    var prevAttrs = this.prevJSON;
+
+    this.prevJSON = curAttrs;
+
+    var diffAttrs = {};
+
+    for (var attr in curAttrs){
+      var curVal = curAttrs[attr];
+      if (!_.isEqual(curVal, prevAttrs[attr])){
+        diffAttrs[attr] = curVal;
+      }
+    }
+
+    if (this.isNew()){
+      this.beingCreated = true;
+      return originalSave.call(this, undefined, {
+        success: onSave, 
+        error: onSave
+      });
+    }else if (!_.isEmpty(diffAttrs)){
+      return originalSave.call(this, undefined, {attrs: diffAttrs});
+    }
+
+  };
+
+})();
 (function(){
   // keep qsl function as a closure with context variable "selector"
   // faster to set the variable "selector", than creating a closure everytime
@@ -263,13 +402,6 @@ Backbone.Model.prototype.toJSON = function() {
       return this(selector);
     };
 })();
-var WebRemixer = {
-  Util: {},
-  Routers: {},
-  Views: {},
-  Models: {},
-  Collections: {}
-};
 WebRemixer.Views.Ruler = Backbone.View.extend({
   className: 'ruler',
   
@@ -406,8 +538,10 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
       'change:timeline': this.onTimelineChange,
       'change:selected': this.onSelectedChange
     });
-    
-    this.model.trigger('change change:selected');
+
+    this.model.trigger('change:selected');
+
+    this.render();
   },
   
   onSelectedChange: function(){
@@ -428,7 +562,9 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
   
   onDragStop: function(){
     if (this.origDraggableParent){
-      this.$el.appendTo(this.origDraggableParent);
+      if (!this.$el.parent('.timeline-clips').length){
+        this.$el.appendTo(this.origDraggableParent);
+      }
       this.model.set('startTime', (this.$el.position().left - this.origDraggableParent.offset().left) / WebRemixer.PX_PER_SEC);
       this.origDraggableParent = null;
     }
@@ -449,14 +585,13 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
     var selected = this.model.get('selected');
   
     var clone = new WebRemixer.Models.TimelineClip({
+      timeline: this.model.get('timeline'),
       clip: this.model.get('clip'),
       startTime: this.model.get('startTime') + (typeof timeDelta === 'number' && timeDelta || this.model.get('duration')),
       duration: this.model.get('duration'),
       loop: this.model.get('loop'),
       selected: selected
-    })
-    
-    this.model.get('timeline').get('timelineClips').add(clone);
+    });
 
     if (selected){
       this.model.set('selected', false);
@@ -706,6 +841,7 @@ WebRemixer.Views.VideoFinder = Backbone.View.extend({
   onVisibilityChange: function(){
     if (this.model.get('open')){
       this.$el.dialog('open');
+      this.$search.select();
     }else{
       this.$el.dialog('close');
     }
@@ -898,23 +1034,35 @@ WebRemixer.Views.ClipManager = Backbone.View.extend({
   },
   
   createNewClip: function(){
-    var clip = new WebRemixer.Models.Clip({
+    var clip =
+      new WebRemixer.Models.Clip({
+        remix: this.model.get('remix')
+      });
 
+    clip.save();
+
+    this.inspect( clip );
+  },
+
+ onClipsAdd: function(model){
+    var view = new WebRemixer.Views.Clip({
+      model: model
     });
-    
-    this.model.get('remix').get('clips').add(clip);
-    
-    this.inspect(clip);
+
+    //insert clip in the correct position
+    this.$clips.children('.clip').each(function(){
+      if ($(this).data('view').model.get('order') > model.get('order')){
+        view.$el.insertBefore(this);
+        return false;
+      }
+    });
+
+    //if not inserted, insert the clip
+    if (!view.$el.parent().length){
+      this.$clips.append(view.el);
+    }
   },
-  
-  onClipsAdd: function(model){
-    this.$clips.append(
-      new WebRemixer.Views.Clip({
-        model: model
-      }).el
-    );
-  },
-  
+
   onClipsRemove: function(model){
     this.$clips.single('#' + model.cid).data('view').remove();
   },
@@ -1044,7 +1192,7 @@ WebRemixer.Views.Remix = Backbone.View.extend({
   
     //insert timeline in the correct position
     this.$timelines.children('.timeline').each(function(){
-      if ($(this).attr('data-order') > model.get('order')){
+      if ($(this).data('view').model.get('order') > model.get('order')){
         view.$el.insertBefore(this);
         return false;
       }
@@ -1160,8 +1308,6 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
     this.$el
       .prop(
         'id', this.model.cid
-      ).attr(
-        'data-order', this.model.get('order')
       )
       .data('view', this);
       
@@ -1203,10 +1349,6 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
   onOrderChange: function(){
     var order = this.model.get('order');
   
-    this.$el.attr(
-      'data-order', order
-    );
-    
     this.$header.attr(
       'data-title', 'Timeline %s'.sprintf(order)
     );
@@ -1226,15 +1368,21 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
   },
   
   onTimelineClipsAdd: function(model){
-    this.$timelineClips.append(
-      new WebRemixer.Views.TimelineClip({
+    var $timelineClip = $.single('#' + model.cid);
+
+    if (!$timelineClip.length){
+      $timelineClip = new WebRemixer.Views.TimelineClip({
         model: model
-      }).el
-    );
+      }).el;
+    }
+
+    this.$timelineClips.append($timelineClip);
   },
   
   onTimelineClipsRemove: function(model){
-    this.$timelineClips.single('#' + model.cid).data('view').remove();
+    if (model.get('timeline') === this){
+      $.single('#' + model.cid).data('view').remove();
+    }
   },
 
   onToggleHeightClick: function(){
@@ -1330,19 +1478,14 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
     var view = ui.draggable.data('view');
     
     if (view instanceof WebRemixer.Views.TimelineClip){
-      var curTimeline = view.model.get('timeline');
-      if (curTimeline !== this.model){
-        curTimeline.get('timelineClips').remove(view.model);
-        this.model.get('timelineClips').add(view.model);
-      }
+      view.model.set('timeline', this.model);
     }else if (view instanceof WebRemixer.Views.Clip){
-      this.model.get('timelineClips').add(
-          new WebRemixer.Models.TimelineClip({
-            clip: view.model,
-            startTime: (ui.offset.left - this.$timelineClips.offset().left) / WebRemixer.PX_PER_SEC,
-            loop: true
-          })
-      );
+      new WebRemixer.Models.TimelineClip({
+        timeline: this.model,
+        clip: view.model,
+        startTime: (ui.offset.left - this.$timelineClips.offset().left) / WebRemixer.PX_PER_SEC,
+        loop: true
+      }).save();
     }
   },
   
@@ -1606,7 +1749,7 @@ WebRemixer.Views.Clip = Backbone.View.extend({
     
     this.render();
   },
-  
+
   onDeleteClick: function(){
     this.model.destroy();
   },
@@ -1633,8 +1776,8 @@ WebRemixer.Views.Clip = Backbone.View.extend({
   }
 });
 $(function(){
-  new WebRemixer.Routers.Remix();
-  Backbone.history.start({pushState: true});
+	WebRemixer.router = new WebRemixer.Routers.Remix();
+	Backbone.history.start({pushState: true});
 });
 WebRemixer.preloadDelay = .5;
 WebRemixer.EMS_PER_SEC = 8;
@@ -1664,16 +1807,17 @@ WebRemixer.Util.intersects = function(lineClip1, lineClip2){
   
 };
 
-
-  
-
-
-WebRemixer.Util.Model = {};
-
-WebRemixer.Util.Model.saveChanged = function(){
-  var attrs = _.pick(this.toJSON(), _.keys(this.changedAttributes()));
-  if (!_.isEmpty(attrs)){
-    this.save(undefined, {patch: true, attrs: attrs});
+WebRemixer.Util.createOrUpdateModels = function(Model, dataArr){
+  for (var i = dataArr.length; i--;){
+    var dat = dataArr[i];
+      
+    var existing = WebRemixer.Models.all.get(dat[WebRemixer.Models.idAttribute]);
+    
+    if (existing){
+      existing.set( existing.parse(dat) );
+    }else{
+      new Model( dat, {parse: true});
+    }
   }
 };
 WebRemixer.Routers.Remix = Backbone.Router.extend({
@@ -1685,36 +1829,224 @@ WebRemixer.Routers.Remix = Backbone.Router.extend({
 
   newRemix: function() {
     
-    var remixModel = new WebRemixer.Models.Remix();
+    var remix = new WebRemixer.Models.Remix();
     
-    var remixView = new WebRemixer.Views.Remix({
-      model: remixModel
-    });
-    
-    remixView.$el.appendTo(document.body);
-    
-    var timelines = remixModel.get('timelines');
+    new WebRemixer.Views.Remix({
+      model: remix
+    }).$el.appendTo(document.body);
     
     // add some timelines to begin
     for (var count = 5; count--;){
-      timelines.add(new WebRemixer.Models.Timeline());
+      new WebRemixer.Models.Timeline({remix: remix}).save();
     }
+
+    remix.save();
   },
 
   getRemix: function(id) {
     var attrs = {};
-    attrs[Backbone.Model.prototype.idAttribute] = id;
-    var remixModel = new WebRemixer.Models.Remix(attrs);
+    attrs[WebRemixer.Models.idAttribute] = id;
+
+    var remix = new WebRemixer.Models.Remix(attrs);
     
-    var remixView = new WebRemixer.Views.Remix({
-      model: remixModel
-    });
+    new WebRemixer.Views.Remix({
+      model: remix
+    }).$el.appendTo(document.body);
     
-    remixView.$el.appendTo(document.body);
-    
-    remixModel.fetch();
+    remix.fetch();
   }
 
+});
+WebRemixer.Models.Remix = Backbone.Model.extend({
+  urlRoot: 'remixes',
+  
+  includeInJSON: {title: String},
+
+  defaults: {
+    duration: 200,
+    playTime: 0
+  },
+
+  initialize: function(){
+  
+    _.bindAll(this);
+
+    var opts = {
+      remix: this
+    };
+    
+    this.set({
+            mainMenu: new WebRemixer.Models.MainMenu(opts),
+        playControls: new WebRemixer.Models.PlayControls(opts),
+               ruler: new WebRemixer.Models.Ruler(opts),
+         clipManager: new WebRemixer.Models.ClipManager(opts),
+       clipInspector: new WebRemixer.Models.ClipInspector(opts),
+           timelines: new WebRemixer.Collections.Timelines(),
+               clips: new WebRemixer.Collections.Clips()
+    });
+    
+    this.set({
+       playerManager: new WebRemixer.Models.PlayerManager(opts)
+    });
+    
+    this.listenTo(this.get('clips'), {
+      add: this.onClipsAdd,
+      remove: this.onClipsRemove
+    });
+    
+    this.listenTo(this.get('timelines'), {
+      add: this.onTimelinesAdd,
+      remove: this.onTimelinesRemove
+    });
+    
+    this.listenTo(this, {
+      change: this.onChange,
+      'change:playing': this.onPlayingChange,
+      'change:realTimeNeeded': this.onRealTimeNeededChange
+    });
+
+    this.listenTo(this, 'change:%s'.sprintf(this.idAttribute), this.onChangeId);
+    
+    if (this.id) {
+      this.fetchChildren();
+    }
+  },
+
+  onChangeId: function(){
+    WebRemixer.router.navigate('%s'.sprintf(this.id));
+  },
+  
+  fetchChildren: function(){
+    $.get('%s/children'.sprintf(this.url()), this.onFetchedChildren);
+  },
+  
+  onFetchedChildren: function(res){
+    WebRemixer.Util.createOrUpdateModels(WebRemixer.Models.Clip, res.clips);
+    
+    WebRemixer.Util.createOrUpdateModels(WebRemixer.Models.Timeline, res.timelines);
+    
+    WebRemixer.Util.createOrUpdateModels(WebRemixer.Models.TimelineClip, res.timelineClips);
+  },
+  
+  onChange: function(){
+    this.save();
+  },
+  
+  onRealTimeNeededChange: function(){
+    if (this.get('realTimeNeeded')){
+      this.playProcedure();
+      this.set('realTimeNeeded', false, {silent: true});
+    }
+  },
+  
+  onClipsAdd: function(model){
+    model.set('remix', this);
+  },
+  
+  onClipsRemove: function(model){
+    if (model.get('remix') === this){
+      model.set('remix', undefined);
+    }
+  },
+  
+  onTimelinesAdd: function(model){
+    model.set('remix', this);
+  },
+  
+  onTimelinesRemove: function(model){
+    if (model.get('remix') === this){
+      model.set('remix', undefined);
+    }
+  },
+  
+  onPlayingChange: function(){
+    if (this.get('playing')){
+      this.play();
+    }else{
+      this.pause();
+    }
+  },
+  
+  play: function(){
+    this.playStartTime = new Date() * 1 - this.get('playTime') * 1000;
+    this.playInterval = setInterval(this.playProcedure, 0);
+  },
+  
+  playProcedure: function(){
+    this.set('playTime', ((new Date() * 1) - this.playStartTime) / 1000);
+  },
+  
+  pause: function(){
+    if (this.playInterval){
+      clearInterval(this.playInterval);
+      this.playInterval = undefined;
+    }
+  }
+  
+});
+WebRemixer.Models.Timeline = Backbone.Model.extend({
+
+  urlRoot: 'timelines',
+  
+  includeInJSON: {remix: WebRemixer.Models.Remix, order: String},
+
+  initialize: function(){
+    _.bindAll(this);
+
+    this.set({
+      timelineClips : new WebRemixer.Collections.TimelineClips(),
+      selection : {
+        startTime: 0,
+        duration: 0
+      }
+    });
+     
+    this.listenTo(this.get('timelineClips'), {
+      add: this.onTimelineClipsAdd,
+      remove: this.onTimelineClipsRemove
+    });
+    
+    this.onRemixChange();
+
+    this.listenTo(this, {
+      change: this.onChange,
+      'change:remix': this.onRemixChange
+    });
+  },
+  
+  onChange: function(){
+    this.save();
+  },
+  
+  onRemixChange: function(){
+  
+    var prevRemix = this.previous('remix');
+    if (prevRemix){
+      prevRemix.get('timelines').remove(this);
+      this.stopListening(prevRemix);
+    }
+  
+    var remix = this.get('remix');
+    if (remix){
+      var timelines = remix.get('timelines');
+
+      timelines.add(this);
+      if (!this.get('order')){
+        this.set('order', timelines.indexOf(this) + 1);
+      }
+      this.listenTo(remix, 'change:%s'.sprintf(WebRemixer.Models.Remix.prototype.idAttribute), this.onChange);
+    }
+  },
+  
+  onTimelineClipsAdd: function(model){
+    model.set('timeline', this);
+  },
+  
+  onTimelineClipsRemove: function(model){
+    if (model.get('timeline') === this){
+      model.set('timeline', undefined);
+    }
+  }
 });
 WebRemixer.Models.Video = Backbone.Model.extend({
 
@@ -1724,10 +2056,11 @@ WebRemixer.Models.Video = Backbone.Model.extend({
     source: 'youtube'
   },
   
-  includeInJSON: ['source', 'sourceVideoId'],
+  includedAsObject: true,
+  includeInJSON: {source: String, sourceVideoId: String},
 
   initialize: function(){
-    _.bindAll(this, 'gotVideoData');
+    _.bindAll(this);
     
     
     if (!this.get('title')){
@@ -1757,20 +2090,47 @@ WebRemixer.Models.Clip = Backbone.Model.extend({
     title: 'New Clip'
   },
   
-  shouldBeIdRefInJSON: true,
-  
-  includeInJSON: ['remix', 'title', 'video', 'cutStart', 'cutDuration'],
+  includeInJSON: {remix: WebRemixer.Models.Remix, order: String, title: String, video: WebRemixer.Models.Video, cutStart: String, cutDuration: String},
 
   initialize: function(){
+    _.bindAll(this);
+
+    this.onVideoChange();
+    this.onRemixChange();
+
     this.listenTo(this, {
       change: this.onChange,
-      'change:video': this.onVideoChange 
+      'change:remix': this.onRemixChange,
+      'change:video': this.onVideoChange
     });
-    
-    this.trigger('change:video');
   },
   
-  onChange: WebRemixer.Util.Model.saveChanged,
+  onChange: function(){
+    this.save();
+  },
+
+
+  onRemixChange: function(){
+  
+    var prevRemix = this.previous('remix');
+    if (prevRemix){
+      prevRemix.get('clips').remove(this);
+      this.stopListening(prevRemix);
+    }
+  
+    var remix = this.get('remix');
+    if (remix){
+      var clips = remix.get('clips');
+
+      clips.add(this);
+
+      if (!this.get('order')){
+        this.set('order', clips.indexOf(this) + 1);
+      }
+
+      this.listenTo(remix, 'change:%s'.sprintf(WebRemixer.Models.Remix.prototype.idAttribute), this.onChange);
+    }
+  },
   
   onVideoChange: function(){
     var video = this.get('video');
@@ -1802,12 +2162,10 @@ WebRemixer.Models.TimelineClip = Backbone.Model.extend({
 
   urlRoot: 'timeline-clips',
   
-  shouldBeIdRefInJSON: true,
-  
-  includeInJSON: ['remix', 'timeline', 'clip', 'startTime', 'duration', 'loop'],
+  includeInJSON: {remix: WebRemixer.Models.Remix, timeline: WebRemixer.Models.Timeline, clip: WebRemixer.Models.Clip, startTime: String, duration: String, loop: String},
     
   initialize: function(){
-    _.bindAll(this, 'prepareToPlay', 'play', 'pause');
+    _.bindAll(this);
   
     var clip = this.get('clip');
 
@@ -1827,6 +2185,8 @@ WebRemixer.Models.TimelineClip = Backbone.Model.extend({
       change: _.bind(this.trigger, this, "change"),
       destroy: this.destroy
     });
+
+    this.onTimelineChange();
     
     this.listenTo(this, {
       change: this.onChange,
@@ -1835,7 +2195,9 @@ WebRemixer.Models.TimelineClip = Backbone.Model.extend({
     });
   },
 
-  onChange: WebRemixer.Util.Model.saveChanged,
+  onChange: function(){
+    this.save();
+  },
   
   onRemixChange: function(){
     var prevRemix = this.previous('remix');
@@ -1845,8 +2207,31 @@ WebRemixer.Models.TimelineClip = Backbone.Model.extend({
     var remix = this.get('remix');
     if (remix){
       this.listenTo(remix, 'change:playing', this.onRemixPlayingChange);
+      this.listenTo(remix, 'change:%s'.sprintf(WebRemixer.Models.Remix.prototype.idAttribute), this.onChange);
     }
     this.get('clipPlayer').set('remix', remix);
+  },
+
+
+  onTimelineChange: function(){
+    var prevTimeline = this.previous('timeline');
+    if (prevTimeline){
+      prevTimeline.get('timelineClips').remove(this);
+      this.stopListening(prevTimeline);
+    }
+
+    var timeline = this.get('timeline');
+
+    var remix;
+
+    if (timeline){
+      timeline.get('timelineClips').add(this);
+      this.listenTo(timeline, 'change:' + WebRemixer.Models.Timeline.prototype.idAttribute, this.onChange);
+
+      remix = timeline.get('remix');
+    }
+
+    this.set('remix', remix);
   },
   
   onRemixPlayingChange: function(){
@@ -1923,63 +2308,7 @@ WebRemixer.Models.TimelineClip = Backbone.Model.extend({
       this.playTimeout = undefined; 
     }
     this.get('clipPlayer').set('playing', false);
-  },
-  
-  onTimelineChange: function(){
-    var timeline = this.get('timeline');
-    var remix = timeline ? timeline.get('remix') : null;
-    this.set('remix', remix);
-    this.get('clipPlayer').set('remix', remix);
   }
-});
-WebRemixer.Models.Timeline = Backbone.Model.extend({
-
-  urlRoot: 'timelines',
-  
-  shouldBeIdRefInJSON: true,
-  
-  includeInJSON: ['remix', 'order'],
-
-  initialize: function(){
-    this.set({
-      timelineClips : new WebRemixer.Collections.TimelineClips(),
-      selection : {
-        startTime: 0,
-        duration: 0
-      }
-    });
-     
-    this.listenTo(this.get('timelineClips'), {
-      add: this.onTimelineClipsAdd,
-      remove: this.onTimelineClipsRemove
-    });
-    
-    this.listenTo(this, {
-      change: this.onChange,
-      'change:remix': this.onRemixChange
-    });
-    
-    this.trigger('change:remix');
-  },
-  
-  onChange: WebRemixer.Util.Model.saveChanged,
-  
-  onRemixChange: function(){
-    if (this.collection){
-      if (!this.get('order')){
-        this.set('order', this.collection.indexOf(this) + 1);
-      }
-    }
-  },
-  
-  onTimelineClipsAdd: function(model){
-    model.set('timeline', this);
-  },
-  
-  onTimelineClipsRemove: function(model){
-    model.set('timeline', null);
-  }
-  
 });
 WebRemixer.Models.Ruler = Backbone.Model.extend({
   initialize: function(){
@@ -1990,6 +2319,7 @@ WebRemixer.Models.ClipPlayer = Backbone.Model.extend({
 
   initialize: function(){
     _.bindAll(this);
+    
     this.listenTo(this, {
       'change:playing': this.onPlayingChange,
       'change:playTime': this.onPlayTimeChange
@@ -2106,10 +2436,6 @@ WebRemixer.Models.ClipPlayer = Backbone.Model.extend({
 });
 WebRemixer.Models.MainMenu = Backbone.Model.extend({
 
-  initialize: function(){
-    
-  }
-  
 });
 WebRemixer.Models.VideoPlayer = Backbone.Model.extend({
 
@@ -2235,145 +2561,10 @@ WebRemixer.Models.VideoFinder = Backbone.Model.extend({
   }
 });
 WebRemixer.Models.PlayControls = Backbone.Model.extend({
-  initialize: function(){
-  
-  }
+
 });
 WebRemixer.Models.ClipManager = Backbone.Model.extend({
 
-  initialize: function(){
-    
-  }
-});
-WebRemixer.Models.Remix = Backbone.Model.extend({
-  urlRoot: 'remixes',
-  
-  includeInJSON: ['title'],
-
-  defaults: {
-    duration: 200,
-    playTime: 0
-  },
-  
-  shouldBeIdRefInJSON: true,
-
-  initialize: function(){
-  
-    _.bindAll(this, 'playProcedure', 'onGotChildren');
-
-    var opts = {
-      remix: this
-    };
-    
-    this.set({
-            mainMenu: new WebRemixer.Models.MainMenu(opts),
-        playControls: new WebRemixer.Models.PlayControls(opts),
-               ruler: new WebRemixer.Models.Ruler(opts),
-         clipManager: new WebRemixer.Models.ClipManager(opts),
-       clipInspector: new WebRemixer.Models.ClipInspector(opts),
-           timelines: new WebRemixer.Collections.Timelines(),
-               clips: new WebRemixer.Collections.Clips()
-    });
-    
-    this.set({
-       playerManager: new WebRemixer.Models.PlayerManager(opts)
-    });
-    
-    this.listenTo(this.get('clips'), {
-      add: this.onClipsAdd,
-      remove: this.onClipsRemove
-    });
-    
-    this.listenTo(this.get('timelines'), {
-      add: this.onTimelinesAdd,
-      remove: this.onTimelinesRemove
-    });
-    
-    this.listenTo(this, {
-      change: this.onChange,
-      'change:playing': this.onPlayingChange,
-      'change:realTimeNeeded': this.onRealTimeNeededChange
-    });
-    
-    this.listenTo(this.get('clips'), 'change', this.onClipsChange);
-    this.listenTo(this.get('timelines'), 'change', this.onTimelinesChange);
-    
-    if (this.id) {
-      this.fetchChildren();
-    }else{
-      this.save();
-    }
-  },
-  
-  fetchChildren: function(){
-    if (!this.id) return;
-    
-    $.get('%s/children'.sprintf(this.url()), this.onGotChildren);
-  },
-  
-  onGotChildren: function(res){
-    console.log(res);
-  },
-  
-  onChange: WebRemixer.Util.Model.saveChanged,
-  
-  /*
-  onTimelinesChange: function(){
-    this.save(undefined, {
-      attrs: {
-        clips: this.get('timelines').pluck(Backbone.Model.prototype.idAttribute)
-      }
-    }, {patch: true});
-  },
-  */
-  
-  onRealTimeNeededChange: function(){
-    if (this.get('realTimeNeeded')){
-      this.playProcedure();
-      this.set('realTimeNeeded', false, {silent: true});
-    }
-  },
-  
-  onClipsAdd: function(model){
-    model.set('remix', this);
-  },
-  
-  onClipsRemove: function(model){
-    model.set('remix', undefined);
-  },
-  
-  onTimelinesAdd: function(model){
-    model.set('remix', this);
-  },
-  
-  onTimelinesRemove: function(model){
-    model.set('remix', undefined);
-  },
-  
-  onPlayingChange: function(){
-    if (this.get('playing')){
-      this.play();
-    }else{
-      this.pause();
-    }
-  },
-  
-  play: function(){
-    this.playStartTime = new Date() * 1 - this.get('playTime') * 1000;
-    this.playInterval = setInterval(this.playProcedure, 0);
-  },
-  
-  playProcedure: function(){
-    this.set('playTime', ((new Date() * 1) - this.playStartTime) / 1000);
-  },
-  
-  pause: function(){
-    if (this.playInterval){
-      clearInterval(this.playInterval);
-      this.playInterval = undefined;
-    }
-  }
-  
 });
 WebRemixer.Models.ClipInspector = Backbone.Model.extend({
 

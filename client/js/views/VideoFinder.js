@@ -54,6 +54,7 @@ WebRemixer.Views.VideoFinder = Backbone.View.extend({
   onVisibilityChange: function(){
     if (this.model.get('open')){
       this.$el.dialog('open');
+      this.$search.select();
     }else{
       this.$el.dialog('close');
     }

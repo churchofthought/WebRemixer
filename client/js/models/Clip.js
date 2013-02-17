@@ -8,20 +8,47 @@ WebRemixer.Models.Clip = Backbone.Model.extend({
     title: 'New Clip'
   },
   
-  shouldBeIdRefInJSON: true,
-  
-  includeInJSON: ['remix', 'title', 'video', 'cutStart', 'cutDuration'],
+  includeInJSON: {remix: WebRemixer.Models.Remix, order: String, title: String, video: WebRemixer.Models.Video, cutStart: String, cutDuration: String},
 
   initialize: function(){
+    _.bindAll(this);
+
+    this.onVideoChange();
+    this.onRemixChange();
+
     this.listenTo(this, {
       change: this.onChange,
-      'change:video': this.onVideoChange 
+      'change:remix': this.onRemixChange,
+      'change:video': this.onVideoChange
     });
-    
-    this.trigger('change:video');
   },
   
-  onChange: WebRemixer.Util.Model.saveChanged,
+  onChange: function(){
+    this.save();
+  },
+
+
+  onRemixChange: function(){
+  
+    var prevRemix = this.previous('remix');
+    if (prevRemix){
+      prevRemix.get('clips').remove(this);
+      this.stopListening(prevRemix);
+    }
+  
+    var remix = this.get('remix');
+    if (remix){
+      var clips = remix.get('clips');
+
+      clips.add(this);
+
+      if (!this.get('order')){
+        this.set('order', clips.indexOf(this) + 1);
+      }
+
+      this.listenTo(remix, 'change:%s'.sprintf(WebRemixer.Models.Remix.prototype.idAttribute), this.onChange);
+    }
+  },
   
   onVideoChange: function(){
     var video = this.get('video');

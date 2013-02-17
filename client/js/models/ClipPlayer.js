@@ -2,6 +2,7 @@ WebRemixer.Models.ClipPlayer = Backbone.Model.extend({
 
   initialize: function(){
     _.bindAll(this);
+    
     this.listenTo(this, {
       'change:playing': this.onPlayingChange,
       'change:playTime': this.onPlayTimeChange

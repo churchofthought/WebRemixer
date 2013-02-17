@@ -12,8 +12,6 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
     this.$el
       .prop(
         'id', this.model.cid
-      ).attr(
-        'data-order', this.model.get('order')
       )
       .data('view', this);
       
@@ -55,10 +53,6 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
   onOrderChange: function(){
     var order = this.model.get('order');
   
-    this.$el.attr(
-      'data-order', order
-    );
-    
     this.$header.attr(
       'data-title', 'Timeline %s'.sprintf(order)
     );
@@ -78,15 +72,21 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
   },
   
   onTimelineClipsAdd: function(model){
-    this.$timelineClips.append(
-      new WebRemixer.Views.TimelineClip({
+    var $timelineClip = $.single('#' + model.cid);
+
+    if (!$timelineClip.length){
+      $timelineClip = new WebRemixer.Views.TimelineClip({
         model: model
-      }).el
-    );
+      }).el;
+    }
+
+    this.$timelineClips.append($timelineClip);
   },
   
   onTimelineClipsRemove: function(model){
-    this.$timelineClips.single('#' + model.cid).data('view').remove();
+    if (model.get('timeline') === this){
+      $.single('#' + model.cid).data('view').remove();
+    }
   },
 
   onToggleHeightClick: function(){
@@ -182,19 +182,14 @@ WebRemixer.Views.Timeline = Backbone.View.extend({
     var view = ui.draggable.data('view');
     
     if (view instanceof WebRemixer.Views.TimelineClip){
-      var curTimeline = view.model.get('timeline');
-      if (curTimeline !== this.model){
-        curTimeline.get('timelineClips').remove(view.model);
-        this.model.get('timelineClips').add(view.model);
-      }
+      view.model.set('timeline', this.model);
     }else if (view instanceof WebRemixer.Views.Clip){
-      this.model.get('timelineClips').add(
-          new WebRemixer.Models.TimelineClip({
-            clip: view.model,
-            startTime: (ui.offset.left - this.$timelineClips.offset().left) / WebRemixer.PX_PER_SEC,
-            loop: true
-          })
-      );
+      new WebRemixer.Models.TimelineClip({
+        timeline: this.model,
+        clip: view.model,
+        startTime: (ui.offset.left - this.$timelineClips.offset().left) / WebRemixer.PX_PER_SEC,
+        loop: true
+      }).save();
     }
   },
   

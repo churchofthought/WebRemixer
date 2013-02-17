@@ -1,18 +1,16 @@
 WebRemixer.Models.Remix = Backbone.Model.extend({
   urlRoot: 'remixes',
   
-  includeInJSON: ['title'],
+  includeInJSON: {title: String},
 
   defaults: {
     duration: 200,
     playTime: 0
   },
-  
-  shouldBeIdRefInJSON: true,
 
   initialize: function(){
   
-    _.bindAll(this, 'playProcedure', 'onGotChildren');
+    _.bindAll(this);
 
     var opts = {
       remix: this
@@ -47,38 +45,33 @@ WebRemixer.Models.Remix = Backbone.Model.extend({
       'change:playing': this.onPlayingChange,
       'change:realTimeNeeded': this.onRealTimeNeededChange
     });
-    
-    this.listenTo(this.get('clips'), 'change', this.onClipsChange);
-    this.listenTo(this.get('timelines'), 'change', this.onTimelinesChange);
+
+    this.listenTo(this, 'change:%s'.sprintf(this.idAttribute), this.onChangeId);
     
     if (this.id) {
       this.fetchChildren();
-    }else{
-      this.save();
     }
+  },
+
+  onChangeId: function(){
+    WebRemixer.router.navigate('%s'.sprintf(this.id));
   },
   
   fetchChildren: function(){
-    if (!this.id) return;
+    $.get('%s/children'.sprintf(this.url()), this.onFetchedChildren);
+  },
+  
+  onFetchedChildren: function(res){
+    WebRemixer.Util.createOrUpdateModels(WebRemixer.Models.Clip, res.clips);
     
-    $.get('%s/children'.sprintf(this.url()), this.onGotChildren);
+    WebRemixer.Util.createOrUpdateModels(WebRemixer.Models.Timeline, res.timelines);
+    
+    WebRemixer.Util.createOrUpdateModels(WebRemixer.Models.TimelineClip, res.timelineClips);
   },
   
-  onGotChildren: function(res){
-    console.log(res);
+  onChange: function(){
+    this.save();
   },
-  
-  onChange: WebRemixer.Util.Model.saveChanged,
-  
-  /*
-  onTimelinesChange: function(){
-    this.save(undefined, {
-      attrs: {
-        clips: this.get('timelines').pluck(Backbone.Model.prototype.idAttribute)
-      }
-    }, {patch: true});
-  },
-  */
   
   onRealTimeNeededChange: function(){
     if (this.get('realTimeNeeded')){
@@ -92,7 +85,9 @@ WebRemixer.Models.Remix = Backbone.Model.extend({
   },
   
   onClipsRemove: function(model){
-    model.set('remix', undefined);
+    if (model.get('remix') === this){
+      model.set('remix', undefined);
+    }
   },
   
   onTimelinesAdd: function(model){
@@ -100,7 +95,9 @@ WebRemixer.Models.Remix = Backbone.Model.extend({
   },
   
   onTimelinesRemove: function(model){
-    model.set('remix', undefined);
+    if (model.get('remix') === this){
+      model.set('remix', undefined);
+    }
   },
   
   onPlayingChange: function(){

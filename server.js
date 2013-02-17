@@ -8,6 +8,7 @@ var Schemas = {};
 
 Schemas.Clip = mongoose.Schema({
         remix: {ref: 'Remix', type: mongoose.Schema.Types.ObjectId},
+        order: Number,
         title: String,
      cutStart: Number,
   cutDuration: Number,
@@ -41,8 +42,8 @@ Schemas.Remix = mongoose.Schema({
 var Models = {
   Remix         : mongoose.model('Remix',         Schemas.Remix),
   Timeline      : mongoose.model('Timeline',      Schemas.Timeline),
-  TimelineClip  : mongoose.model('TimelineClip',  Schemas.TimelineClip),
-  Clip          : mongoose.model('Clip',          Schemas.Clip)
+  Clip          : mongoose.model('Clip',          Schemas.Clip),
+  TimelineClip  : mongoose.model('TimelineClip',  Schemas.TimelineClip)
 };
 
 
@@ -97,13 +98,7 @@ function addCRUDMethods(url, model){
     });
     
     app.put(url + '/:id', function (req, res){
-      model.findByIdAndUpdate(req.params.id, {$set: req.body}, function (err, m) {
-        res.send(m);
-      });
-    });
-    
-    app.patch(url + '/:id', function (req, res){
-      model.findByIdAndUpdate(req.params.id, {$set: req.body}, function (err, m) {
+      model.findByIdAndUpdate(req.params.id, req.body, function (err, m) {
         res.send(m);
       });
     });
@@ -115,7 +110,7 @@ function addCRUDMethods(url, model){
     });
 }
 
-app.get('/remixes/:id/children', function (req, res){ 
+app.get('/remixes/:id/children', function (req, res){
 
   var query = {
     remix: req.params.id
@@ -130,7 +125,7 @@ app.get('/remixes/:id/children', function (req, res){
     },
     clips: function(callback){
       Models.Clip.find(query, callback);
-    },
+    }
   },
   
   function (err, results){

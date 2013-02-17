@@ -7,34 +7,31 @@ WebRemixer.Routers.Remix = Backbone.Router.extend({
 
   newRemix: function() {
     
-    var remixModel = new WebRemixer.Models.Remix();
+    var remix = new WebRemixer.Models.Remix();
     
-    var remixView = new WebRemixer.Views.Remix({
-      model: remixModel
-    });
-    
-    remixView.$el.appendTo(document.body);
-    
-    var timelines = remixModel.get('timelines');
+    new WebRemixer.Views.Remix({
+      model: remix
+    }).$el.appendTo(document.body);
     
     // add some timelines to begin
     for (var count = 5; count--;){
-      timelines.add(new WebRemixer.Models.Timeline());
+      new WebRemixer.Models.Timeline({remix: remix}).save();
     }
+
+    remix.save();
   },
 
   getRemix: function(id) {
     var attrs = {};
-    attrs[Backbone.Model.prototype.idAttribute] = id;
-    var remixModel = new WebRemixer.Models.Remix(attrs);
+    attrs[WebRemixer.Models.idAttribute] = id;
+
+    var remix = new WebRemixer.Models.Remix(attrs);
     
-    var remixView = new WebRemixer.Views.Remix({
-      model: remixModel
-    });
+    new WebRemixer.Views.Remix({
+      model: remix
+    }).$el.appendTo(document.body);
     
-    remixView.$el.appendTo(document.body);
-    
-    remixModel.fetch();
+    remix.fetch();
   }
 
 });

@@ -21,15 +21,16 @@ WebRemixer.Util.intersects = function(lineClip1, lineClip2){
   
 };
 
-
-  
-
-
-WebRemixer.Util.Model = {};
-
-WebRemixer.Util.Model.saveChanged = function(){
-  var attrs = _.pick(this.toJSON(), _.keys(this.changedAttributes()));
-  if (!_.isEmpty(attrs)){
-    this.save(undefined, {patch: true, attrs: attrs});
+WebRemixer.Util.createOrUpdateModels = function(Model, dataArr){
+  for (var i = dataArr.length; i--;){
+    var dat = dataArr[i];
+      
+    var existing = WebRemixer.Models.all.get(dat[WebRemixer.Models.idAttribute]);
+    
+    if (existing){
+      existing.set( existing.parse(dat) );
+    }else{
+      new Model( dat, {parse: true});
+    }
   }
 };

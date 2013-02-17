@@ -1,4 +1,4 @@
 $(function(){
-  new WebRemixer.Routers.Remix();
-  Backbone.history.start({pushState: true});
+	WebRemixer.router = new WebRemixer.Routers.Remix();
+	Backbone.history.start({pushState: true});
 });

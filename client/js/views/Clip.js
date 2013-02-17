@@ -45,7 +45,7 @@ WebRemixer.Views.Clip = Backbone.View.extend({
     
     this.render();
   },
-  
+
   onDeleteClick: function(){
     this.model.destroy();
   },

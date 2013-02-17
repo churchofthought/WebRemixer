@@ -2,11 +2,11 @@ WebRemixer.Models.Timeline = Backbone.Model.extend({
 
   urlRoot: 'timelines',
   
-  shouldBeIdRefInJSON: true,
-  
-  includeInJSON: ['remix', 'order'],
+  includeInJSON: {remix: WebRemixer.Models.Remix, order: String},
 
   initialize: function(){
+    _.bindAll(this);
+
     this.set({
       timelineClips : new WebRemixer.Collections.TimelineClips(),
       selection : {
@@ -20,21 +20,35 @@ WebRemixer.Models.Timeline = Backbone.Model.extend({
       remove: this.onTimelineClipsRemove
     });
     
+    this.onRemixChange();
+
     this.listenTo(this, {
       change: this.onChange,
       'change:remix': this.onRemixChange
     });
-    
-    this.trigger('change:remix');
   },
   
-  onChange: WebRemixer.Util.Model.saveChanged,
+  onChange: function(){
+    this.save();
+  },
   
   onRemixChange: function(){
-    if (this.collection){
+  
+    var prevRemix = this.previous('remix');
+    if (prevRemix){
+      prevRemix.get('timelines').remove(this);
+      this.stopListening(prevRemix);
+    }
+  
+    var remix = this.get('remix');
+    if (remix){
+      var timelines = remix.get('timelines');
+
+      timelines.add(this);
       if (!this.get('order')){
-        this.set('order', this.collection.indexOf(this) + 1);
+        this.set('order', timelines.indexOf(this) + 1);
       }
+      this.listenTo(remix, 'change:%s'.sprintf(WebRemixer.Models.Remix.prototype.idAttribute), this.onChange);
     }
   },
   
@@ -43,7 +57,8 @@ WebRemixer.Models.Timeline = Backbone.Model.extend({
   },
   
   onTimelineClipsRemove: function(model){
-    model.set('timeline', null);
+    if (model.get('timeline') === this){
+      model.set('timeline', undefined);
+    }
   }
-  
 });

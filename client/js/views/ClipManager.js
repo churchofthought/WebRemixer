@@ -41,23 +41,35 @@ WebRemixer.Views.ClipManager = Backbone.View.extend({
   },
   
   createNewClip: function(){
-    var clip = new WebRemixer.Models.Clip({
+    var clip =
+      new WebRemixer.Models.Clip({
+        remix: this.model.get('remix')
+      });
 
+    clip.save();
+
+    this.inspect( clip );
+  },
+
+ onClipsAdd: function(model){
+    var view = new WebRemixer.Views.Clip({
+      model: model
     });
-    
-    this.model.get('remix').get('clips').add(clip);
-    
-    this.inspect(clip);
+
+    //insert clip in the correct position
+    this.$clips.children('.clip').each(function(){
+      if ($(this).data('view').model.get('order') > model.get('order')){
+        view.$el.insertBefore(this);
+        return false;
+      }
+    });
+
+    //if not inserted, insert the clip
+    if (!view.$el.parent().length){
+      this.$clips.append(view.el);
+    }
   },
-  
-  onClipsAdd: function(model){
-    this.$clips.append(
-      new WebRemixer.Views.Clip({
-        model: model
-      }).el
-    );
-  },
-  
+
   onClipsRemove: function(model){
     this.$clips.single('#' + model.cid).data('view').remove();
   },

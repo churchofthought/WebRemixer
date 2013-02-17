@@ -2,12 +2,10 @@ WebRemixer.Models.TimelineClip = Backbone.Model.extend({
 
   urlRoot: 'timeline-clips',
   
-  shouldBeIdRefInJSON: true,
-  
-  includeInJSON: ['remix', 'timeline', 'clip', 'startTime', 'duration', 'loop'],
+  includeInJSON: {remix: WebRemixer.Models.Remix, timeline: WebRemixer.Models.Timeline, clip: WebRemixer.Models.Clip, startTime: String, duration: String, loop: String},
     
   initialize: function(){
-    _.bindAll(this, 'prepareToPlay', 'play', 'pause');
+    _.bindAll(this);
   
     var clip = this.get('clip');
 
@@ -27,6 +25,8 @@ WebRemixer.Models.TimelineClip = Backbone.Model.extend({
       change: _.bind(this.trigger, this, "change"),
       destroy: this.destroy
     });
+
+    this.onTimelineChange();
     
     this.listenTo(this, {
       change: this.onChange,
@@ -35,7 +35,9 @@ WebRemixer.Models.TimelineClip = Backbone.Model.extend({
     });
   },
 
-  onChange: WebRemixer.Util.Model.saveChanged,
+  onChange: function(){
+    this.save();
+  },
   
   onRemixChange: function(){
     var prevRemix = this.previous('remix');
@@ -45,8 +47,31 @@ WebRemixer.Models.TimelineClip = Backbone.Model.extend({
     var remix = this.get('remix');
     if (remix){
       this.listenTo(remix, 'change:playing', this.onRemixPlayingChange);
+      this.listenTo(remix, 'change:%s'.sprintf(WebRemixer.Models.Remix.prototype.idAttribute), this.onChange);
     }
     this.get('clipPlayer').set('remix', remix);
+  },
+
+
+  onTimelineChange: function(){
+    var prevTimeline = this.previous('timeline');
+    if (prevTimeline){
+      prevTimeline.get('timelineClips').remove(this);
+      this.stopListening(prevTimeline);
+    }
+
+    var timeline = this.get('timeline');
+
+    var remix;
+
+    if (timeline){
+      timeline.get('timelineClips').add(this);
+      this.listenTo(timeline, 'change:' + WebRemixer.Models.Timeline.prototype.idAttribute, this.onChange);
+
+      remix = timeline.get('remix');
+    }
+
+    this.set('remix', remix);
   },
   
   onRemixPlayingChange: function(){
@@ -123,12 +148,5 @@ WebRemixer.Models.TimelineClip = Backbone.Model.extend({
       this.playTimeout = undefined; 
     }
     this.get('clipPlayer').set('playing', false);
-  },
-  
-  onTimelineChange: function(){
-    var timeline = this.get('timeline');
-    var remix = timeline ? timeline.get('remix') : null;
-    this.set('remix', remix);
-    this.get('clipPlayer').set('remix', remix);
   }
 });

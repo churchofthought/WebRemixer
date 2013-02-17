@@ -81,8 +81,10 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
       'change:timeline': this.onTimelineChange,
       'change:selected': this.onSelectedChange
     });
-    
-    this.model.trigger('change change:selected');
+
+    this.model.trigger('change:selected');
+
+    this.render();
   },
   
   onSelectedChange: function(){
@@ -103,7 +105,9 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
   
   onDragStop: function(){
     if (this.origDraggableParent){
-      this.$el.appendTo(this.origDraggableParent);
+      if (!this.$el.parent('.timeline-clips').length){
+        this.$el.appendTo(this.origDraggableParent);
+      }
       this.model.set('startTime', (this.$el.position().left - this.origDraggableParent.offset().left) / WebRemixer.PX_PER_SEC);
       this.origDraggableParent = null;
     }
@@ -124,14 +128,13 @@ WebRemixer.Views.TimelineClip = Backbone.View.extend({
     var selected = this.model.get('selected');
   
     var clone = new WebRemixer.Models.TimelineClip({
+      timeline: this.model.get('timeline'),
       clip: this.model.get('clip'),
       startTime: this.model.get('startTime') + (typeof timeDelta === 'number' && timeDelta || this.model.get('duration')),
       duration: this.model.get('duration'),
       loop: this.model.get('loop'),
       selected: selected
-    })
-    
-    this.model.get('timeline').get('timelineClips').add(clone);
+    });
 
     if (selected){
       this.model.set('selected', false);
