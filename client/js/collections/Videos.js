@@ -1,3 +1,3 @@
 WebRemixer.Collections.Videos = Backbone.Collection.extend({
-  model: WebRemixer.Models.Video
+	model: WebRemixer.Models.Video
 });

@@ -1,3 +1,3 @@
-WebRemixer.Models.MainMenu = Backbone.Model.extend({
+WebRemixer.Models.MainMenu = WebRemixer.Model.extend({
 
 });

@@ -1,29 +1,31 @@
 .clip-manager
-  position: fixed
-  left: 0
-  bottom: 0
-  margin: 0 2.5%
-  width: 95%
-  height: 14em
-  background: #fff
-  z-index: 3
-  overflow: auto
-  transition: .2s all ease-out
-  box-shadow: 0 0 4px #555
-  border-radius: 1.25em 1.25em 0 0
-  
-  &:not(.open)
-    bottom: -@height
-    opacity: 0
-  
-  > .new-clip
-    vertical-align: top
-    margin: 1.5em
-  
-  > .clips
-    display: inline-block
-    margin-top: 2em
-    
-    > .clip
-      cursor: pointer
-      margin-left: 2em
+	position: fixed
+	left: 0
+	bottom: 0
+	margin: 0 2.5%
+	width: 95%
+	height: 14em
+	background: #fff
+	z-index: 3
+	transition: .2s all ease-out
+	box-shadow: 0 0 4px #555
+	border-radius: 1.25em 1.25em 0 0
+	
+	&:not(.open)
+		bottom: -@height
+		opacity: 0
+	
+	> .new-clip
+		vertical-align: top
+		margin: 1.5em
+	
+	> .clips
+		display: inline-block
+		margin-top: 2em
+		padding-right: 4em
+		width: inherit
+		overflow: auto
+		
+		> .clip
+			cursor: pointer
+			margin-left: 2em

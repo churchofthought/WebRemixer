@@ -1,51 +1,51 @@
 .clip
-  $bg-color = rgba(255,255,255,0.75)
-  $border-color = rgba(0,0,0,0.5)
+	$bg-color = rgba(255,255,255,0.75)
+	$border-color = rgba(0,0,0,0.5)
 
-  width: $clip-width
-  height: $clip-height
-  background: #000 no-repeat center center
-  background-size: cover
-  position: relative
-  overflow: hidden
-  box-sizing: border-box
-  border: 1px solid $border-color
-  margin: auto
-  display: inline-block
-  
-  > .buttons
-    visibility: hidden
-    opacity: 0
-    transition: .25s all
-    position: absolute
-    bottom: .25em
-    right: .25em
-    font-size: 80%
-    
-    > *
-      margin: .25em
-      box-shadow: 0 0 4px #000 !important
-    
-  &:hover
-    .buttons
-      visibility: visible
-      opacity: 1
-  
-  &::before
-    position: absolute
-    top: 0
-    left: 0
-    display: inline-block
-    content: attr(data-title)
-    background: $bg-color
-    padding: .5em 1em
-    border-bottom: 1px solid $border-color
-  
-  &::after
-    position: absolute
-    bottom: 1em
-    left: 0
-    content: attr(data-duration)
-    background: $bg-color
-    padding: .5em 1em
-    box-shadow: 0 0 .5em $border-color
+	width: $clip-width
+	height: $clip-height
+	background: #000 no-repeat center center
+	background-size: cover
+	position: relative
+	overflow: hidden
+	box-sizing: border-box
+	border: 1px solid $border-color
+	margin: auto
+	display: inline-block !important
+	
+	> .buttons
+		visibility: hidden
+		opacity: 0
+		transition: .25s all
+		position: absolute
+		bottom: .25em
+		right: .25em
+		font-size: 80%
+		
+		> *
+			margin: .25em
+			box-shadow: 0 0 4px #000 !important
+		
+	&:hover
+		.buttons
+			visibility: visible
+			opacity: 1
+	
+	&::before
+		position: absolute
+		top: 0
+		left: 0
+		display: inline-block
+		content: attr(data-title)
+		background: $bg-color
+		padding: .5em 1em
+		border-bottom: 1px solid $border-color
+	
+	&::after
+		position: absolute
+		bottom: 1em
+		left: 0
+		content: attr(data-duration)
+		background: $bg-color
+		padding: .5em 1em
+		box-shadow: 0 0 .5em $border-color

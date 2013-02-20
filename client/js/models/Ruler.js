@@ -1,5 +1,5 @@
-WebRemixer.Models.Ruler = Backbone.Model.extend({
-  initialize: function(){
-  
-  }
+WebRemixer.Models.Ruler = WebRemixer.Model.extend({
+	initialize: function(){
+	
+	}
 });

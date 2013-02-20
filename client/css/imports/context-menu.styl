@@ -1,0 +1,14 @@
+body > .context-menu
+	position: absolute
+	display: inline-block
+	visibility: hidden
+	opacity: 0
+	transition: .25s opacity, visibility
+	z-index: 2
+
+	a
+		cursor: pointer
+
+	&.show
+		visibility: visible
+		opacity: 1

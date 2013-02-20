@@ -1,10 +1,10 @@
-WebRemixer.Models.VideoPlayer = Backbone.Model.extend({
+WebRemixer.Models.VideoPlayer = WebRemixer.Model.extend({
 
-  defaults: {
-    owner: null
-  },
+	defaults: {
+		owner: null
+	},
 
-  initialize: function(){
-    
-  }
+	initialize: function(){
+		
+	}
 });

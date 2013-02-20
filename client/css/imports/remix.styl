@@ -1,41 +1,26 @@
 .remix
-  display: inline-block
-  position: relative
-  white-space: nowrap
-  z-index: 0
-  overflow: hidden;
-  
-  > .toggle-clip-manager
-    position: fixed
-    bottom: 0
-    right: 0
-    margin: 1em
-    z-index: 3
-  
-  > .context-menu
-    position: absolute
-    display: inline-block
-    visibility: hidden
-    opacity: 0
-    transition: .25s opacity, visibility
-    z-index: 2
-    
-    a
-      cursor: pointer
-    
-    &.show
-      visibility: visible
-      opacity: 1
-  
-  > input.title
-    position: fixed
-    left: 50%
-    top: 0
-    width: 50%
-    margin: 0 0 0 (-@width / 2)
-    background: none
-    border: none
-    font-weight: bold
-    font-size: 200%
-    text-align: center
-    box-shadow: none
+	display: inline-block
+	position: relative
+	white-space: nowrap
+	z-index: 0
+	overflow: hidden;
+	
+	> .toggle-clip-manager
+		position: fixed
+		bottom: 0
+		right: 0
+		margin: 1em
+		z-index: 3
+	
+	> input.title
+		position: fixed
+		left: 50%
+		top: 0
+		width: 50%
+		margin: 0 0 0 (-@width / 2)
+		background: none
+		border: none
+		font-weight: bold
+		font-size: 200%
+		text-align: center
+		box-shadow: none

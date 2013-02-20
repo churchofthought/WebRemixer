@@ -1,7 +1,8 @@
 var WebRemixer = {
-  Util: {},
-  Routers: {},
-  Views: {},
-  Models: {},
-  Collections: {}
+	Config: {},
+	Util: {},
+	Routers: {},
+	Views: {},
+	Models: {},
+	Collections: {}
 };

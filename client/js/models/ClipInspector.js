@@ -1,8 +1,8 @@
-WebRemixer.Models.ClipInspector = Backbone.Model.extend({
+WebRemixer.Models.ClipInspector = WebRemixer.Model.extend({
 
-  initialize: function(){
-    this.set('videoFinder', new WebRemixer.Models.VideoFinder({
-      
-    }));
-  }
+	initialize: function(){
+		this.set('videoFinder', new WebRemixer.Models.VideoFinder({
+		
+		}));
+	}
 });

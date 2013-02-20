@@ -1,14 +1,17 @@
 {
-  "name": "Web-Remixer",
-  "description": "HTML5 YouTube/SoundCloud Remixer",
-  "version": "0.0.1",
-  "private": true,
-  "dependencies": {
-        "express" : "*",
-         "stylus" : "*",
-            "nib" : "*",
-       "mongoose" : "*",
-          "grunt" : "*",
-          "async" : "*"
-  }
+	"name": "Web-Remixer",
+	"description": "HTML5 YouTube/SoundCloud Remixer",
+	"version": "0.0.1",
+	"private": true,
+	"dependencies": {
+							"express" : "latest",
+							 "stylus" : "latest",
+									"nib" : "latest",
+						 "mongoose" : "latest",
+								"grunt" : "latest",
+						"grunt-cli" : "latest",
+ "grunt-contrib-concat" : "latest",
+	"grunt-contrib-watch" : "latest",
+								"async" : "latest"
+		}
 }
