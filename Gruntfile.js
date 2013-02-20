@@ -1,6 +1,7 @@
 module.exports = function(grunt) {
 
 	grunt.loadNpmTasks('grunt-contrib-concat');
+	grunt.loadNpmTasks('grunt-contrib-stylus');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 
 	grunt.initConfig({
@@ -10,7 +11,7 @@ module.exports = function(grunt) {
 					'client/js/namespaces.js',
 					'client/js/{' +
 						'{constants,util,main}.js,' + 
-						'{lib,routers}/*' +
+						'{lib,routers}/*.js' +
 					'}',
 					'client/js/views/View.js',
 					'client/js/views/*.js',
@@ -21,20 +22,32 @@ module.exports = function(grunt) {
 					'client/js/models/Clip.js',
 					'client/js/models/TimelineClip.js',
 					'client/js/models/*.js',
-					'client/js/collections/*'
+					'client/js/collections/*.js'
 				],
 				dest: 'public/main.js'
 			},
 		},
-		watch: {
-			scripts: {
-				files: '<config:concat.dist.src>',
-				tasks: 'default'
+		stylus: {
+			compile: {
+				files: {
+					'public/main.css': ['client/css/main.styl']
+				}
 			}
+		},
+		watch: {
+			concat: {
+				files: '<%= concat.dist.src %>',
+				tasks: ['concat']
+			},
+
+			stylus: {
+				files: ['public/css/imports/*.styl'],
+				tasks: ['stylus']
+			},
 		}
 	});
 	
-	grunt.registerTask('default', 'concat');
+	grunt.registerTask('default', ['concat', 'stylus']);
 
 
 

@@ -1,9 +1,8 @@
 var    async = require('async'),
-		mongoose = require('mongoose'),
-		 express = require('express'),
-			stylus = require('stylus'),
-				 nib = require('nib');
+	mongoose = require('mongoose'),
+	 express = require('express');
 
+	 
 var Schemas = {};
 
 Schemas.Clip = mongoose.Schema({
@@ -75,18 +74,6 @@ var app = express();
 app.use(express.bodyParser());
 
 app.use(express.static('public'));
-
-app.use(stylus.middleware({
-	serve: true,
-	src: 'client/css',
-	dest: 'public',
-	compile: function(str, path) {
-		return stylus(str)
-		.set('filename', path)
-		.set('compress', true)
-		.use(nib());
-	}
-}));
 
 
 function addCRUDMethods(url, model){

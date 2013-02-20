@@ -12,6 +12,7 @@
 						"grunt-cli" : "latest",
  "grunt-contrib-concat" : "latest",
 	"grunt-contrib-watch" : "latest",
+ "grunt-contrib-stylus" : "latest",
 								"async" : "latest"
 		}
 }

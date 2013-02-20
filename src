@@ -1,0 +1,83 @@
+.ui-dialog{position:fixed !important}
+*{outline:none}
+.ui-button{box-sizing:border-box;text-decoration:none}
+div[data-label]{padding:1.75em 0;position:relative;}
+div[data-label] input[type='text']{box-sizing:border-box;padding-left:1em}
+div[data-label]::before{padding:.5em;border:1px dotted rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);border-radius:4px;content:attr(data-label)}
+
+body{font-size:14px;font-family:Monaco,sans-serif}
+
+.clip-inspector .cut{position:relative;margin:0 4em;}
+.clip-inspector .cut .ui-slider-handle:focus{outline:none}
+.clip-inspector .cut-start{position:absolute;bottom:100%;margin-bottom:.5em}
+.clip-inspector .cut-end{position:absolute;top:100%;margin-top:.5em}
+.clip-inspector .clip-title{margin-left:2.5%;margin-right:2.5%;padding-left:2.5%;padding-right:2.5%;width:90%}
+.clip-inspector .clip-video{position:relative;display:inline-block;vertical-align:top;margin:0 2em;cursor:pointer;width:$video-width;height:$video-height;}
+.clip-inspector .clip-video:empty{background:rgba(255,255,255,0.25);}
+.clip-inspector .clip-video:empty::before{position:absolute;top:50%;left:0;width:100%;text-align:center;margin-top:-.5em;font-size:200%;content:'Select Video'}
+
+.clip-manager{position:fixed;left:0;bottom:0;margin:0 2.5%;width:95%;height:14em;background:#fff;z-index:3;transition:.2s all ease-out;box-shadow:0 0 4px #555;border-radius:1.25em 1.25em 0 0;}
+.clip-manager:not(.open){bottom:-14em;opacity:0}
+.clip-manager > .new-clip{vertical-align:top;margin:1.5em}
+.clip-manager > .clips{display:inline-block;margin-top:2em;padding-right:4em;width:inherit;overflow:auto;}
+.clip-manager > .clips > .clip{cursor:pointer;margin-left:2em}
+
+.clip{width:$clip-width;height:$clip-height;background:#000 no-repeat center center;background-size:cover;position:relative;overflow:hidden;box-sizing:border-box;border:1px solid rgba(0,0,0,0.5);margin:auto;display:inline-block !important;}
+.clip > .buttons{visibility:hidden;opacity:0;transition:.25s all;position:absolute;bottom:.25em;right:.25em;font-size:80%;}
+.clip > .buttons > *{margin:.25em;box-shadow:0 0 4px #000 !important}
+.clip:hover .buttons{visibility:visible;opacity:1}
+.clip::before{position:absolute;top:0;left:0;display:inline-block;content:attr(data-title);background:rgba(255,255,255,0.75);padding:.5em 1em;border-bottom:1px solid rgba(0,0,0,0.5)}
+.clip::after{position:absolute;bottom:1em;left:0;content:attr(data-duration);background:rgba(255,255,255,0.75);padding:.5em 1em;box-shadow:0 0 .5em rgba(0,0,0,0.5)}
+
+body > .context-menu{position:absolute;display:inline-block;visibility:hidden;opacity:0;transition:.25s opacity,visibility;z-index:2;}
+body > .context-menu a{cursor:pointer}
+body > .context-menu.show{visibility:visible;opacity:1}
+
+.main-menu{padding:.15em;height:2em;background:#eee;}
+.main-menu > .ui-menubar{position:fixed;z-index:3}
+
+.play-controls{position:fixed;display:inline-block;width:$timeline-header-width;background:#ccc;z-index:1;box-sizing:border-box;text-align:center;padding:1em;height:$ruler-height;box-sizing:border-box;border-bottom:1px solid #000;}
+.play-controls button{font-size:12px}
+
+.remix{display:inline-block;position:relative;white-space:nowrap;z-index:0;overflow:hidden;}
+.remix > .toggle-clip-manager{position:fixed;bottom:0;right:0;margin:1em;z-index:3}
+.remix > input.title{position:fixed;left:50%;top:0;width:50%;margin:0 0 0 -25%;background:none;border:none;font-weight:bold;font-size:200%;text-align:center;box-shadow:none}
+
+html,body{padding:0;margin:0}
+
+.ruler{display:inline-block;vertical-align:top;white-space:nowrap;padding-top:1.2em;height:$ruler-height;box-sizing:border-box;overflow:visible;position:relative;left:$timeline-header-width;}
+.ruler > .timeHand{position:absolute;top:0;left:0;width:1px;height:9999px;background:#f00;z-index:2;box-shadow:0 0 1px #000}
+.ruler > .markings{margin-left:-4em;}
+.ruler > .markings > *{display:inline-block;width:8em;text-align:center;position:relative;box-sizing:border-box;}
+.ruler > .markings > *::before{box-sizing:border-box;position:absolute;left:25%;top:100%;width:25%;height:100%;content:"";border-right:1px solid #000;border-left:1px solid #000}
+.ruler > .markings > *::after{box-sizing:border-box;position:absolute;right:25%;top:100%;width:25%;height:100%;content:"";border-right:1px solid #000;border-left:1px solid #000}
+.ruler > .markings > *:first-child{color:transparent;}
+.ruler > .markings > *:first-child::after{border-left:none}
+.ruler > .markings > * > *{position:absolute;left:-1px;top:75%;width:100%;height:125%;border-left:1px solid #000;border-bottom:1px solid #000;}
+.ruler > .markings > * > *::before{position:absolute;bottom:0;left:12.5%;width:50%;height:50%;border-left:1px solid #000;border-right:1px solid #000;content:"";box-sizing:border-box}
+.ruler > .markings > * > *::after{position:absolute;bottom:0;right:12.5%;width:50%;height:50%;border-left:1px solid #000;border-right:1px solid #000;content:"";box-sizing:border-box}
+
+.timeline-clip{background-size:contain !important;height:$timeline-height;min-height:$timeline-height;max-height:$timeline-height;box-sizing:border-box;border:1px solid rgba(0,0,0,0.5);overflow:hidden;transition:.5s border;}
+.timeline-clip > .loop-indicator{position:absolute;left:0;top:0;width:100%;height:100%;background-size:0;background:linear-gradient(left,90% transparent,100% #0f0)}
+.timeline-clips > .timeline-clip{top:0 !important}
+.timeline-clip::before{position:absolute;width:100%;height:2em;padding:1em;box-sizing:border-box;content:attr(data-title);color:#fff;background:rgba(0,0,0,0.5);text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
+.timeline-clip:hover .buttons{visibility:visible;opacity:1}
+.timeline-clip.ui-selected{border:1px solid #0f0}
+.timeline-clip > .buttons{transition:.25s all;visibility:hidden;opacity:0;font-size:80%;position:absolute;top:0;right:0}
+
+.timeline{box-sizing:border-box;height:$timeline-height;border-top:1px solid #000;position:relative;background:#fff;overflow:hidden;transition:.25s all;}
+.timeline > .header{position:fixed;z-index:2;width:$timeline-header-width;height:$timeline-height;background:#ccc;overflow:hidden;transition:.25s all;border-top:1px solid #000;box-sizing:border-box;margin-top:-1px;}
+.timeline > .header > .toggle-height{position:absolute;top:1.5em;right:.5em;font-size:60%}
+.timeline > .header::before{position:absolute;top:0;left:0;width:100%;padding:1em;height:3.5em;box-sizing:border-box;content:attr(data-title);background:#ccc}
+.timeline.collapsed,.timeline.collapsed > .header{height:3.5em}
+.timeline > .timeline-clips{width:100%;height:100%;position:relative;z-index:1;left:$timeline-header-width}
+.timeline > .selection{background:#ccc;position:absolute;top:0;height:100%}
+
+.video-finder{position:relative;overflow:hidden !important;}
+.video-finder .search{width:50%}
+.video-finder .search-results{height:100%;padding-bottom:6em;box-sizing:border-box;overflow:auto}
+.video-finder .video{cursor:pointer;margin:1em}
+
+.video{width:$video-width;height:$video-height;background:transparent no-repeat center center;background-size:100% auto;position:relative;overflow:hidden;box-sizing:border-box;border:1px solid rgba(0,0,0,0.5);color:#000;display:inline-block;}
+.video::before{position:absolute;top:0;left:0;display:inline-block;content:attr(data-title);background:rgba(255,255,255,0.75);padding:.5em 1em;border-bottom:1px solid rgba(0,0,0,0.5)}
+.video::after{position:absolute;bottom:1em;right:0;content:attr(data-duration);background:rgba(255,255,255,0.75);padding:.5em 1em;box-shadow:0 0 .5em rgba(0,0,0,0.5)}
