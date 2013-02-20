@@ -27,6 +27,7 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 		});
 
 		this.onTimelineChange();
+		this.onRemixChange();
 		
 		this.listenTo(this, {
 			change: this.onChange,
@@ -47,7 +48,7 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 		var remix = this.get('remix');
 		if (remix){
 			this.listenTo(remix, 'change:playing', this.onRemixPlayingChange);
-			this.listenTo(remix, 'change:%s'.sprintf(remix.idAttribute), this.onChange);
+			this.listenTo(remix, 'change:' + remix.idAttribute, this.onChange);
 		}
 		this.get('clipPlayer').set('remix', remix);
 	},
@@ -77,7 +78,7 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 	onRemixPlayingChange: function(){
 		if (this.playTimeout){
 			clearTimeout(this.playTimeout);
-			this.playTimeout = undefined; 
+			this.playTimeout = undefined;
 		}
 	
 		var remix = this.get('remix');

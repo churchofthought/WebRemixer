@@ -891,6 +891,7 @@ WebRemixer.Views.PlayControls = WebRemixer.View.extend({
 		}else{
 			remix.set('playTime', 0);
 		}
+		remix.trigger('change:playTime');
 	}
 	
 });
@@ -981,7 +982,8 @@ WebRemixer.Views.Ruler = WebRemixer.View.extend({
 		
 		this.listenTo(remix, {
 			'change:duration' : this.render,
-			'change:playTime' : this.onPlayTimeChange
+			'change:playTime' : this.onPlayTimeChange,
+			'change:playing'  : this.onPlayingChange
 		});
 
 		this.onPlayTimeChange(remix, remix.get('playTime'));
@@ -1006,14 +1008,14 @@ WebRemixer.Views.Ruler = WebRemixer.View.extend({
 		}
 	},
 	
-	onPlayTimeChange: function(model, val){
-		var scrollMin = (WebRemixer.PX_PER_SEC * val + this.$el.prop('offsetLeft')) - (this.$window.width() / 2);
-
-		if (this.$body && this.$body.scrollLeft() < scrollMin){
-			this.$body.scrollLeft(scrollMin);
+	onPlayTimeChange: function(remix, playTime){
+		if (this.$body){
+			this.$body.stop(true, true).animate({
+				scrollLeft: Math.max(0, WebRemixer.PX_PER_SEC * playTime + this.$el.prop('offsetLeft') - this.$window.width() / 2)
+			});
 		}
 
-		this.$timeHand.css('left', (WebRemixer.EMS_PER_SEC * val) + 'em');
+		this.$timeHand.css('left', (WebRemixer.EMS_PER_SEC * playTime) + 'em');
 	},
 	
 	render: function() {
@@ -2212,6 +2214,7 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 		});
 
 		this.onTimelineChange();
+		this.onRemixChange();
 		
 		this.listenTo(this, {
 			change: this.onChange,
@@ -2232,7 +2235,7 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 		var remix = this.get('remix');
 		if (remix){
 			this.listenTo(remix, 'change:playing', this.onRemixPlayingChange);
-			this.listenTo(remix, 'change:%s'.sprintf(remix.idAttribute), this.onChange);
+			this.listenTo(remix, 'change:' + remix.idAttribute, this.onChange);
 		}
 		this.get('clipPlayer').set('remix', remix);
 	},
@@ -2262,7 +2265,7 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 	onRemixPlayingChange: function(){
 		if (this.playTimeout){
 			clearTimeout(this.playTimeout);
-			this.playTimeout = undefined; 
+			this.playTimeout = undefined;
 		}
 	
 		var remix = this.get('remix');
@@ -2377,7 +2380,7 @@ WebRemixer.Models.ClipPlayer = WebRemixer.Model.extend({
 			this.get('remix').get('playerManager')
 					.get('videoPlayersByVideo')[this.get('clip').get('video').cid]
 					.where({
-						owner: null
+						owner: undefined
 					})[0]
 		);
 	},
@@ -2471,12 +2474,12 @@ WebRemixer.Models.ClipPlayer = WebRemixer.Model.extend({
 		var videoPlayer = this.get('videoPlayer');
 		if (videoPlayer){
 			videoPlayer.set({
-				owner: null,
+				owner: undefined,
 				playTime: undefined,
 				playing: false
 			});
 			
-			this.set('videoPlayer', null);
+			this.set('videoPlayer', undefined);
 		}
 	}
 });
@@ -2661,14 +2664,7 @@ WebRemixer.Models.VideoFinder = WebRemixer.Model.extend({
 	}
 });
 WebRemixer.Models.VideoPlayer = WebRemixer.Model.extend({
-
-	defaults: {
-		owner: null
-	},
-
-	initialize: function(){
-		
-	}
+	
 });
 WebRemixer.Collections.Clips = Backbone.Collection.extend({
 	model: WebRemixer.Models.Clip

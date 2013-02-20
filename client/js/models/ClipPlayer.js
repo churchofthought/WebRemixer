@@ -12,7 +12,7 @@ WebRemixer.Models.ClipPlayer = WebRemixer.Model.extend({
 			this.get('remix').get('playerManager')
 					.get('videoPlayersByVideo')[this.get('clip').get('video').cid]
 					.where({
-						owner: null
+						owner: undefined
 					})[0]
 		);
 	},
@@ -106,12 +106,12 @@ WebRemixer.Models.ClipPlayer = WebRemixer.Model.extend({
 		var videoPlayer = this.get('videoPlayer');
 		if (videoPlayer){
 			videoPlayer.set({
-				owner: null,
+				owner: undefined,
 				playTime: undefined,
 				playing: false
 			});
 			
-			this.set('videoPlayer', null);
+			this.set('videoPlayer', undefined);
 		}
 	}
 });

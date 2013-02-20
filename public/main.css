@@ -13,8 +13,8 @@ body > .context-menu{position:absolute;display:inline-block;visibility:hidden;op
 body > .context-menu a{cursor:pointer}
 body > .context-menu.show{visibility:visible;opacity:1;-ms-filter:none;filter:none}
 .main-menu{padding:.15em;height:2em;background:#eee;}
-.main-menu > .ui-menubar{position:fixed;z-index:3}
-.play-controls{position:fixed;display:inline-block;width:10em;background:#ccc;z-index:1;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;text-align:center;padding:1em;height:4em;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;border-bottom:1px solid #000;}
+.main-menu > .ui-menubar{position:fixed;z-index:4}
+.play-controls{position:fixed;display:inline-block;width:10em;background:#ccc;z-index:3;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;text-align:center;padding:1em;height:4em;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;border-bottom:1px solid #000;}
 .play-controls button{font-size:12px}
 .ruler{display:inline-block;vertical-align:top;white-space:nowrap;padding-top:1.2em;height:4em;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;overflow:visible;position:relative;left:10em;}
 .ruler > .timeHand{position:absolute;top:0;left:0;width:1px;height:9999px;background:#f00;z-index:2;-webkit-box-shadow:0 0 1px #000;box-shadow:0 0 1px #000}

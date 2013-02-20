@@ -87,6 +87,7 @@ WebRemixer.Views.PlayControls = WebRemixer.View.extend({
 		}else{
 			remix.set('playTime', 0);
 		}
+		remix.trigger('change:playTime');
 	}
 	
 });

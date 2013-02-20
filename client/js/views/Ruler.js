@@ -13,7 +13,8 @@ WebRemixer.Views.Ruler = WebRemixer.View.extend({
 		
 		this.listenTo(remix, {
 			'change:duration' : this.render,
-			'change:playTime' : this.onPlayTimeChange
+			'change:playTime' : this.onPlayTimeChange,
+			'change:playing'  : this.onPlayingChange
 		});
 
 		this.onPlayTimeChange(remix, remix.get('playTime'));
@@ -38,14 +39,14 @@ WebRemixer.Views.Ruler = WebRemixer.View.extend({
 		}
 	},
 	
-	onPlayTimeChange: function(model, val){
-		var scrollMin = (WebRemixer.PX_PER_SEC * val + this.$el.prop('offsetLeft')) - (this.$window.width() / 2);
-
-		if (this.$body && this.$body.scrollLeft() < scrollMin){
-			this.$body.scrollLeft(scrollMin);
+	onPlayTimeChange: function(remix, playTime){
+		if (this.$body){
+			this.$body.stop(true, true).animate({
+				scrollLeft: Math.max(0, WebRemixer.PX_PER_SEC * playTime + this.$el.prop('offsetLeft') - this.$window.width() / 2)
+			});
 		}
 
-		this.$timeHand.css('left', (WebRemixer.EMS_PER_SEC * val) + 'em');
+		this.$timeHand.css('left', (WebRemixer.EMS_PER_SEC * playTime) + 'em');
 	},
 	
 	render: function() {
