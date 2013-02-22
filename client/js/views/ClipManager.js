@@ -5,13 +5,13 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 		'click .clip .inspect' : 'onInspectClick',
 						 'click .clip' : 'onInspectClick',
 				 'click .new-clip' : 'createNewClip',
-							'sortout'    : 'onSortOut',
-							'sortover'   : 'onSortOver',
-							'sortupdate' : 'onSortUpdate'
+							sortout    : 'onSortOut',
+							sortover   : 'onSortOver',
+							sortupdate : 'onSortUpdate'
 	},
 
 	initialize: function(){
-		this.$newClip = $('<button class="new-clip"/>').button({
+		this.$newClip = $('<button/>').prop('class', 'new-clip').button({
 			icons: {
 				primary: 'ui-icon-plus'
 			},
@@ -19,7 +19,7 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 			text: false
 		}).appendTo(this.el);
 			
-		this.$clips = $('<div/>').addClass('clips').sortable({
+		this.$clips = $('<div/>').prop('class', 'clips').sortable({
 			tolerance: 'pointer'
 		}).appendTo(this.el);
 	
@@ -32,11 +32,15 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 			remove: this.onClipsRemove
 		});
 
-		this.listenTo(remix, {
-			'change:clipIds': this.onClipIdsChange
-		});
+		this.listenTo(remix, 'change:clipIds', this.onClipIdsChange);
 		
-		this.model.trigger('change:open');
+		this.onVisibilityChange(this.model, this.model.get('open'));
+
+		$(this.onLoad);
+	},
+
+	onLoad: function(){
+		this.$el.appendTo(document.body);
 	},
 
 	onSortOver: function(event, ui){
@@ -47,8 +51,8 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 		ui.item.removeClass('over-manager');
 	},
 	
-	onVisibilityChange: function(){
-		if (this.model.get('open')){
+	onVisibilityChange: function(clipManager, open){
+		if (open){
 			this.$el.addClass('open');
 		}else{
 			this.$el.removeClass('open');
@@ -66,9 +70,7 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 		this.inspect( clip );
 	},
 
-	onClipIdsChange: function(){
-		var clipIds = this.model.get('remix').get('clipIds');
-
+	onClipIdsChange: function(remix, clipIds){
 		var $clips = this.$clips.children('.clip');
 
 		$clips.each(function(){
@@ -95,16 +97,16 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 		);
 	},
 
- onClipsAdd: function(model){
-		this.listenTo(model, 'change:' + model.idAttribute, this.onSortUpdate);
+ onClipsAdd: function(clip){
+		this.listenTo(clip, 'change:' + clip.idAttribute, this.onSortUpdate);
 
 		var view = new WebRemixer.Views.Clip({
-			model: model
+			model: clip
 		});
 
 		var clipIds = this.model.get('remix').get('clipIds');
 
-		var order = _.indexOf(clipIds, model.id);
+		var order = _.indexOf(clipIds, clip.id);
 
 		if (order !== -1){
 			//insert clip in the correct position
@@ -122,10 +124,10 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 		}
 	},
 
-	onClipsRemove: function(model){
-		this.stopListening(model);
+	onClipsRemove: function(clip){
+		this.stopListening(clip);
 
-		this.$clips.single('#' + model.cid).data('view').remove();
+		this.$clips.single('#' + clip.cid).data('view').remove();
 	},
 	
 	onInspectClick: function(event){

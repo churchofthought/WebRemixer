@@ -2,7 +2,8 @@
 	"folders":
 	[
 		{
-			"path": "/Volumes/YTR/home/andrew/WebRemixer"
+			"path": "/Volumes/YTR/home/andrew/WebRemixer",
+			"folder_exclude_patterns": ["node_modules"]
 		}
 	]
 }

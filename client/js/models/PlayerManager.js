@@ -17,8 +17,8 @@ WebRemixer.Models.PlayerManager = WebRemixer.Model.extend({
 		});
 	},
 	
-	onTimelinesAdd: function(model){
-		this.listenTo(model.get('timelineClips'), {
+	onTimelinesAdd: function(timeline){
+		this.listenTo(timeline.get('timelineClips'), {
 			add: this.onTimelineClipsAdd,
 			remove: this.onTimelineClipsRemove
 		});
@@ -57,7 +57,7 @@ WebRemixer.Models.PlayerManager = WebRemixer.Model.extend({
 		
 		if (videoPlayers.length < needed){
 			do {
-				var videoPlayer = 
+				var videoPlayer =
 					new WebRemixer.Models.VideoPlayer({
 						video: video
 					});
@@ -65,7 +65,7 @@ WebRemixer.Models.PlayerManager = WebRemixer.Model.extend({
 				
 				//instantiate view so flash/html5 videoPlayer gets appended to dom
 				new WebRemixer.Views.VideoPlayer({
-					el: $("<div/>").appendTo(document.body),
+					el: $('<div/>').appendTo(document.body),
 					model: videoPlayer
 				});
 			} while (videoPlayers.length < needed);
@@ -76,8 +76,8 @@ WebRemixer.Models.PlayerManager = WebRemixer.Model.extend({
 		}
 	},
 	
-	onTimelineClipsAdd: function(model){
-		var video = model.get('clip').get('video');
+	onTimelineClipsAdd: function(timelineClip){
+		var video = timelineClip.get('clip').get('video');
 		var timelineClipsByVideo = this.get('timelineClipsByVideo');
 	
 		var timelineClips = timelineClipsByVideo[video.cid];
@@ -86,19 +86,17 @@ WebRemixer.Models.PlayerManager = WebRemixer.Model.extend({
 			timelineClips.video = video;
 		}
 		
-		timelineClips.add(model);
-		
-		this.listenTo(model, {
-		 'change destroy' : this.allocatePlayers
-		});
-		
+		timelineClips.add(timelineClip);
+
+		this.listenTo(timelineClip, 'change destroy', this.allocatePlayers);
+
 		this.allocatePlayers();
 	},
 	
-	onTimelineClipsRemove: function(model){
-		this.stopListening(model);
+	onTimelineClipsRemove: function(timelineClip){
+		this.stopListening(timelineClip);
 	
-		this.get('timelineClipsByVideo')[model.get('clip').get('video').cid].remove(model);
+		this.get('timelineClipsByVideo')[timelineClip.get('clip').get('video').cid].remove(timelineClip);
 		
 		this.allocatePlayers();
 	}

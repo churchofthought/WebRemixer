@@ -19,20 +19,20 @@ WebRemixer.Models.Timeline = WebRemixer.Model.extend({
 			add: this.onTimelineClipsAdd,
 			remove: this.onTimelineClipsRemove
 		});
-		
-		this.onRemixChange();
 
 		this.listenTo(this, {
 			change: this.onChange,
 			'change:remix': this.onRemixChange
 		});
+
+		this.onRemixChange(this, this.get('remix'));
 	},
 	
 	onChange: function(){
 		this.save();
 	},
 	
-	onRemixChange: function(){
+	onRemixChange: function(timeline, remix){
 	
 		var prevRemix = this.previous('remix');
 		if (prevRemix){
@@ -40,23 +40,22 @@ WebRemixer.Models.Timeline = WebRemixer.Model.extend({
 			this.stopListening(prevRemix);
 		}
 	
-		var remix = this.get('remix');
 		if (remix){
 			var timelines = remix.get('timelines');
 
 			timelines.add(this);
 			
-			this.listenTo(remix, 'change:%s'.sprintf(remix.idAttribute), this.onChange);
+			this.listenTo(remix, 'change' + remix.idAttribute, this.onChange);
 		}
 	},
 	
-	onTimelineClipsAdd: function(model){
-		model.set('timeline', this);
+	onTimelineClipsAdd: function(timelineClip){
+		timelineClip.set('timeline', this);
 	},
 	
-	onTimelineClipsRemove: function(model){
-		if (model.get('timeline') === this){
-			model.set('timeline', undefined);
+	onTimelineClipsRemove: function(timelineClip){
+		if (timelineClip.get('timeline') === this){
+			timelineClip.set('timeline', undefined);
 		}
 	}
 });

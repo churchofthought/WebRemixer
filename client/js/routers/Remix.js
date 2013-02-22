@@ -1,8 +1,8 @@
 WebRemixer.Routers.Remix = Backbone.Router.extend({
 
 	routes: {
-		"new": "newRemix",
-		":id": "getRemix"
+			new : "newRemix",
+		":id" : "getRemix"
 	},
 
 	newRemix: function() {
@@ -14,7 +14,7 @@ WebRemixer.Routers.Remix = Backbone.Router.extend({
 		}).$el.appendTo(document.body);
 
 		remix.save();
-		remix.once('change:%s'.sprintf(remix.idAttribute), this.onNewRemixSaved);
+		remix.once('change:' + remix.idAttribute, this.onNewRemixSaved);
 	},
 
 	onNewRemixSaved: function(model){

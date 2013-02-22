@@ -13,14 +13,14 @@ WebRemixer.Models.Clip = WebRemixer.Model.extend({
 	initialize: function(){
 		this.onChange = _.debounce(this.onChange, WebRemixer.Config.saveOnChangeDelay);
 
-		this.onVideoChange();
-		this.onRemixChange();
-
 		this.listenTo(this, {
 			change: this.onChange,
 			'change:remix': this.onRemixChange,
 			'change:video': this.onVideoChange
 		});
+
+		this.onRemixChange(this, this.get('remix'));
+		this.onVideoChange(this, this.get('video'));
 	},
 	
 	onChange: function(){
@@ -28,7 +28,7 @@ WebRemixer.Models.Clip = WebRemixer.Model.extend({
 	},
 
 
-	onRemixChange: function(){
+	onRemixChange: function(clip, remix){
 	
 		var prevRemix = this.previous('remix');
 		if (prevRemix){
@@ -36,19 +36,16 @@ WebRemixer.Models.Clip = WebRemixer.Model.extend({
 			this.stopListening(prevRemix);
 		}
 	
-		var remix = this.get('remix');
 		if (remix){
 			var clips = remix.get('clips');
 
 			clips.add(this);
 
-			this.listenTo(remix, 'change:%s'.sprintf(remix.idAttribute), this.onChange);
+			this.listenTo(remix, 'change:' + remix.idAttribute, this.onChange);
 		}
 	},
 	
-	onVideoChange: function(){
-		var video = this.get('video');
-		
+	onVideoChange: function(clip, video){
 		var previousVideo = this.previous('video');
 		if (previousVideo){
 			this.stopListening(previousVideo);
@@ -56,18 +53,18 @@ WebRemixer.Models.Clip = WebRemixer.Model.extend({
 		
 		if (video){
 			this.listenTo(video, {
-				 change: _.bind(this.trigger, this, 'change'),
+				change: _.partial(this.trigger, 'change'),
 				'change:title': this.onVideoTitleChange
 			});
 			
-			video.trigger('change:title');
+			this.onVideoTitleChange(video, video.get('title'));
 		}
 	},
 	
-	onVideoTitleChange: function(){
+	onVideoTitleChange: function(video, videoTitle){
 		var title = this.get('title');
-		if (!title || title == this.defaults.title){
-			this.set('title', this.get('video').get('title'));
+		if (_.isEmpty(title) || title === this.defaults.title){
+			this.set('title', videoTitle);
 		}
 	}
 	

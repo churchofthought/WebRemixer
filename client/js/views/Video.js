@@ -4,7 +4,7 @@ WebRemixer.Views.Video = WebRemixer.View.extend({
 	initialize: function(){
 		this.listenTo(this.model, 'change', this.render);
 		
-		this.model.trigger('change');
+		this.render();
 	},
 	
 	getFormattedDuration: function(){
@@ -13,9 +13,8 @@ WebRemixer.Views.Video = WebRemixer.View.extend({
 	},
 	
 	render: function(){
-		this.$el.css({
-			backgroundImage: 'url("%s")'.sprintf(this.model.get('thumbnail'))
-		}).attr({
+		this.$el.css('background-image', 'url("' + this.model.get('thumbnail') + '")')
+		.attr({
 			'data-title': this.model.get('title'),
 			'data-duration': this.getFormattedDuration()
 		});

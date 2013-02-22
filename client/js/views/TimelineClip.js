@@ -2,8 +2,8 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 	className: 'timeline-clip',
 	
 	events: {
-		'dragstop': 'onDragStop',
-		'resizestop': 'onResizeStop',
+		dragstop: 'onDragStop',
+		resizestop: 'onResizeStop',
 		'click .toggle-loop': 'toggleLoop',
 		'click .duplicate': 'duplicate',
 		'click .delete': 'del'
@@ -35,15 +35,19 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 			'</ul>'
 		).menu();*/
 		
-		this.$loopIndicator = $('<div/>').addClass('loop-indicator').appendTo(this.el);
+		this.$loopIndicator = $('<div/>').prop('class', 'loop-indicator').appendTo(this.el);
 		
-		var $buttons = $('<div/>').addClass('buttons');
+		var $buttons = $('<div/>').prop('class', 'buttons');
 		
-		var $loopLabel = $('<label for="%s"/>'.sprintf(Math.random().toString(36))).appendTo($buttons);
+		var loopId = Math.random().toString(36);
+		var $loopLabel = $('<label/>').attr('for', loopId).appendTo($buttons);
 
 		$buttons.append(
 		
-			$('<input id="%s" type="checkbox" class="toggle-loop"/>'.sprintf($loopLabel.attr('for'))).appendTo($buttons).button({
+			$('<input type="checkbox"/>').prop({
+					id: loopId,
+					class: 'toggle-loop'
+				}).appendTo($buttons).button({
 				icons: {
 					primary: 'ui-icon-refresh'
 				},
@@ -51,7 +55,7 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 				text: false
 			}),
 			
-			$('<button class="duplicate"/>').button({
+			$('<button/>').prop('class', 'duplicate').button({
 				icons: {
 					primary: 'ui-icon-copy'
 				},
@@ -59,7 +63,7 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 				text: false
 			}),
 			
-			$('<button class="delete"/>').button({
+			$('<button/>').prop('class', 'delete').button({
 				icons: {
 					primary: 'ui-icon-close'
 				},
@@ -72,18 +76,18 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 		
 		
 		this.listenTo(this.model, {
-								change : this.render,
-			'change:timeline': this.onTimelineChange,
-			'change:selected': this.onSelectedChange
+							 change : this.render,
+		'change:timeline' : this.onTimelineChange,
+		'change:selected' : this.onSelectedChange
 		});
 
-		this.model.trigger('change:selected');
-
 		this.render();
+
+		this.onSelectedChange(this.model, this.model.get('selected'));
 	},
 	
-	onSelectedChange: function(){
-		if (this.model.get('selected')){
+	onSelectedChange: function(timelineClip, selected){
+		if (selected){
 			this.$el.addClass('ui-selected');
 		}else{
 			this.$el.removeClass('ui-selected');
@@ -157,7 +161,7 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 		});
 		
 		this.$el.css({
-			background: 'url("%s")'.sprintf(video.get('thumbnail')),
+			background: 'url("' + video.get('thumbnail') + '")',
 			left: WebRemixer.EMS_PER_SEC * this.model.get('startTime') + 'em',
 			width: WebRemixer.EMS_PER_SEC * this.model.get('duration') + 'em'
 		}).attr({

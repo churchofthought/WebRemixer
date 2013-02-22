@@ -2,16 +2,15 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 	className: 'timelines',
 		
 	events: {
-		'selectablestart' : 'onSelectStart',
-		'selectableselecting' : 'onSelecting',
-		'selectableunselecting' : 'onUnselecting',
-		'selectableselected' : 'onSelected',
-		'selectableunselected' : 'onUnselected',
-		'selectablestop' : 'onSelectStop',
-		'menuselect' : 'onMenuSelect',
+		selectablestart : 'onSelectStart',
+		selectableselecting : 'onSelecting',
+		selectableunselecting : 'onUnselecting',
+		selectableselected : 'onSelected',
+		selectableunselected : 'onUnselected',
+		selectablestop : 'onSelectStop',
 		'contextmenu .timeline-clips' : 'onContextMenu',
 		'contextmenu .selection' : 'onContextMenu',
-		'mousedown' : 'onMouseDown'
+		mousedown : 'onMouseDown'
 	},
 
 	initialize: function(){
@@ -20,10 +19,12 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		});
 
 		this.$contextMenu = $('<ul/>')
-			.addClass('context-menu')
+			.prop('class', 'context-menu')
 			.append('<li data-cmd="duplicate"><a><span class="ui-icon ui-icon-copy"></span>Duplicate</a></li>')
 			.append('<li data-cmd="delete"><a><span class="ui-icon ui-icon-close"></span>Delete</a></li>')
-			.menu()
+			.menu({
+				select: this.onMenuSelect
+			})
 			.appendTo(document.body);
 			
 		var remix = this.model.get('remix');
@@ -61,7 +62,8 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 
 		var curSelection = remix.get('selection');
 		curSelection.offset.left += curSelection.width;
-		remix.trigger('change:selection');
+
+		remix.trigger('change:selection', remix, curSelection);
 	},
 	
 	onMouseDown: function(){
@@ -93,6 +95,7 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		this.updateSelection(true);
 	},
 	
+	/* TODO :: make more efficient! */
 	updateSelection: function(repeat){
 		this.model.get('remix').set('selection', {
 			offset: this.$helper.offset(),
@@ -128,9 +131,7 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 	},
 
 
-	onTimelineIdsChange: function(){
-		var timelineIds = this.model.get('remix').get('timelineIds');
-
+	onTimelineIdsChange: function(remix, timelineIds){
 		var $timelines = this.$el.children('.timeline');
 
 		$timelines.each(function(){
@@ -149,16 +150,16 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 
 	},
 
-	onTimelinesAdd: function(model){
-		this.listenTo(model, 'change:' + model.idAttribute, this.onTimelinesSortUpdate);
+	onTimelinesAdd: function(timeline){
+		this.listenTo(timeline, 'change:' + timeline.idAttribute, this.onTimelinesSortUpdate);
 
 		var view = new WebRemixer.Views.Timeline({
-			model: model
+			model: timeline
 		});
 
-		var timelineIds = this.model.get('remix').get('timelineIds');
+		var timelineIds = timeline.get('remix').get('timelineIds');
 
-		var order = _.indexOf(timelineIds, model.id);
+		var order = _.indexOf(timelineIds, timeline.id);
 
 		if (order !== -1){
 			//insert timeline in the correct position
@@ -176,10 +177,10 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		}
 	},
 	
-	onTimelinesRemove: function(model){
-		this.stopListening(model);
+	onTimelinesRemove: function(timeline){
+		this.stopListening(timeline);
 
-		this.$el.single('#' + model.cid).data('view').remove();
+		this.$el.single('#' + timeline.cid).data('view').remove();
 	}
 
 });

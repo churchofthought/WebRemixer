@@ -24,13 +24,13 @@ module.exports = function(grunt) {
 					'client/js/models/*.js',
 					'client/js/collections/*.js'
 				],
-				dest: 'public/main.js'
+				dest: 'public/js/main.js'
 			},
 		},
 		stylus: {
 			compile: {
 				files: {
-					'public/main.css': ['client/css/main.styl']
+					'public/css/main.css': ['client/css/main.styl']
 				}
 			}
 		},

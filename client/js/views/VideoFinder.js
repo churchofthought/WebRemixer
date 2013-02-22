@@ -2,17 +2,17 @@ WebRemixer.Views.VideoFinder = WebRemixer.View.extend({
 	className: 'video-finder',
 		
 	events: {
-		'dialogopen' : 'onOpen',
-		'dialogclose' : 'onClose',
+		dialogopen : 'onOpen',
+		dialogclose : 'onClose',
 		'change .search': 'onSearchChange',
 		'click .video': 'onVideoClick'
 	},
 	
 	initialize: function(){
-		this.$search = $('<input class="search" type="text"/>').appendTo(
-			$('<div data-label="Search"/>').appendTo(this.el)
+		this.$search = $('<input type="text"/>').prop('class', 'search').appendTo(
+			$('<div/>').attr('data-label', 'Search').appendTo(this.el)
 		);
-		this.$searchResults = $('<div class="search-results"/>').appendTo(this.el);
+		this.$searchResults = $('<div/>').prop('class', 'search-results').appendTo(this.el);
 		
 		
 		this.listenTo(this.model, 'change:open', this.onVisibilityChange);
@@ -26,10 +26,10 @@ WebRemixer.Views.VideoFinder = WebRemixer.View.extend({
 		$(this.onLoad);
 	},
 	
-	onVideosAdd: function(model){
+	onVideosAdd: function(video){
 		this.$searchResults.append(
 			new WebRemixer.Views.Video({
-				model: model
+				model: video
 			}).el
 		);
 	},
@@ -41,15 +41,15 @@ WebRemixer.Views.VideoFinder = WebRemixer.View.extend({
 	},
 	
 	onOpen: function(){
-		this.model.set('open', true);
+		this.model.set('open', true, {silent: true});
 	},
 	
 	onClose: function(){
-		this.model.set('open', false);
+		this.model.set('open', false, {silent: true});
 	},
 	
-	onVisibilityChange: function(){
-		if (this.model.get('open')){
+	onVisibilityChange: function(videoFinder, open){
+		if (open){
 			this.$el.dialog('open');
 			this.$search.select();
 		}else{

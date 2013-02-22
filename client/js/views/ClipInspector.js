@@ -2,8 +2,8 @@ WebRemixer.Views.ClipInspector = WebRemixer.View.extend({
 	className: 'clip-inspector',
 		
 	events: {
-		'dialogopen' : 'onOpen',
-		'dialogclose' : 'onClose',
+		dialogopen : 'onOpen',
+		dialogclose : 'onClose',
 		'change .clip-title' : 'onTitleInputChange',
 		'slide .cut' : 'onCutSlide',
 		'slidestop .cut' : 'onCutSlide',
@@ -15,26 +15,26 @@ WebRemixer.Views.ClipInspector = WebRemixer.View.extend({
 			model: this.model.get('videoFinder')
 		});
 		
-		this.$title = $('<input class="clip-title" type="text" placeholder="Title"/>')
-			.appendTo(
-				this.el
-			);
+		this.$title = $('<input type="text"/>')
+		.prop('class', 'clip-title')
+		.attr('placeholder', 'Title')
+		.appendTo(this.el);
 			
 			
 		
-		var $cutContainer = $('<div class="cut"/>').appendTo($('<div data-label="Cut"/>').appendTo(this.el));
+		var $cutContainer = $('<div/>').prop('class', 'cut').appendTo($('<div/>').attr('data-label', 'Cut').appendTo(this.el));
 		
-		this.$cutSlider = $('<div class="cut-slider"/>').slider({
+		this.$cutSlider = $('<div/>').prop('class', 'cut-slider').slider({
 			range: true,
 			min: 0
 		}).appendTo($cutContainer);
 		
-		this.$cutStart = $('<span class="cut-start"/>').appendTo($cutContainer);
-		this.$cutEnd = $('<span class="cut-end"/>').appendTo($cutContainer);
+		this.$cutStart = $('<span/>').prop('class', 'cut-start').appendTo($cutContainer);
+		this.$cutEnd = $('<span/>').prop('class', 'cut-end').appendTo($cutContainer);
 		
 		
-		this.$video = $('<div class="clip-video"/>').appendTo(
-			$('<div data-label="Video"/>').appendTo(this.el)
+		this.$video = $('<div/>').prop('class', 'clip-video').appendTo(
+			$('<div/>').attr('data-label', 'Video').appendTo(this.el)
 		);
 		
 		
@@ -50,10 +50,7 @@ WebRemixer.Views.ClipInspector = WebRemixer.View.extend({
 		$(this.onLoad);
 	},
 	
-	onVideoFinderVideoChanged: function(){
-		var videoFinder = this.model.get('videoFinder');
-	
-		var video = videoFinder.get('video');
+	onVideoFinderVideoChanged: function(videoFinder, video){
 
 		if (video){
 			this.model.get('clip').set('video', video);
@@ -114,8 +111,8 @@ WebRemixer.Views.ClipInspector = WebRemixer.View.extend({
 		});
 	},
 	
-	onVisibilityChange: function(){
-		if (this.model.get('open')){
+	onVisibilityChange: function(clipInspector, open){
+		if (open){
 			this.$el.dialog('open');
 		}else{
 			this.$el.dialog('close');
@@ -131,15 +128,14 @@ WebRemixer.Views.ClipInspector = WebRemixer.View.extend({
 	},
 	
 	onOpen: function(){
-		this.model.set('open', true);
+		this.model.set('open', true, {silent: true});
 	},
 	
 	onClose: function(){
-		this.model.set('open', false);
+		this.model.set('open', false, {silent: true});
 	},
 	
-	onClipChange: function(){
-		var clip = this.model.get('clip');
+	onClipChange: function(clipInspector, clip){
 		var cutStart = clip.get('cutStart');
 	
 		this.$title.val(clip.get('title'));
@@ -159,12 +155,10 @@ WebRemixer.Views.ClipInspector = WebRemixer.View.extend({
 		
 		//kickstart it
 		this.onCutSlide();
-		clip.trigger('change:video');
+		this.onClipVideoChange(clip, clip.get('video'));
 	},
 	
-	onClipVideoChange: function(){
-		var clip = this.model.get('clip');
-		var video = clip.get('video');
+	onClipVideoChange: function(clip, video){
 		
 		var oldView = this.$video.children().data('view');
 		if (oldView){
@@ -180,7 +174,7 @@ WebRemixer.Views.ClipInspector = WebRemixer.View.extend({
 			
 			var previousVideo = clip.previous('video');
 		
-			if (previousVideo && clip.get('title') == previousVideo.get('title')){
+			if (previousVideo && clip.get('title') === previousVideo.get('title')){
 				clip.set('title', video.get('title'));
 			}
 		
@@ -193,14 +187,16 @@ WebRemixer.Views.ClipInspector = WebRemixer.View.extend({
 			this.model.get('videoFinder').set('open', true);
 		}
 	},
+
+	onClipTitleChange: function(clip, title){
+		this.$title.val(title);
+	},
 	
 	onTitleInputChange: function(){
 		var clip = this.model.get('clip');
-		clip.set('title', this.$title.val() || clip.get('video').get('title'));
-		this.onClipTitleChange();
+		var title = this.$title.val();
+		clip.set('title', _.isEmpty(title) ? clip.get('video').get('title') : title);
 	},
 	
-	onClipTitleChange: function(){
-		this.$title.val(this.model.get('clip').get('title'));
-	}
+	
 });

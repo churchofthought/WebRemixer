@@ -7,13 +7,13 @@ WebRemixer.Models.ClipManager = WebRemixer.Model.extend({
 		});
 	},
 
-	onClipsAdd: function(model){
-		model.set('remix', this.get('remix'));
+	onClipsAdd: function(clip){
+		clip.set('remix', this.get('remix'));
 	},
 	
-	onClipsRemove: function(model){
-		if (model.get('remix') === this.get('remix')){
-			model.set('remix', undefined);
+	onClipsRemove: function(clip){
+		if (clip.get('remix') === this.get('remix')){
+			clip.set('remix', undefined);
 		}
 	}
 

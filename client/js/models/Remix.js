@@ -40,7 +40,7 @@ WebRemixer.Models.Remix = WebRemixer.Model.extend({
 		
 		this.listenTo(this, 'change', this.onChange);
 
-		this.listenTo(this, 'change:%s'.sprintf(this.idAttribute), this.onChangeId);
+		this.listenTo(this, 'change:' + this.idAttribute, this.onChangeId);
 		
 		if (this.id) {
 			this.fetchChildren();
@@ -52,11 +52,11 @@ WebRemixer.Models.Remix = WebRemixer.Model.extend({
 	},
 
 	onChangeId: function(){
-		WebRemixer.router.navigate('%s'.sprintf(this.id));
+		WebRemixer.router.navigate(this.id);
 	},
 	
 	fetchChildren: function(){
-		$.get('%s/children'.sprintf(this.url()), this.onFetchedChildren);
+		$.get(this.url() + '/children', this.onFetchedChildren);
 	},
 	
 	onFetchedChildren: function(res){

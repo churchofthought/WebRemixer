@@ -12,7 +12,7 @@ WebRemixer.Views.PlayControls = WebRemixer.View.extend({
 	initialize: function(){	
 		this.$el.append(
 		
-			$('<button class="restart"/>').button({
+			$('<button/>').prop('class', 'restart').button({
 				text: false,
 				icons: {
 					primary: 'ui-icon-seek-start'
@@ -20,7 +20,7 @@ WebRemixer.Views.PlayControls = WebRemixer.View.extend({
 				label: 'Restart'
 			}),
 			
-			this.$play = $('<button class="play"/>').button({
+			this.$play = $('<button/>').prop('class', 'play').button({
 				text: false,
 				icons: {
 					primary: 'ui-icon-play'
@@ -28,7 +28,7 @@ WebRemixer.Views.PlayControls = WebRemixer.View.extend({
 				label: 'Play'
 			}),
 		 
-			$('<button class="stop"/>').button({
+			$('<button/>').prop('class', 'stop').button({
 				text: false,
 				icons: {
 					primary: 'ui-icon-stop'
@@ -43,10 +43,7 @@ WebRemixer.Views.PlayControls = WebRemixer.View.extend({
 		this.listenTo(this.model.get('remix'), 'change:playing', this.onPlayingChange);
 	},
 	
-	onPlayingChange: function(){
-	
-		var playing = this.model.get('remix').get('playing');
-	
+	onPlayingChange: function(remix, playing){
 		if (playing){
 			this.$play.button('option', {
 				icons: {

@@ -11,7 +11,7 @@ WebRemixer.Models.Video = WebRemixer.Model.extend({
 
 	initialize: function(){
 		if (!this.get('title')){
-			$.getJSON('https://gdata.youtube.com/feeds/api/videos/%s'.sprintf(this.get('sourceVideoId')), { 
+			$.getJSON('https://gdata.youtube.com/feeds/api/videos/' + this.get('sourceVideoId'), { 
 				v: 2.1,
 				alt: 'jsonc' 
 			}, this.gotVideoData);

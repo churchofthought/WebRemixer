@@ -3,7 +3,7 @@ WebRemixer.Views.Clip = WebRemixer.View.extend({
 	className: 'clip',
 	
 	events: {
-		'dragstart'     : 'onDragStart',
+		  dragstart     : 'onDragStart',
 		'click .delete' : 'onDeleteClick'
 	},
 	
@@ -16,15 +16,15 @@ WebRemixer.Views.Clip = WebRemixer.View.extend({
 				appendTo: document.body
 			});*/
 			
-		$('<div/>').addClass('buttons').append(
-			$('<button class="inspect"/>').button({
+		$('<div/>').prop('class', 'buttons').append(
+			$('<button/>').prop('class', 'inspect').button({
 				icons: {
 					primary: 'ui-icon-pencil'
 				},
 				label: 'Inspect',
 				text: false
 			}),
-			$('<button class="delete"/>').button({
+			$('<button/>').prop('class', 'delete').button({
 				icons: {
 					primary: 'ui-icon-close'
 				},
@@ -52,9 +52,7 @@ WebRemixer.Views.Clip = WebRemixer.View.extend({
 		var video = this.model.get('video');
 		
 		if (video){
-			this.$el.css({
-				backgroundImage: 'url("%s")'.sprintf(video.get('thumbnail'))
-			});
+			this.$el.css('background-image', 'url("' + video.get('thumbnail') + '")');
 		}
 		
 		this.$el.attr({

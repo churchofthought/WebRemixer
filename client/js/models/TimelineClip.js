@@ -22,30 +22,30 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 	
 		// trigger a change event, everytime our clip changes
 		this.listenTo(clip, {
-			change: _.bind(this.trigger, this, "change"),
+			change: _.partial(this.trigger, 'change'),
 			destroy: this.destroy
 		});
-
-		this.onTimelineChange();
-		this.onRemixChange();
 		
 		this.listenTo(this, {
 			change: this.onChange,
 			'change:timeline': this.onTimelineChange,
 			'change:remix': this.onRemixChange
 		});
+
+		this.onTimelineChange(this, this.get('timeline'));
+		this.onRemixChange(this, this.get('remix'));
 	},
 
 	onChange: function(){
 		this.save();
 	},
 	
-	onRemixChange: function(){
+	onRemixChange: function(timelineClip, remix){
 		var prevRemix = this.previous('remix');
 		if (prevRemix){
 			this.stopListening(prevRemix);
 		}
-		var remix = this.get('remix');
+
 		if (remix){
 			this.listenTo(remix, 'change:playing', this.onRemixPlayingChange);
 			this.listenTo(remix, 'change:' + remix.idAttribute, this.onChange);
@@ -54,14 +54,12 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 	},
 
 
-	onTimelineChange: function(){
+	onTimelineChange: function(timelineClip, timeline){
 		var prevTimeline = this.previous('timeline');
 		if (prevTimeline){
 			prevTimeline.get('timelineClips').remove(this);
 			this.stopListening(prevTimeline);
 		}
-
-		var timeline = this.get('timeline');
 
 		var remix;
 
@@ -75,17 +73,15 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 		this.set('remix', remix);
 	},
 	
-	onRemixPlayingChange: function(){
+	onRemixPlayingChange: function(remix, playing){
 		if (this.playTimeout){
 			clearTimeout(this.playTimeout);
 			this.playTimeout = undefined;
 		}
-	
-		var remix = this.get('remix');
 		
 		var delay = this.get('startTime') - remix.get('playTime');
 		
-		if (remix.get('playing')){
+		if (playing){
 			if (delay >= 0){
 				this.playTimeout = setTimeout(this.prepareToPlay, Math.max(0, delay - WebRemixer.preloadDelay) * 1000);
 			}else if (-delay <= this.get('duration')){
@@ -104,7 +100,7 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 
 		var remix = this.get('remix');
 		
-		remix.set('realTimeNeeded', true);
+		remix.trigger('updatePlayTime');
 		
 		var delay = this.get('startTime') - remix.get('playTime');
 		
@@ -123,7 +119,7 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 		
 		var remix = this.get('remix');
 		
-		remix.set('realTimeNeeded', true);
+		remix.trigger('updatePlayTime');
 		
 		var passed = remix.get('playTime') - this.get('startTime');
 		

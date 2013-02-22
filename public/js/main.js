@@ -275,8 +275,8 @@ $(function(){
 WebRemixer.Routers.Remix = Backbone.Router.extend({
 
 	routes: {
-		"new": "newRemix",
-		":id": "getRemix"
+			new : "newRemix",
+		":id" : "getRemix"
 	},
 
 	newRemix: function() {
@@ -288,7 +288,7 @@ WebRemixer.Routers.Remix = Backbone.Router.extend({
 		}).$el.appendTo(document.body);
 
 		remix.save();
-		remix.once('change:%s'.sprintf(remix.idAttribute), this.onNewRemixSaved);
+		remix.once('change:' + remix.idAttribute, this.onNewRemixSaved);
 	},
 
 	onNewRemixSaved: function(model){
@@ -359,8 +359,16 @@ WebRemixer.View = Backbone.View.extend({
 	}
 });
 
-// give every view access to the window and body
-WebRemixer.View.prototype.$window = $(window);
+// give every view access to common elements and window width / height
+_.extend(WebRemixer.View.prototype, {
+	$window: $(window),
+	$html: $(document.documentElement)
+});
+
+WebRemixer.View.prototype.$window.resize(function(){
+	WebRemixer.View.prototype.windowWidth = WebRemixer.View.prototype.$window.width();
+	WebRemixer.View.prototype.windowHeight = WebRemixer.View.prototype.$window.height();
+}).trigger('resize');
 
 $(function(){
 	WebRemixer.View.prototype.$body = $(document.body);
@@ -370,7 +378,7 @@ WebRemixer.Views.Clip = WebRemixer.View.extend({
 	className: 'clip',
 	
 	events: {
-		'dragstart'     : 'onDragStart',
+		  dragstart     : 'onDragStart',
 		'click .delete' : 'onDeleteClick'
 	},
 	
@@ -383,15 +391,15 @@ WebRemixer.Views.Clip = WebRemixer.View.extend({
 				appendTo: document.body
 			});*/
 			
-		$('<div/>').addClass('buttons').append(
-			$('<button class="inspect"/>').button({
+		$('<div/>').prop('class', 'buttons').append(
+			$('<button/>').prop('class', 'inspect').button({
 				icons: {
 					primary: 'ui-icon-pencil'
 				},
 				label: 'Inspect',
 				text: false
 			}),
-			$('<button class="delete"/>').button({
+			$('<button/>').prop('class', 'delete').button({
 				icons: {
 					primary: 'ui-icon-close'
 				},
@@ -419,9 +427,7 @@ WebRemixer.Views.Clip = WebRemixer.View.extend({
 		var video = this.model.get('video');
 		
 		if (video){
-			this.$el.css({
-				backgroundImage: 'url("%s")'.sprintf(video.get('thumbnail'))
-			});
+			this.$el.css('background-image', 'url("' + video.get('thumbnail') + '")');
 		}
 		
 		this.$el.attr({
@@ -434,8 +440,8 @@ WebRemixer.Views.ClipInspector = WebRemixer.View.extend({
 	className: 'clip-inspector',
 		
 	events: {
-		'dialogopen' : 'onOpen',
-		'dialogclose' : 'onClose',
+		dialogopen : 'onOpen',
+		dialogclose : 'onClose',
 		'change .clip-title' : 'onTitleInputChange',
 		'slide .cut' : 'onCutSlide',
 		'slidestop .cut' : 'onCutSlide',
@@ -447,26 +453,26 @@ WebRemixer.Views.ClipInspector = WebRemixer.View.extend({
 			model: this.model.get('videoFinder')
 		});
 		
-		this.$title = $('<input class="clip-title" type="text" placeholder="Title"/>')
-			.appendTo(
-				this.el
-			);
+		this.$title = $('<input type="text"/>')
+		.prop('class', 'clip-title')
+		.attr('placeholder', 'Title')
+		.appendTo(this.el);
 			
 			
 		
-		var $cutContainer = $('<div class="cut"/>').appendTo($('<div data-label="Cut"/>').appendTo(this.el));
+		var $cutContainer = $('<div/>').prop('class', 'cut').appendTo($('<div/>').attr('data-label', 'Cut').appendTo(this.el));
 		
-		this.$cutSlider = $('<div class="cut-slider"/>').slider({
+		this.$cutSlider = $('<div/>').prop('class', 'cut-slider').slider({
 			range: true,
 			min: 0
 		}).appendTo($cutContainer);
 		
-		this.$cutStart = $('<span class="cut-start"/>').appendTo($cutContainer);
-		this.$cutEnd = $('<span class="cut-end"/>').appendTo($cutContainer);
+		this.$cutStart = $('<span/>').prop('class', 'cut-start').appendTo($cutContainer);
+		this.$cutEnd = $('<span/>').prop('class', 'cut-end').appendTo($cutContainer);
 		
 		
-		this.$video = $('<div class="clip-video"/>').appendTo(
-			$('<div data-label="Video"/>').appendTo(this.el)
+		this.$video = $('<div/>').prop('class', 'clip-video').appendTo(
+			$('<div/>').attr('data-label', 'Video').appendTo(this.el)
 		);
 		
 		
@@ -482,10 +488,7 @@ WebRemixer.Views.ClipInspector = WebRemixer.View.extend({
 		$(this.onLoad);
 	},
 	
-	onVideoFinderVideoChanged: function(){
-		var videoFinder = this.model.get('videoFinder');
-	
-		var video = videoFinder.get('video');
+	onVideoFinderVideoChanged: function(videoFinder, video){
 
 		if (video){
 			this.model.get('clip').set('video', video);
@@ -546,8 +549,8 @@ WebRemixer.Views.ClipInspector = WebRemixer.View.extend({
 		});
 	},
 	
-	onVisibilityChange: function(){
-		if (this.model.get('open')){
+	onVisibilityChange: function(clipInspector, open){
+		if (open){
 			this.$el.dialog('open');
 		}else{
 			this.$el.dialog('close');
@@ -563,15 +566,14 @@ WebRemixer.Views.ClipInspector = WebRemixer.View.extend({
 	},
 	
 	onOpen: function(){
-		this.model.set('open', true);
+		this.model.set('open', true, {silent: true});
 	},
 	
 	onClose: function(){
-		this.model.set('open', false);
+		this.model.set('open', false, {silent: true});
 	},
 	
-	onClipChange: function(){
-		var clip = this.model.get('clip');
+	onClipChange: function(clipInspector, clip){
 		var cutStart = clip.get('cutStart');
 	
 		this.$title.val(clip.get('title'));
@@ -591,12 +593,10 @@ WebRemixer.Views.ClipInspector = WebRemixer.View.extend({
 		
 		//kickstart it
 		this.onCutSlide();
-		clip.trigger('change:video');
+		this.onClipVideoChange(clip, clip.get('video'));
 	},
 	
-	onClipVideoChange: function(){
-		var clip = this.model.get('clip');
-		var video = clip.get('video');
+	onClipVideoChange: function(clip, video){
 		
 		var oldView = this.$video.children().data('view');
 		if (oldView){
@@ -612,7 +612,7 @@ WebRemixer.Views.ClipInspector = WebRemixer.View.extend({
 			
 			var previousVideo = clip.previous('video');
 		
-			if (previousVideo && clip.get('title') == previousVideo.get('title')){
+			if (previousVideo && clip.get('title') === previousVideo.get('title')){
 				clip.set('title', video.get('title'));
 			}
 		
@@ -625,16 +625,18 @@ WebRemixer.Views.ClipInspector = WebRemixer.View.extend({
 			this.model.get('videoFinder').set('open', true);
 		}
 	},
+
+	onClipTitleChange: function(clip, title){
+		this.$title.val(title);
+	},
 	
 	onTitleInputChange: function(){
 		var clip = this.model.get('clip');
-		clip.set('title', this.$title.val() || clip.get('video').get('title'));
-		this.onClipTitleChange();
+		var title = this.$title.val();
+		clip.set('title', _.isEmpty(title) ? clip.get('video').get('title') : title);
 	},
 	
-	onClipTitleChange: function(){
-		this.$title.val(this.model.get('clip').get('title'));
-	}
+	
 });
 WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 	className: 'clip-manager',
@@ -643,13 +645,13 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 		'click .clip .inspect' : 'onInspectClick',
 						 'click .clip' : 'onInspectClick',
 				 'click .new-clip' : 'createNewClip',
-							'sortout'    : 'onSortOut',
-							'sortover'   : 'onSortOver',
-							'sortupdate' : 'onSortUpdate'
+							sortout    : 'onSortOut',
+							sortover   : 'onSortOver',
+							sortupdate : 'onSortUpdate'
 	},
 
 	initialize: function(){
-		this.$newClip = $('<button class="new-clip"/>').button({
+		this.$newClip = $('<button/>').prop('class', 'new-clip').button({
 			icons: {
 				primary: 'ui-icon-plus'
 			},
@@ -657,7 +659,7 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 			text: false
 		}).appendTo(this.el);
 			
-		this.$clips = $('<div/>').addClass('clips').sortable({
+		this.$clips = $('<div/>').prop('class', 'clips').sortable({
 			tolerance: 'pointer'
 		}).appendTo(this.el);
 	
@@ -670,11 +672,15 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 			remove: this.onClipsRemove
 		});
 
-		this.listenTo(remix, {
-			'change:clipIds': this.onClipIdsChange
-		});
+		this.listenTo(remix, 'change:clipIds', this.onClipIdsChange);
 		
-		this.model.trigger('change:open');
+		this.onVisibilityChange(this.model, this.model.get('open'));
+
+		$(this.onLoad);
+	},
+
+	onLoad: function(){
+		this.$el.appendTo(document.body);
 	},
 
 	onSortOver: function(event, ui){
@@ -685,8 +691,8 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 		ui.item.removeClass('over-manager');
 	},
 	
-	onVisibilityChange: function(){
-		if (this.model.get('open')){
+	onVisibilityChange: function(clipManager, open){
+		if (open){
 			this.$el.addClass('open');
 		}else{
 			this.$el.removeClass('open');
@@ -704,9 +710,7 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 		this.inspect( clip );
 	},
 
-	onClipIdsChange: function(){
-		var clipIds = this.model.get('remix').get('clipIds');
-
+	onClipIdsChange: function(remix, clipIds){
 		var $clips = this.$clips.children('.clip');
 
 		$clips.each(function(){
@@ -733,16 +737,16 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 		);
 	},
 
- onClipsAdd: function(model){
-		this.listenTo(model, 'change:' + model.idAttribute, this.onSortUpdate);
+ onClipsAdd: function(clip){
+		this.listenTo(clip, 'change:' + clip.idAttribute, this.onSortUpdate);
 
 		var view = new WebRemixer.Views.Clip({
-			model: model
+			model: clip
 		});
 
 		var clipIds = this.model.get('remix').get('clipIds');
 
-		var order = _.indexOf(clipIds, model.id);
+		var order = _.indexOf(clipIds, clip.id);
 
 		if (order !== -1){
 			//insert clip in the correct position
@@ -760,10 +764,10 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 		}
 	},
 
-	onClipsRemove: function(model){
-		this.stopListening(model);
+	onClipsRemove: function(clip){
+		this.stopListening(clip);
 
-		this.$clips.single('#' + model.cid).data('view').remove();
+		this.$clips.single('#' + clip.cid).data('view').remove();
 	},
 	
 	onInspectClick: function(event){
@@ -816,7 +820,7 @@ WebRemixer.Views.PlayControls = WebRemixer.View.extend({
 	initialize: function(){	
 		this.$el.append(
 		
-			$('<button class="restart"/>').button({
+			$('<button/>').prop('class', 'restart').button({
 				text: false,
 				icons: {
 					primary: 'ui-icon-seek-start'
@@ -824,7 +828,7 @@ WebRemixer.Views.PlayControls = WebRemixer.View.extend({
 				label: 'Restart'
 			}),
 			
-			this.$play = $('<button class="play"/>').button({
+			this.$play = $('<button/>').prop('class', 'play').button({
 				text: false,
 				icons: {
 					primary: 'ui-icon-play'
@@ -832,7 +836,7 @@ WebRemixer.Views.PlayControls = WebRemixer.View.extend({
 				label: 'Play'
 			}),
 		 
-			$('<button class="stop"/>').button({
+			$('<button/>').prop('class', 'stop').button({
 				text: false,
 				icons: {
 					primary: 'ui-icon-stop'
@@ -847,10 +851,7 @@ WebRemixer.Views.PlayControls = WebRemixer.View.extend({
 		this.listenTo(this.model.get('remix'), 'change:playing', this.onPlayingChange);
 	},
 	
-	onPlayingChange: function(){
-	
-		var playing = this.model.get('remix').get('playing');
-	
+	onPlayingChange: function(remix, playing){
 		if (playing){
 			this.$play.button('option', {
 				icons: {
@@ -906,7 +907,7 @@ WebRemixer.Views.Remix = WebRemixer.View.extend({
 
 
 	initialize: function(){
-		this.$title = $('<input/>').addClass('title').attr('placeholder', 'Title Your Remix').appendTo(this.el);
+		this.$title = $('<input type="text"/>').prop('class', 'title').attr('placeholder', 'Title Your Remix').appendTo(this.el);
 			
 		this.mainMenu = new WebRemixer.Views.MainMenu({
 			model: this.model.get('mainMenu')
@@ -919,7 +920,8 @@ WebRemixer.Views.Remix = WebRemixer.View.extend({
 		this.playControls.$el.appendTo(this.el);
 		
 		this.ruler = new WebRemixer.Views.Ruler({
-			model: this.model.get('ruler')
+			model: this.model.get('ruler'),
+			$remix: this.el
 		});
 		this.ruler.$el.appendTo(this.el);
 
@@ -932,7 +934,6 @@ WebRemixer.Views.Remix = WebRemixer.View.extend({
 			model: this.model.get('clipManager')
 		});
 		this.clipManager.model.set('open', true);
-		this.clipManager.$el.appendTo(this.el);
 		
 		this.clipInspector = new WebRemixer.Views.ClipInspector({
 			model: this.model.get('clipInspector')
@@ -949,7 +950,7 @@ WebRemixer.Views.Remix = WebRemixer.View.extend({
 		
 		this.listenTo(this.model, 'change:title', this.onTitleChange);
 		
-		this.onTitleChange();
+		this.onTitleChange(this.model, this.model.get('title'));
 	},
 	
 	onTitleInputChange: function(){
@@ -958,8 +959,8 @@ WebRemixer.Views.Remix = WebRemixer.View.extend({
 		this.$title.blur();
 	},
 	
-	onTitleChange: function(){
-		this.$title.val(this.model.get('title'));
+	onTitleChange: function(remix, title){
+		this.$title.val(title);
 	},
 	
 	onToggleClipManagerClick: function(){
@@ -975,10 +976,12 @@ WebRemixer.Views.Ruler = WebRemixer.View.extend({
 	},
 	
 	initialize: function() {
-		this.$markings = $('<div/>').addClass('markings').appendTo(this.el);
-		this.$timeHand = $('<div/>').addClass('timeHand').appendTo(this.el);
-	
 		var remix = this.model.get('remix');
+
+		this.$markings = $('<div/>').prop('class', 'markings').appendTo(this.el);
+		this.$timeHand = $('<div/>').prop('class', 'timeHand').appendTo(this.options.$remix);
+	
+		
 		
 		this.listenTo(remix, {
 			'change:duration' : this.render,
@@ -986,9 +989,15 @@ WebRemixer.Views.Ruler = WebRemixer.View.extend({
 			'change:playing'  : this.onPlayingChange
 		});
 
-		this.onPlayTimeChange(remix, remix.get('playTime'));
-
 		this.render();
+
+		this.onPlayTimeChange(remix, remix.get('playTime'));
+	
+		this.$window.scroll(this.onScroll);
+	},
+
+	onScroll: function(){
+		this.$el.css('transform', 'translate3d(0,' + this.$window.scrollTop() + 'px,0)');
 	},
 	
 	onClick: function(event){
@@ -1009,13 +1018,14 @@ WebRemixer.Views.Ruler = WebRemixer.View.extend({
 	},
 	
 	onPlayTimeChange: function(remix, playTime){
+		
 		if (this.$body){
-			this.$body.stop(true, true).animate({
-				scrollLeft: Math.max(0, WebRemixer.PX_PER_SEC * playTime + this.$el.prop('offsetLeft') - this.$window.width() / 2)
+			this.$body.add(this.$html).stop(true, true).animate({
+				scrollLeft: Math.max(0, WebRemixer.PX_PER_SEC * playTime + this.$el.prop('offsetLeft') - this.windowWidth / 2)
 			});
 		}
 
-		this.$timeHand.css('left', (WebRemixer.EMS_PER_SEC * playTime) + 'em');
+		this.$timeHand.css('transform', 'translate3d(' + (WebRemixer.EMS_PER_SEC * playTime) + 'em' + ',0,0)');
 	},
 	
 	render: function() {
@@ -1036,10 +1046,10 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 	initialize: function(){
 			
 		this.$header = $('<div/>')
-			.addClass('header')
+			.prop('class', 'header')
 			.appendTo(this.el);
 			
-		this.$toggleHeight = $('<button class="toggle-height"/>')
+		this.$toggleHeight = $('<button/>').prop('class', 'toggle-height')
 			.button({
 				icons: {
 					primary: 'ui-icon-circle-triangle-s'
@@ -1048,15 +1058,13 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 				text: false
 			}).appendTo(this.$header);
 			
-		this.$timelineClips = $('<div/>').addClass('timeline-clips').droppable({
+		this.$timelineClips = $('<div/>').prop('class', 'timeline-clips').droppable({
 			accept: '.clip, .timeline-clip',
 			tolerance: 'pointer',
 			hoverClass: 'ui-state-highlight'
 		}).appendTo(this.el);
 			
-		$('<div/>').addClass('selection').appendTo(this.el);
-
-		this.onRemixChange();
+		$('<div/>').prop('class', 'selection').appendTo(this.el);
 		
 		this.listenTo(this.model, {
 			'change:collapsed': this.onCollapsedChange,
@@ -1066,23 +1074,28 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 			add: this.onTimelineClipsAdd,
 			remove: this.onTimelineClipsRemove
 		});
+
+		this.onRemixChange(this.model, this.model.get('remix'));
+
+		this.$window.scroll(this.onScroll);
+	},
+
+	onScroll: function(){
+		this.$header.css('transform', 'translate3d(0,' + (-this.$window.scrollTop()) + 'px,0)');
 	},
 	
-	onTimelineIdsChange: function(){
-		var timelineIds = this.model.get('remix').get('timelineIds');
+	onTimelineIdsChange: function(remix, timelineIds){
 		this.$header.attr(
-			'data-title', 'Timeline %s'.sprintf(_.indexOf(timelineIds, this.model.id) + 1)
+			'data-title', 'Timeline ' + (_.indexOf(timelineIds, this.model.id) + 1)
 		);
 	},
 	
-	onRemixChange: function(){
+	onRemixChange: function(timeline, remix){
 		var prevRemix = this.model.previous('remix');
 		if (prevRemix){
 			this.stopListening(prevRemix);
 		}
 		
-		var remix = this.model.get('remix');
-	
 		if (remix){
 			this.listenTo(remix, {
 				'change:selection': this.onSelectionChange,
@@ -1091,21 +1104,21 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 		}
 	},
 	
-	onTimelineClipsAdd: function(model){
-		var $timelineClip = $.single('#' + model.cid);
+	onTimelineClipsAdd: function(timelineClip){
+		var $timelineClip = $.single('#' + timelineClip.cid);
 
 		if (!$timelineClip.length){
 			$timelineClip = new WebRemixer.Views.TimelineClip({
-				model: model
+				model: timelineClip
 			}).el;
 		}
 
 		this.$timelineClips.append($timelineClip);
 	},
 	
-	onTimelineClipsRemove: function(model){
-		if (!model.get('timeline')){
-			var view = this.$timelineClips.single('#' + model.cid).data('view');
+	onTimelineClipsRemove: function(timelineClip){
+		if (!timelineClip.get('timeline')){
+			var view = this.$timelineClips.single('#' + timelineClip.cid).data('view');
 			if (view){
 				view.remove();
 			}
@@ -1116,9 +1129,7 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 		this.model.set('collapsed', !this.model.get('collapsed'));
 	},
 	
-	onCollapsedChange: function(){
-		var collapsed = this.model.get('collapsed');
-		
+	onCollapsedChange: function(timeline, collapsed){
 		if (collapsed){
 			this.$el.addClass('collapsed');
 			this.$toggleHeight.button('option', {
@@ -1168,10 +1179,8 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 		return $selectedClips.size() && $selectedClips;
 	},
 	
-	onSelectionChange: function(){
+	onSelectionChange: function(remix, selection){
 	
-		var selection = this.model.get('remix').get('selection');
-		
 		var offset = this.$el.offset();
 		var height = this.$el.height();
 		
@@ -1224,8 +1233,8 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 	className: 'timeline-clip',
 	
 	events: {
-		'dragstop': 'onDragStop',
-		'resizestop': 'onResizeStop',
+		dragstop: 'onDragStop',
+		resizestop: 'onResizeStop',
 		'click .toggle-loop': 'toggleLoop',
 		'click .duplicate': 'duplicate',
 		'click .delete': 'del'
@@ -1257,15 +1266,19 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 			'</ul>'
 		).menu();*/
 		
-		this.$loopIndicator = $('<div/>').addClass('loop-indicator').appendTo(this.el);
+		this.$loopIndicator = $('<div/>').prop('class', 'loop-indicator').appendTo(this.el);
 		
-		var $buttons = $('<div/>').addClass('buttons');
+		var $buttons = $('<div/>').prop('class', 'buttons');
 		
-		var $loopLabel = $('<label for="%s"/>'.sprintf(Math.random().toString(36))).appendTo($buttons);
+		var loopId = Math.random().toString(36);
+		var $loopLabel = $('<label/>').attr('for', loopId).appendTo($buttons);
 
 		$buttons.append(
 		
-			$('<input id="%s" type="checkbox" class="toggle-loop"/>'.sprintf($loopLabel.attr('for'))).appendTo($buttons).button({
+			$('<input type="checkbox"/>').prop({
+					id: loopId,
+					class: 'toggle-loop'
+				}).appendTo($buttons).button({
 				icons: {
 					primary: 'ui-icon-refresh'
 				},
@@ -1273,7 +1286,7 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 				text: false
 			}),
 			
-			$('<button class="duplicate"/>').button({
+			$('<button/>').prop('class', 'duplicate').button({
 				icons: {
 					primary: 'ui-icon-copy'
 				},
@@ -1281,7 +1294,7 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 				text: false
 			}),
 			
-			$('<button class="delete"/>').button({
+			$('<button/>').prop('class', 'delete').button({
 				icons: {
 					primary: 'ui-icon-close'
 				},
@@ -1294,18 +1307,18 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 		
 		
 		this.listenTo(this.model, {
-								change : this.render,
-			'change:timeline': this.onTimelineChange,
-			'change:selected': this.onSelectedChange
+							 change : this.render,
+		'change:timeline' : this.onTimelineChange,
+		'change:selected' : this.onSelectedChange
 		});
 
-		this.model.trigger('change:selected');
-
 		this.render();
+
+		this.onSelectedChange(this.model, this.model.get('selected'));
 	},
 	
-	onSelectedChange: function(){
-		if (this.model.get('selected')){
+	onSelectedChange: function(timelineClip, selected){
+		if (selected){
 			this.$el.addClass('ui-selected');
 		}else{
 			this.$el.removeClass('ui-selected');
@@ -1379,7 +1392,7 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 		});
 		
 		this.$el.css({
-			background: 'url("%s")'.sprintf(video.get('thumbnail')),
+			background: 'url("' + video.get('thumbnail') + '")',
 			left: WebRemixer.EMS_PER_SEC * this.model.get('startTime') + 'em',
 			width: WebRemixer.EMS_PER_SEC * this.model.get('duration') + 'em'
 		}).attr({
@@ -1392,16 +1405,15 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 	className: 'timelines',
 		
 	events: {
-		'selectablestart' : 'onSelectStart',
-		'selectableselecting' : 'onSelecting',
-		'selectableunselecting' : 'onUnselecting',
-		'selectableselected' : 'onSelected',
-		'selectableunselected' : 'onUnselected',
-		'selectablestop' : 'onSelectStop',
-		'menuselect' : 'onMenuSelect',
+		selectablestart : 'onSelectStart',
+		selectableselecting : 'onSelecting',
+		selectableunselecting : 'onUnselecting',
+		selectableselected : 'onSelected',
+		selectableunselected : 'onUnselected',
+		selectablestop : 'onSelectStop',
 		'contextmenu .timeline-clips' : 'onContextMenu',
 		'contextmenu .selection' : 'onContextMenu',
-		'mousedown' : 'onMouseDown'
+		mousedown : 'onMouseDown'
 	},
 
 	initialize: function(){
@@ -1410,10 +1422,12 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		});
 
 		this.$contextMenu = $('<ul/>')
-			.addClass('context-menu')
+			.prop('class', 'context-menu')
 			.append('<li data-cmd="duplicate"><a><span class="ui-icon ui-icon-copy"></span>Duplicate</a></li>')
 			.append('<li data-cmd="delete"><a><span class="ui-icon ui-icon-close"></span>Delete</a></li>')
-			.menu()
+			.menu({
+				select: this.onMenuSelect
+			})
 			.appendTo(document.body);
 			
 		var remix = this.model.get('remix');
@@ -1451,7 +1465,8 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 
 		var curSelection = remix.get('selection');
 		curSelection.offset.left += curSelection.width;
-		remix.trigger('change:selection');
+
+		remix.trigger('change:selection', remix, curSelection);
 	},
 	
 	onMouseDown: function(){
@@ -1483,6 +1498,7 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		this.updateSelection(true);
 	},
 	
+	/* TODO :: make more efficient! */
 	updateSelection: function(repeat){
 		this.model.get('remix').set('selection', {
 			offset: this.$helper.offset(),
@@ -1518,9 +1534,7 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 	},
 
 
-	onTimelineIdsChange: function(){
-		var timelineIds = this.model.get('remix').get('timelineIds');
-
+	onTimelineIdsChange: function(remix, timelineIds){
 		var $timelines = this.$el.children('.timeline');
 
 		$timelines.each(function(){
@@ -1539,16 +1553,16 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 
 	},
 
-	onTimelinesAdd: function(model){
-		this.listenTo(model, 'change:' + model.idAttribute, this.onTimelinesSortUpdate);
+	onTimelinesAdd: function(timeline){
+		this.listenTo(timeline, 'change:' + timeline.idAttribute, this.onTimelinesSortUpdate);
 
 		var view = new WebRemixer.Views.Timeline({
-			model: model
+			model: timeline
 		});
 
-		var timelineIds = this.model.get('remix').get('timelineIds');
+		var timelineIds = timeline.get('remix').get('timelineIds');
 
-		var order = _.indexOf(timelineIds, model.id);
+		var order = _.indexOf(timelineIds, timeline.id);
 
 		if (order !== -1){
 			//insert timeline in the correct position
@@ -1566,10 +1580,10 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		}
 	},
 	
-	onTimelinesRemove: function(model){
-		this.stopListening(model);
+	onTimelinesRemove: function(timeline){
+		this.stopListening(timeline);
 
-		this.$el.single('#' + model.cid).data('view').remove();
+		this.$el.single('#' + timeline.cid).data('view').remove();
 	}
 
 });
@@ -1579,7 +1593,7 @@ WebRemixer.Views.Video = WebRemixer.View.extend({
 	initialize: function(){
 		this.listenTo(this.model, 'change', this.render);
 		
-		this.model.trigger('change');
+		this.render();
 	},
 	
 	getFormattedDuration: function(){
@@ -1588,9 +1602,8 @@ WebRemixer.Views.Video = WebRemixer.View.extend({
 	},
 	
 	render: function(){
-		this.$el.css({
-			backgroundImage: 'url("%s")'.sprintf(this.model.get('thumbnail'))
-		}).attr({
+		this.$el.css('background-image', 'url("' + this.model.get('thumbnail') + '")')
+		.attr({
 			'data-title': this.model.get('title'),
 			'data-duration': this.getFormattedDuration()
 		});
@@ -1600,17 +1613,17 @@ WebRemixer.Views.VideoFinder = WebRemixer.View.extend({
 	className: 'video-finder',
 		
 	events: {
-		'dialogopen' : 'onOpen',
-		'dialogclose' : 'onClose',
+		dialogopen : 'onOpen',
+		dialogclose : 'onClose',
 		'change .search': 'onSearchChange',
 		'click .video': 'onVideoClick'
 	},
 	
 	initialize: function(){
-		this.$search = $('<input class="search" type="text"/>').appendTo(
-			$('<div data-label="Search"/>').appendTo(this.el)
+		this.$search = $('<input type="text"/>').prop('class', 'search').appendTo(
+			$('<div/>').attr('data-label', 'Search').appendTo(this.el)
 		);
-		this.$searchResults = $('<div class="search-results"/>').appendTo(this.el);
+		this.$searchResults = $('<div/>').prop('class', 'search-results').appendTo(this.el);
 		
 		
 		this.listenTo(this.model, 'change:open', this.onVisibilityChange);
@@ -1624,10 +1637,10 @@ WebRemixer.Views.VideoFinder = WebRemixer.View.extend({
 		$(this.onLoad);
 	},
 	
-	onVideosAdd: function(model){
+	onVideosAdd: function(video){
 		this.$searchResults.append(
 			new WebRemixer.Views.Video({
-				model: model
+				model: video
 			}).el
 		);
 	},
@@ -1639,15 +1652,15 @@ WebRemixer.Views.VideoFinder = WebRemixer.View.extend({
 	},
 	
 	onOpen: function(){
-		this.model.set('open', true);
+		this.model.set('open', true, {silent: true});
 	},
 	
 	onClose: function(){
-		this.model.set('open', false);
+		this.model.set('open', false, {silent: true});
 	},
 	
-	onVisibilityChange: function(){
-		if (this.model.get('open')){
+	onVisibilityChange: function(videoFinder, open){
+		if (open){
 			this.$el.dialog('open');
 			this.$search.select();
 		}else{
@@ -1708,7 +1721,8 @@ WebRemixer.Views.VideoPlayer = WebRemixer.View.extend({
 		
 		this.$video = $('<iframe/>').hide().prop({
 			id: Math.random().toString(36),
-			src: 'http://www.youtube.com/embed/%s?origin=http://%s&enablejsapi=1&html5=1&autoplay=0&controls=0'.sprintf(this.model.get('video').get('sourceVideoId'),location.host)
+			src: 'http://www.youtube.com/embed/' + this.model.get('video').get('sourceVideoId') +
+				 '?origin=http://' + location.host + '&enablejsapi=1&html5=1&autoplay=0&controls=0'
 		}).appendTo(this.el);
 		
 		this.player = new YT.Player(this.$video.prop('id'), {
@@ -1725,8 +1739,7 @@ WebRemixer.Views.VideoPlayer = WebRemixer.View.extend({
 		});
 	},
 	
-	onPlayTimeChange: function(){
-		var playTime = this.model.get('playTime');
+	onPlayTimeChange: function(videoPlayer, playTime){
 		// check to make sure playTime is not undefined
 		if (playTime >= 0){
 			this.seek(playTime);
@@ -1734,8 +1747,8 @@ WebRemixer.Views.VideoPlayer = WebRemixer.View.extend({
 		}
 	},
 	
-	onPlayingChange: function(){
-		if (this.model.get('playing')){
+	onPlayingChange: function(videoPlayer, playing){
+		if (playing){
 			this.play();
 		}else{
 			this.pause();
@@ -1990,7 +2003,7 @@ WebRemixer.Models.Remix = WebRemixer.Model.extend({
 		
 		this.listenTo(this, 'change', this.onChange);
 
-		this.listenTo(this, 'change:%s'.sprintf(this.idAttribute), this.onChangeId);
+		this.listenTo(this, 'change:' + this.idAttribute, this.onChangeId);
 		
 		if (this.id) {
 			this.fetchChildren();
@@ -2002,11 +2015,11 @@ WebRemixer.Models.Remix = WebRemixer.Model.extend({
 	},
 
 	onChangeId: function(){
-		WebRemixer.router.navigate('%s'.sprintf(this.id));
+		WebRemixer.router.navigate(this.id);
 	},
 	
 	fetchChildren: function(){
-		$.get('%s/children'.sprintf(this.url()), this.onFetchedChildren);
+		$.get(this.url() + '/children', this.onFetchedChildren);
 	},
 	
 	onFetchedChildren: function(res){
@@ -2041,20 +2054,20 @@ WebRemixer.Models.Timeline = WebRemixer.Model.extend({
 			add: this.onTimelineClipsAdd,
 			remove: this.onTimelineClipsRemove
 		});
-		
-		this.onRemixChange();
 
 		this.listenTo(this, {
 			change: this.onChange,
 			'change:remix': this.onRemixChange
 		});
+
+		this.onRemixChange(this, this.get('remix'));
 	},
 	
 	onChange: function(){
 		this.save();
 	},
 	
-	onRemixChange: function(){
+	onRemixChange: function(timeline, remix){
 	
 		var prevRemix = this.previous('remix');
 		if (prevRemix){
@@ -2062,23 +2075,22 @@ WebRemixer.Models.Timeline = WebRemixer.Model.extend({
 			this.stopListening(prevRemix);
 		}
 	
-		var remix = this.get('remix');
 		if (remix){
 			var timelines = remix.get('timelines');
 
 			timelines.add(this);
 			
-			this.listenTo(remix, 'change:%s'.sprintf(remix.idAttribute), this.onChange);
+			this.listenTo(remix, 'change' + remix.idAttribute, this.onChange);
 		}
 	},
 	
-	onTimelineClipsAdd: function(model){
-		model.set('timeline', this);
+	onTimelineClipsAdd: function(timelineClip){
+		timelineClip.set('timeline', this);
 	},
 	
-	onTimelineClipsRemove: function(model){
-		if (model.get('timeline') === this){
-			model.set('timeline', undefined);
+	onTimelineClipsRemove: function(timelineClip){
+		if (timelineClip.get('timeline') === this){
+			timelineClip.set('timeline', undefined);
 		}
 	}
 });
@@ -2095,7 +2107,7 @@ WebRemixer.Models.Video = WebRemixer.Model.extend({
 
 	initialize: function(){
 		if (!this.get('title')){
-			$.getJSON('https://gdata.youtube.com/feeds/api/videos/%s'.sprintf(this.get('sourceVideoId')), { 
+			$.getJSON('https://gdata.youtube.com/feeds/api/videos/' + this.get('sourceVideoId'), { 
 				v: 2.1,
 				alt: 'jsonc' 
 			}, this.gotVideoData);
@@ -2126,14 +2138,14 @@ WebRemixer.Models.Clip = WebRemixer.Model.extend({
 	initialize: function(){
 		this.onChange = _.debounce(this.onChange, WebRemixer.Config.saveOnChangeDelay);
 
-		this.onVideoChange();
-		this.onRemixChange();
-
 		this.listenTo(this, {
 			change: this.onChange,
 			'change:remix': this.onRemixChange,
 			'change:video': this.onVideoChange
 		});
+
+		this.onRemixChange(this, this.get('remix'));
+		this.onVideoChange(this, this.get('video'));
 	},
 	
 	onChange: function(){
@@ -2141,7 +2153,7 @@ WebRemixer.Models.Clip = WebRemixer.Model.extend({
 	},
 
 
-	onRemixChange: function(){
+	onRemixChange: function(clip, remix){
 	
 		var prevRemix = this.previous('remix');
 		if (prevRemix){
@@ -2149,19 +2161,16 @@ WebRemixer.Models.Clip = WebRemixer.Model.extend({
 			this.stopListening(prevRemix);
 		}
 	
-		var remix = this.get('remix');
 		if (remix){
 			var clips = remix.get('clips');
 
 			clips.add(this);
 
-			this.listenTo(remix, 'change:%s'.sprintf(remix.idAttribute), this.onChange);
+			this.listenTo(remix, 'change:' + remix.idAttribute, this.onChange);
 		}
 	},
 	
-	onVideoChange: function(){
-		var video = this.get('video');
-		
+	onVideoChange: function(clip, video){
 		var previousVideo = this.previous('video');
 		if (previousVideo){
 			this.stopListening(previousVideo);
@@ -2169,18 +2178,18 @@ WebRemixer.Models.Clip = WebRemixer.Model.extend({
 		
 		if (video){
 			this.listenTo(video, {
-				 change: _.bind(this.trigger, this, 'change'),
+				change: _.partial(this.trigger, 'change'),
 				'change:title': this.onVideoTitleChange
 			});
 			
-			video.trigger('change:title');
+			this.onVideoTitleChange(video, video.get('title'));
 		}
 	},
 	
-	onVideoTitleChange: function(){
+	onVideoTitleChange: function(video, videoTitle){
 		var title = this.get('title');
-		if (!title || title == this.defaults.title){
-			this.set('title', this.get('video').get('title'));
+		if (_.isEmpty(title) || title === this.defaults.title){
+			this.set('title', videoTitle);
 		}
 	}
 	
@@ -2209,30 +2218,30 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 	
 		// trigger a change event, everytime our clip changes
 		this.listenTo(clip, {
-			change: _.bind(this.trigger, this, "change"),
+			change: _.partial(this.trigger, 'change'),
 			destroy: this.destroy
 		});
-
-		this.onTimelineChange();
-		this.onRemixChange();
 		
 		this.listenTo(this, {
 			change: this.onChange,
 			'change:timeline': this.onTimelineChange,
 			'change:remix': this.onRemixChange
 		});
+
+		this.onTimelineChange(this, this.get('timeline'));
+		this.onRemixChange(this, this.get('remix'));
 	},
 
 	onChange: function(){
 		this.save();
 	},
 	
-	onRemixChange: function(){
+	onRemixChange: function(timelineClip, remix){
 		var prevRemix = this.previous('remix');
 		if (prevRemix){
 			this.stopListening(prevRemix);
 		}
-		var remix = this.get('remix');
+
 		if (remix){
 			this.listenTo(remix, 'change:playing', this.onRemixPlayingChange);
 			this.listenTo(remix, 'change:' + remix.idAttribute, this.onChange);
@@ -2241,14 +2250,12 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 	},
 
 
-	onTimelineChange: function(){
+	onTimelineChange: function(timelineClip, timeline){
 		var prevTimeline = this.previous('timeline');
 		if (prevTimeline){
 			prevTimeline.get('timelineClips').remove(this);
 			this.stopListening(prevTimeline);
 		}
-
-		var timeline = this.get('timeline');
 
 		var remix;
 
@@ -2262,17 +2269,15 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 		this.set('remix', remix);
 	},
 	
-	onRemixPlayingChange: function(){
+	onRemixPlayingChange: function(remix, playing){
 		if (this.playTimeout){
 			clearTimeout(this.playTimeout);
 			this.playTimeout = undefined;
 		}
-	
-		var remix = this.get('remix');
 		
 		var delay = this.get('startTime') - remix.get('playTime');
 		
-		if (remix.get('playing')){
+		if (playing){
 			if (delay >= 0){
 				this.playTimeout = setTimeout(this.prepareToPlay, Math.max(0, delay - WebRemixer.preloadDelay) * 1000);
 			}else if (-delay <= this.get('duration')){
@@ -2291,7 +2296,7 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 
 		var remix = this.get('remix');
 		
-		remix.set('realTimeNeeded', true);
+		remix.trigger('updatePlayTime');
 		
 		var delay = this.get('startTime') - remix.get('playTime');
 		
@@ -2310,7 +2315,7 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 		
 		var remix = this.get('remix');
 		
-		remix.set('realTimeNeeded', true);
+		remix.trigger('updatePlayTime');
 		
 		var passed = remix.get('playTime') - this.get('startTime');
 		
@@ -2355,13 +2360,13 @@ WebRemixer.Models.ClipManager = WebRemixer.Model.extend({
 		});
 	},
 
-	onClipsAdd: function(model){
-		model.set('remix', this.get('remix'));
+	onClipsAdd: function(clip){
+		clip.set('remix', this.get('remix'));
 	},
 	
-	onClipsRemove: function(model){
-		if (model.get('remix') === this.get('remix')){
-			model.set('remix', undefined);
+	onClipsRemove: function(clip){
+		if (clip.get('remix') === this.get('remix')){
+			clip.set('remix', undefined);
 		}
 	}
 
@@ -2385,18 +2390,16 @@ WebRemixer.Models.ClipPlayer = WebRemixer.Model.extend({
 		);
 	},
 
-	onPlayingChange: function(){
-		if (this.get('playing')){
+	onPlayingChange: function(clipPlayer, playing){
+		if (playing){
 			this.play();
 		}else{
 			this.pause();
 		}
 	},
 	
-	onPlayTimeChange: function(){
-		var playTime = this.get('playTime');
-		
-		if (playTime != undefined){
+	onPlayTimeChange: function(clipPlayer, playTime){
+		if (_.isNumber(playTime)){
 			//reserve a player if we haven't already
 			var videoPlayer = this.get('videoPlayer');
 			if (!videoPlayer){
@@ -2491,21 +2494,16 @@ WebRemixer.Models.PlayControls = WebRemixer.Model.extend({
 	initialize: function(){
 		this.listenTo(this.get('remix'), {
 			'change:playing': this.onPlayingChange,
-			'change:realTimeNeeded': this.onRealTimeNeededChange
+			'updatePlayTime': this.updatePlayTime
 		});
 	},
 
-	onRealTimeNeededChange: function(){
-		var remix = this.get('remix');
-
-		if (remix.get('realTimeNeeded')){
-			this.playProcedure();
-			remix.set('realTimeNeeded', false, {silent: true});
-		}
+	updatePlayTime: function(){
+		this.get('remix').set('playTime', ((new Date()).getTime() - this.playStartTime) / 1000);
 	},
 	
-	onPlayingChange: function(){
-		if (this.get('remix').get('playing')){
+	onPlayingChange: function(remix, playing){
+		if (playing){
 			this.play();
 		}else{
 			this.pause();
@@ -2513,12 +2511,13 @@ WebRemixer.Models.PlayControls = WebRemixer.Model.extend({
 	},
 	
 	play: function(){
-		this.playStartTime = new Date() * 1 - this.get('remix').get('playTime') * 1000;
-		this.playInterval = setInterval(this.playProcedure, 0);
-	},
-	
-	playProcedure: function(){
-		this.get('remix').set('playTime', ((new Date() * 1) - this.playStartTime) / 1000);
+		var remix = this.get('remix');
+
+		var playStartTime = this.playStartTime = (new Date()).getTime() - remix.get('playTime') * 1000;
+
+		this.playInterval = setInterval(function(){
+			remix.set('playTime', ((new Date()).getTime() - playStartTime) / 1000);
+		}, 0);
 	},
 	
 	pause: function(){
@@ -2547,8 +2546,8 @@ WebRemixer.Models.PlayerManager = WebRemixer.Model.extend({
 		});
 	},
 	
-	onTimelinesAdd: function(model){
-		this.listenTo(model.get('timelineClips'), {
+	onTimelinesAdd: function(timeline){
+		this.listenTo(timeline.get('timelineClips'), {
 			add: this.onTimelineClipsAdd,
 			remove: this.onTimelineClipsRemove
 		});
@@ -2587,7 +2586,7 @@ WebRemixer.Models.PlayerManager = WebRemixer.Model.extend({
 		
 		if (videoPlayers.length < needed){
 			do {
-				var videoPlayer = 
+				var videoPlayer =
 					new WebRemixer.Models.VideoPlayer({
 						video: video
 					});
@@ -2595,7 +2594,7 @@ WebRemixer.Models.PlayerManager = WebRemixer.Model.extend({
 				
 				//instantiate view so flash/html5 videoPlayer gets appended to dom
 				new WebRemixer.Views.VideoPlayer({
-					el: $("<div/>").appendTo(document.body),
+					el: $('<div/>').appendTo(document.body),
 					model: videoPlayer
 				});
 			} while (videoPlayers.length < needed);
@@ -2606,8 +2605,8 @@ WebRemixer.Models.PlayerManager = WebRemixer.Model.extend({
 		}
 	},
 	
-	onTimelineClipsAdd: function(model){
-		var video = model.get('clip').get('video');
+	onTimelineClipsAdd: function(timelineClip){
+		var video = timelineClip.get('clip').get('video');
 		var timelineClipsByVideo = this.get('timelineClipsByVideo');
 	
 		var timelineClips = timelineClipsByVideo[video.cid];
@@ -2616,19 +2615,17 @@ WebRemixer.Models.PlayerManager = WebRemixer.Model.extend({
 			timelineClips.video = video;
 		}
 		
-		timelineClips.add(model);
-		
-		this.listenTo(model, {
-		 'change destroy' : this.allocatePlayers
-		});
-		
+		timelineClips.add(timelineClip);
+
+		this.listenTo(timelineClip, 'change destroy', this.allocatePlayers);
+
 		this.allocatePlayers();
 	},
 	
-	onTimelineClipsRemove: function(model){
-		this.stopListening(model);
+	onTimelineClipsRemove: function(timelineClip){
+		this.stopListening(timelineClip);
 	
-		this.get('timelineClipsByVideo')[model.get('clip').get('video').cid].remove(model);
+		this.get('timelineClipsByVideo')[timelineClip.get('clip').get('video').cid].remove(timelineClip);
 		
 		this.allocatePlayers();
 	}
@@ -2648,13 +2645,13 @@ WebRemixer.Models.TimelineManager = WebRemixer.Model.extend({
 		});
 	},
 
-	onTimelinesAdd: function(model){
-		model.set('remix', this.get('remix'));
+	onTimelinesAdd: function(timeline){
+		timeline.set('remix', this.get('remix'));
 	},
 
-	onTimelinesRemove: function(model){
-		if (model.get('remix') === this.get('remix')){
-			model.set('remix', undefined);
+	onTimelinesRemove: function(timeline){
+		if (timeline.get('remix') === this.get('remix')){
+			timeline.set('remix', undefined);
 		}
 	}
 });

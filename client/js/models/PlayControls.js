@@ -3,21 +3,16 @@ WebRemixer.Models.PlayControls = WebRemixer.Model.extend({
 	initialize: function(){
 		this.listenTo(this.get('remix'), {
 			'change:playing': this.onPlayingChange,
-			'change:realTimeNeeded': this.onRealTimeNeededChange
+			'updatePlayTime': this.updatePlayTime
 		});
 	},
 
-	onRealTimeNeededChange: function(){
-		var remix = this.get('remix');
-
-		if (remix.get('realTimeNeeded')){
-			this.playProcedure();
-			remix.set('realTimeNeeded', false, {silent: true});
-		}
+	updatePlayTime: function(){
+		this.get('remix').set('playTime', ((new Date()).getTime() - this.playStartTime) / 1000);
 	},
 	
-	onPlayingChange: function(){
-		if (this.get('remix').get('playing')){
+	onPlayingChange: function(remix, playing){
+		if (playing){
 			this.play();
 		}else{
 			this.pause();
@@ -25,12 +20,13 @@ WebRemixer.Models.PlayControls = WebRemixer.Model.extend({
 	},
 	
 	play: function(){
-		this.playStartTime = new Date() * 1 - this.get('remix').get('playTime') * 1000;
-		this.playInterval = setInterval(this.playProcedure, 0);
-	},
-	
-	playProcedure: function(){
-		this.get('remix').set('playTime', ((new Date() * 1) - this.playStartTime) / 1000);
+		var remix = this.get('remix');
+
+		var playStartTime = this.playStartTime = (new Date()).getTime() - remix.get('playTime') * 1000;
+
+		this.playInterval = setInterval(function(){
+			remix.set('playTime', ((new Date()).getTime() - playStartTime) / 1000);
+		}, 0);
 	},
 	
 	pause: function(){

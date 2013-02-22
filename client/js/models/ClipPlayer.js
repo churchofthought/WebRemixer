@@ -17,18 +17,16 @@ WebRemixer.Models.ClipPlayer = WebRemixer.Model.extend({
 		);
 	},
 
-	onPlayingChange: function(){
-		if (this.get('playing')){
+	onPlayingChange: function(clipPlayer, playing){
+		if (playing){
 			this.play();
 		}else{
 			this.pause();
 		}
 	},
 	
-	onPlayTimeChange: function(){
-		var playTime = this.get('playTime');
-		
-		if (playTime != undefined){
+	onPlayTimeChange: function(clipPlayer, playTime){
+		if (_.isNumber(playTime)){
 			//reserve a player if we haven't already
 			var videoPlayer = this.get('videoPlayer');
 			if (!videoPlayer){

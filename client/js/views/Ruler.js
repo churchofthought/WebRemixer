@@ -6,10 +6,12 @@ WebRemixer.Views.Ruler = WebRemixer.View.extend({
 	},
 	
 	initialize: function() {
-		this.$markings = $('<div/>').addClass('markings').appendTo(this.el);
-		this.$timeHand = $('<div/>').addClass('timeHand').appendTo(this.el);
-	
 		var remix = this.model.get('remix');
+
+		this.$markings = $('<div/>').prop('class', 'markings').appendTo(this.el);
+		this.$timeHand = $('<div/>').prop('class', 'timeHand').appendTo(this.options.$remix);
+	
+		
 		
 		this.listenTo(remix, {
 			'change:duration' : this.render,
@@ -17,9 +19,15 @@ WebRemixer.Views.Ruler = WebRemixer.View.extend({
 			'change:playing'  : this.onPlayingChange
 		});
 
-		this.onPlayTimeChange(remix, remix.get('playTime'));
-
 		this.render();
+
+		this.onPlayTimeChange(remix, remix.get('playTime'));
+	
+		this.$window.scroll(this.onScroll);
+	},
+
+	onScroll: function(){
+		this.$el.css('transform', 'translate3d(0,' + this.$window.scrollTop() + 'px,0)');
 	},
 	
 	onClick: function(event){
@@ -40,13 +48,14 @@ WebRemixer.Views.Ruler = WebRemixer.View.extend({
 	},
 	
 	onPlayTimeChange: function(remix, playTime){
+		
 		if (this.$body){
-			this.$body.stop(true, true).animate({
-				scrollLeft: Math.max(0, WebRemixer.PX_PER_SEC * playTime + this.$el.prop('offsetLeft') - this.$window.width() / 2)
+			this.$body.add(this.$html).stop(true, true).animate({
+				scrollLeft: Math.max(0, WebRemixer.PX_PER_SEC * playTime + this.$el.prop('offsetLeft') - this.windowWidth / 2)
 			});
 		}
 
-		this.$timeHand.css('left', (WebRemixer.EMS_PER_SEC * playTime) + 'em');
+		this.$timeHand.css('transform', 'translate3d(' + (WebRemixer.EMS_PER_SEC * playTime) + 'em' + ',0,0)');
 	},
 	
 	render: function() {

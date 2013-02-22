@@ -3,6 +3,10 @@
 	{
 		"selected_items":
 		[
+			[
+				"onTimeline",
+				"onTimelineIdsChange"
+			]
 		]
 	},
 	"buffers":
@@ -11,15 +15,27 @@
 	"build_system": "",
 	"command_palette":
 	{
-		"height": 0.0,
+		"height": 47.0,
 		"selected_items":
 		[
+			[
+				"sideba",
+				"View: Toggle Side Bar"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"",
+				"Package Control: Install Package"
+			]
 		],
-		"width": 0.0
+		"width": 467.0
 	},
 	"console":
 	{
-		"height": 0.0
+		"height": 209.0
 	},
 	"distraction_free":
 	{
@@ -32,16 +48,89 @@
 	},
 	"file_history":
 	[
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/ClipInspector.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/View.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Model.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/Ruler.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/util.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Remix.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/ruler.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/PlayControls.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/package.json",
+		"/Volumes/YTR/home/andrew/WebRemixer/server.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/Gruntfile.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/main.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/video.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/remix.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/video.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/public/main.css",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/constants.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/video-finder.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/timeline.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/namespaces.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/shared.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/main.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/VideoPlayer.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/VideoPlayer.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/TimelineClip.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/ClipPlayer.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/PlayControls.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/timeline.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/play-controls.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/video-finder.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/main-menu.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Clip.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/ClipInspector.js",
+		"/Users/roxyfoxy/Library/Application Support/Sublime Text 2/Packages/User/Preferences.sublime-settings",
+		"/Volumes/YTR/home/andrew/WebRemixer/grunt.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/TimelineManager.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/Clip.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/ClipManager.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/ClipPlayer.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/MainMenu.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/Remix.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/Timeline.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/TimelineClip.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/Video.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/VideoFinder.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/public/main.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/ClipManager.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/PlayerManager.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Timeline.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Video.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/routers/Remix.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Ruler.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/TimelineManager.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/VideoFinder.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/MainMenu.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/lib/backbone.modifications.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/collections/Clips.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/collections/TimelineClips.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/collections/Timelines.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/collections/VideoPlayers.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/collections/Videos.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/lib/jquery.single.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/public/main.html",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/clip-manager.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/clip-inspector.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/context-menu.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/shared.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/clip.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/body.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/reset.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/timeline-clip.styl",
+		"/Users/roxyfoxy/Library/Application Support/Sublime Text 2/Packages/User/SublimeLinter.sublime-settings"
 	],
 	"find":
 	{
-		"height": 0.0
+		"height": 43.0
 	},
 	"find_in_files":
 	{
 		"height": 0.0,
 		"where_history":
 		[
+			""
 		]
 	},
 	"find_state":
@@ -49,6 +138,69 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"onRemixChange",
+			"trigger",
+			" == ",
+			"trigger",
+			"this",
+			"the",
+			"this",
+			"app",
+			"null",
+			"onremixplayingchange",
+			"set",
+			": \"latest\",\n			 \"stylus\" : \"latest\",\n					\"nib\" : \"latest\",\n		 \"mongoose\" : \"latest\",\n				\"grunt\" : \"latest\",\n		\"grunt-cli\" : \"latest\",\n\"contrib-concat\": \"latest\",\n				\"async\" :",
+			":",
+			"*",
+			" \"*\",",
+			"\"*\",",
+			"*",
+			"\"*\",",
+			"grunt",
+			"mongoose",
+			"onplaytimechange",
+			"bindall",
+			"model",
+			"bindall",
+			"onload",
+			"Backbone.View.extend",
+			"render",
+			"bindall",
+			"render",
+			"Backbone.Model.extend",
+			"contextmenu",
+			"timelines",
+			"mousedown",
+			"selection",
+			"timeline",
+			"ontimelinesadd",
+			"timelines",
+			"orig",
+			"save",
+			"debounce",
+			"ontimelinessortupdate",
+			"fetchedchildren",
+			"onsortupdate",
+			"onclipidschange",
+			"ontimelineidschange",
+			"videofinder",
+			"onsortupdate",
+			"order",
+			"idattribute",
+			"order",
+			"autoplay",
+			"attrType",
+			"includeInJSON",
+			"idattribute",
+			"this.id",
+			"data-order",
+			"'",
+			"attr",
+			"delete",
+			".add",
+			"onclipschange",
+			"clips",
+			"timelineclips"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -56,6 +208,15 @@
 		"regex": false,
 		"replace_history":
 		[
+			"this",
+			"WebRemixer.View.extend",
+			"WebRemixer.Model.extend",
+			"AttrType",
+			"attrType",
+			"",
+			"'",
+			" {'remix': String, 'order': String, 'title': String, 'video': Object, 'cutStart': String, 'cutDuration': String},",
+			""
 		],
 		"reverse": false,
 		"show_context": true,
@@ -73,11 +234,11 @@
 	],
 	"incremental_find":
 	{
-		"height": 0.0
+		"height": 44.0
 	},
 	"input":
 	{
-		"height": 0.0
+		"height": 43.0
 	},
 	"layout":
 	{
@@ -104,7 +265,7 @@
 	"menu_visible": true,
 	"replace":
 	{
-		"height": 0.0
+		"height": 80.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -127,6 +288,6 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 150.0,
+	"side_bar_width": 244.0,
 	"status_bar_visible": true
 }

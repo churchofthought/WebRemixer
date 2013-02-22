@@ -7,13 +7,13 @@ WebRemixer.Models.TimelineManager = WebRemixer.Model.extend({
 		});
 	},
 
-	onTimelinesAdd: function(model){
-		model.set('remix', this.get('remix'));
+	onTimelinesAdd: function(timeline){
+		timeline.set('remix', this.get('remix'));
 	},
 
-	onTimelinesRemove: function(model){
-		if (model.get('remix') === this.get('remix')){
-			model.set('remix', undefined);
+	onTimelinesRemove: function(timeline){
+		if (timeline.get('remix') === this.get('remix')){
+			timeline.set('remix', undefined);
 		}
 	}
 });

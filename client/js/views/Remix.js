@@ -9,7 +9,7 @@ WebRemixer.Views.Remix = WebRemixer.View.extend({
 
 
 	initialize: function(){
-		this.$title = $('<input/>').addClass('title').attr('placeholder', 'Title Your Remix').appendTo(this.el);
+		this.$title = $('<input type="text"/>').prop('class', 'title').attr('placeholder', 'Title Your Remix').appendTo(this.el);
 			
 		this.mainMenu = new WebRemixer.Views.MainMenu({
 			model: this.model.get('mainMenu')
@@ -22,7 +22,8 @@ WebRemixer.Views.Remix = WebRemixer.View.extend({
 		this.playControls.$el.appendTo(this.el);
 		
 		this.ruler = new WebRemixer.Views.Ruler({
-			model: this.model.get('ruler')
+			model: this.model.get('ruler'),
+			$remix: this.el
 		});
 		this.ruler.$el.appendTo(this.el);
 
@@ -35,7 +36,6 @@ WebRemixer.Views.Remix = WebRemixer.View.extend({
 			model: this.model.get('clipManager')
 		});
 		this.clipManager.model.set('open', true);
-		this.clipManager.$el.appendTo(this.el);
 		
 		this.clipInspector = new WebRemixer.Views.ClipInspector({
 			model: this.model.get('clipInspector')
@@ -52,7 +52,7 @@ WebRemixer.Views.Remix = WebRemixer.View.extend({
 		
 		this.listenTo(this.model, 'change:title', this.onTitleChange);
 		
-		this.onTitleChange();
+		this.onTitleChange(this.model, this.model.get('title'));
 	},
 	
 	onTitleInputChange: function(){
@@ -61,8 +61,8 @@ WebRemixer.Views.Remix = WebRemixer.View.extend({
 		this.$title.blur();
 	},
 	
-	onTitleChange: function(){
-		this.$title.val(this.model.get('title'));
+	onTitleChange: function(remix, title){
+		this.$title.val(title);
 	},
 	
 	onToggleClipManagerClick: function(){
