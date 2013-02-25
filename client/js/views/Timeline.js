@@ -26,12 +26,18 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 			tolerance: 'pointer',
 			hoverClass: 'ui-state-highlight'
 		}).appendTo(this.el);
+
+		this.automationData = new WebRemixer.Views.AutomationData({
+			model: this.model.get('automationData')
+		});
+		this.automationData.$el.appendTo(this.$timelineClips);
 			
 		$('<div/>').prop('class', 'selection').appendTo(this.el);
 		
 		this.listenTo(this.model, {
 			'change:collapsed': this.onCollapsedChange,
-			'change:remix': this.onRemixChange
+			'change:remix': this.onRemixChange,
+			'change:order': this.onOrderChange
 		});
 		this.listenTo(this.model.get('timelineClips'), {
 			add: this.onTimelineClipsAdd,
@@ -47,9 +53,9 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 		this.$header.css('transform', 'translate3d(0,' + (-this.$window.scrollTop()) + 'px,0)');
 	},
 	
-	onTimelineIdsChange: function(remix, timelineIds){
+	onOrderChange: function(timeline, order){
 		this.$header.attr(
-			'data-title', 'Timeline ' + (_.indexOf(timelineIds, this.model.id) + 1)
+			'data-title', 'Timeline ' + (order + 1)
 		);
 	},
 	
@@ -61,8 +67,7 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 		
 		if (remix){
 			this.listenTo(remix, {
-				'change:selection': this.onSelectionChange,
-				'change:timelineIds': this.onTimelineIdsChange
+				'change:selection': this.onSelectionChange
 			});
 		}
 	},
@@ -120,7 +125,7 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 		
 		$selectedClips.each(function(){
 			$(this).data('view').duplicate(duration);
-		})
+		});
 		
 	},
 	
@@ -151,9 +156,9 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 
 		//make sure selection is at least 1x1 and check for the 3 types of intersections
 		if (selection.width >= 1 && selection.height >= 1 &&
-				((selection.offset.top >= offset.top && selection.offset.top <= offset.top + height)
-				|| (selection.offset.top + selection.height >= offset.top && selection.offset.top + selection.height <= offset.top + height)
-				|| (selection.offset.top <= offset.top && selection.offset.top + selection.height >= offset.top + height))) {
+				((selection.offset.top >= offset.top && selection.offset.top <= offset.top + height) ||
+				(selection.offset.top + selection.height >= offset.top && selection.offset.top + selection.height <= offset.top + height) ||
+				(selection.offset.top <= offset.top && selection.offset.top + selection.height >= offset.top + height))) {
 			$selection.css({
 				left: selection.offset.left,
 				width: selection.width

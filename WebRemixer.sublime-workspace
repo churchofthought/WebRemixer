@@ -11,6 +11,32 @@
 	},
 	"buffers":
 	[
+		{
+			"contents": "Searching 74 files for \"ids\"\n\n/Volumes/YTR/home/andrew/WebRemixer/server.js:\n   33  Schemas.Remix = mongoose.Schema({\n   34  	title: String,\n   35: 	clipIds: [{ref: 'Clip', type: mongoose.Schema.Types.ObjectId}],\n   36: 	timelineIds: [{ref: 'Timeline', type: mongoose.Schema.Types.ObjectId}]\n   37  });\n   38  \n\n/Volumes/YTR/home/andrew/WebRemixer/WebRemixer.sublime-workspace:\n    6  			[\n    7  				\"onTimeline\",\n    8: 				\"onTimelineIdsChange\"\n    9  			]\n   10  		]\n   ..\n  217  			\"fetchedchildren\",\n  218  			\"onsortupdate\",\n  219: 			\"onclipidschange\",\n  220: 			\"ontimelineidschange\",\n  221  			\"videofinder\",\n  222  			\"onsortupdate\",\n\n/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Remix.js:\n    2  	urlRoot: 'remixes',\n    3  	\n    4: 	includeInJSON: {title: String, timelineIds: Array, clipIds: Array},\n    5  \n    6  	defaults: {\n    .\n   16  		};\n   17  \n   18: 		if (!_.isArray(this.get('timelineIds'))){\n   19: 			this.set('timelineIds', []);\n   20  		}\n   21  \n   22: 		if (!_.isArray(this.get('clipIds'))){\n   23: 			this.set('clipIds', []);\n   24  		}\n   25  		\n\n/Volumes/YTR/home/andrew/WebRemixer/client/js/views/ClipManager.js:\n   33  		});\n   34  \n   35: 		this.listenTo(remix, 'change:clipIds', this.onClipIdsChange);\n   36  		\n   37  		this.onVisibilityChange(this.model, this.model.get('open'));\n   ..\n   71  	},\n   72  \n   73: 	onClipIdsChange: function(remix, clipIds){\n   74  		var $clips = this.$clips.children('.clip');\n   75  \n   ..\n   77  			var $this = $(this);\n   78  \n   79: 			var order = _.indexOf(clipIds, $this.data('view').model.id);\n   80  \n   81  			$clips.each(function(){\n   82: 				if (order < _.indexOf(clipIds, $(this).data('view').model.id)){\n   83  					$this.insertBefore(this);\n   84  					return false;\n   ..\n   91  \n   92  	onSortUpdate: function(event, ui){\n   93: 		this.model.get('remix').set('clipIds',\n   94  			this.$clips.children('.clip').map(function(){\n   95  				return $(this).data('view').model.id;\n   ..\n  105  		});\n  106  \n  107: 		var clipIds = this.model.get('remix').get('clipIds');\n  108  \n  109: 		var order = _.indexOf(clipIds, clip.id);\n  110  \n  111  		if (order !== -1){\n  112  			//insert clip in the correct position\n  113  			this.$clips.children('.clip').each(function(){\n  114: 				if (order < _.indexOf(clipIds, $(this).data('view').model.id)){\n  115  					view.$el.insertBefore(this);\n  116  					return false;\n\n/Volumes/YTR/home/andrew/WebRemixer/client/js/views/Timeline.js:\n   53  	},\n   54  	\n   55: 	onTimelineIdsChange: function(remix, timelineIds){\n   56  		this.$header.attr(\n   57: 			'data-title', 'Timeline ' + (_.indexOf(timelineIds, this.model.id) + 1)\n   58  		);\n   59  	},\n   ..\n   68  			this.listenTo(remix, {\n   69  				'change:selection': this.onSelectionChange,\n   70: 				'change:timelineIds': this.onTimelineIdsChange\n   71  			});\n   72  		}\n\n/Volumes/YTR/home/andrew/WebRemixer/client/js/views/TimelineManager.js:\n   30  		var remix = this.model.get('remix');\n   31  \n   32: 		this.listenTo(remix, 'change:timelineIds', this.onTimelineIdsChange);\n   33  		this.listenTo(remix.get('timelines'), {\n   34  			add: this.onTimelinesAdd,\n   ..\n  124  \n  125  	onTimelinesSortUpdate: function(event, ui){\n  126: 		this.model.get('remix').set('timelineIds',\n  127  			this.$el.children('.timeline').map(function(){\n  128  				return $(this).data('view').model.id;\n  ...\n  132  \n  133  \n  134: 	onTimelineIdsChange: function(remix, timelineIds){\n  135  		var $timelines = this.$el.children('.timeline');\n  136  \n  ...\n  138  			var $this = $(this);\n  139  \n  140: 			var order = _.indexOf(timelineIds, $this.data('view').model.id);\n  141  \n  142  			$timelines.each(function(){\n  143: 				if (order < _.indexOf(timelineIds, $(this).data('view').model.id)){\n  144  					$this.insertBefore(this);\n  145  					return false;\n  ...\n  158  		});\n  159  \n  160: 		var timelineIds = timeline.get('remix').get('timelineIds');\n  161  \n  162: 		var order = _.indexOf(timelineIds, timeline.id);\n  163  \n  164  		if (order !== -1){\n  165  			//insert timeline in the correct position\n  166  			this.$el.children('.timeline').each(function(){\n  167: 				if (order < _.indexOf(timelineIds, $(this).data('view').model.id)){\n  168  					view.$el.insertBefore(this);\n  169  					return false;\n\n/Volumes/YTR/home/andrew/WebRemixer/public/js/main.js:\n  781  		});\n  782  \n  783: 		this.listenTo(remix, 'change:clipIds', this.onClipIdsChange);\n  784  		\n  785  		this.onVisibilityChange(this.model, this.model.get('open'));\n  ...\n  819  	},\n  820  \n  821: 	onClipIdsChange: function(remix, clipIds){\n  822  		var $clips = this.$clips.children('.clip');\n  823  \n  ...\n  825  			var $this = $(this);\n  826  \n  827: 			var order = _.indexOf(clipIds, $this.data('view').model.id);\n  828  \n  829  			$clips.each(function(){\n  830: 				if (order < _.indexOf(clipIds, $(this).data('view').model.id)){\n  831  					$this.insertBefore(this);\n  832  					return false;\n  ...\n  839  \n  840  	onSortUpdate: function(event, ui){\n  841: 		this.model.get('remix').set('clipIds',\n  842  			this.$clips.children('.clip').map(function(){\n  843  				return $(this).data('view').model.id;\n  ...\n  853  		});\n  854  \n  855: 		var clipIds = this.model.get('remix').get('clipIds');\n  856  \n  857: 		var order = _.indexOf(clipIds, clip.id);\n  858  \n  859  		if (order !== -1){\n  860  			//insert clip in the correct position\n  861  			this.$clips.children('.clip').each(function(){\n  862: 				if (order < _.indexOf(clipIds, $(this).data('view').model.id)){\n  863  					view.$el.insertBefore(this);\n  864  					return false;\n  ...\n 1198  	},\n 1199  	\n 1200: 	onTimelineIdsChange: function(remix, timelineIds){\n 1201  		this.$header.attr(\n 1202: 			'data-title', 'Timeline ' + (_.indexOf(timelineIds, this.model.id) + 1)\n 1203  		);\n 1204  	},\n ....\n 1213  			this.listenTo(remix, {\n 1214  				'change:selection': this.onSelectionChange,\n 1215: 				'change:timelineIds': this.onTimelineIdsChange\n 1216  			});\n 1217  		}\n ....\n 1546  		var remix = this.model.get('remix');\n 1547  \n 1548: 		this.listenTo(remix, 'change:timelineIds', this.onTimelineIdsChange);\n 1549  		this.listenTo(remix.get('timelines'), {\n 1550  			add: this.onTimelinesAdd,\n ....\n 1640  \n 1641  	onTimelinesSortUpdate: function(event, ui){\n 1642: 		this.model.get('remix').set('timelineIds',\n 1643  			this.$el.children('.timeline').map(function(){\n 1644  				return $(this).data('view').model.id;\n ....\n 1648  \n 1649  \n 1650: 	onTimelineIdsChange: function(remix, timelineIds){\n 1651  		var $timelines = this.$el.children('.timeline');\n 1652  \n ....\n 1654  			var $this = $(this);\n 1655  \n 1656: 			var order = _.indexOf(timelineIds, $this.data('view').model.id);\n 1657  \n 1658  			$timelines.each(function(){\n 1659: 				if (order < _.indexOf(timelineIds, $(this).data('view').model.id)){\n 1660  					$this.insertBefore(this);\n 1661  					return false;\n ....\n 1674  		});\n 1675  \n 1676: 		var timelineIds = timeline.get('remix').get('timelineIds');\n 1677  \n 1678: 		var order = _.indexOf(timelineIds, timeline.id);\n 1679  \n 1680  		if (order !== -1){\n 1681  			//insert timeline in the correct position\n 1682  			this.$el.children('.timeline').each(function(){\n 1683: 				if (order < _.indexOf(timelineIds, $(this).data('view').model.id)){\n 1684  					view.$el.insertBefore(this);\n 1685  					return false;\n ....\n 2078  	urlRoot: 'remixes',\n 2079  	\n 2080: 	includeInJSON: {title: String, timelineIds: Array, clipIds: Array},\n 2081  \n 2082  	defaults: {\n ....\n 2092  		};\n 2093  \n 2094: 		if (!_.isArray(this.get('timelineIds'))){\n 2095: 			this.set('timelineIds', []);\n 2096  		}\n 2097  \n 2098: 		if (!_.isArray(this.get('clipIds'))){\n 2099: 			this.set('clipIds', []);\n 2100  		}\n 2101  		\n\n71 matches across 7 files\n",
+			"settings":
+			{
+				"buffer_size": 7752,
+				"line_ending": "Unix",
+				"name": "Find Results",
+				"scratch": true
+			}
+		},
+		{
+			"file": "client/js/models/Remix.js",
+			"settings":
+			{
+				"buffer_size": 1768,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "client/js/views/ClipManager.js",
+			"settings":
+			{
+				"buffer_size": 2854,
+				"line_ending": "Unix"
+			}
+		}
 	],
 	"build_system": "",
 	"command_palette":
@@ -19,12 +45,20 @@
 		"selected_items":
 		[
 			[
-				"sideba",
-				"View: Toggle Side Bar"
-			],
-			[
 				"install",
 				"Package Control: Install Package"
+			],
+			[
+				"remove pac",
+				"Package Control: Remove Package"
+			],
+			[
+				"browse",
+				"Preferences: Browse Packages"
+			],
+			[
+				"sideba",
+				"View: Toggle Side Bar"
 			],
 			[
 				"",
@@ -48,6 +82,19 @@
 	},
 	"file_history":
 	[
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/AutomationData.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/AutomationData.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/collections/VideoPlayers.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/PlayControls.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Clip.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/VideoPlayer.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Timeline.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/TimelineManager.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/Timeline.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/automation-data.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/main.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/timeline.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/ClipPlayer.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/ClipInspector.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/View.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Model.js",
@@ -55,11 +102,9 @@
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/util.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Remix.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/ruler.styl",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/PlayControls.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/package.json",
 		"/Volumes/YTR/home/andrew/WebRemixer/server.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/Gruntfile.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/css/main.styl",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/video.styl",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/remix.styl",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/css/video.styl",
@@ -70,33 +115,26 @@
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/namespaces.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/css/shared.styl",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/main.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/VideoPlayer.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/VideoPlayer.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/TimelineClip.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/ClipPlayer.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/PlayControls.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/timeline.styl",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/play-controls.styl",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/video-finder.styl",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/main-menu.styl",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Clip.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/ClipInspector.js",
 		"/Users/roxyfoxy/Library/Application Support/Sublime Text 2/Packages/User/Preferences.sublime-settings",
 		"/Volumes/YTR/home/andrew/WebRemixer/grunt.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/TimelineManager.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/Clip.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/ClipManager.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/ClipPlayer.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/MainMenu.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/Remix.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/Timeline.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/TimelineClip.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/Video.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/VideoFinder.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/public/main.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/ClipManager.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/PlayerManager.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Timeline.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Video.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/routers/Remix.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Ruler.js",
@@ -107,7 +145,6 @@
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/collections/Clips.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/collections/TimelineClips.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/collections/Timelines.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/collections/VideoPlayers.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/collections/Videos.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/lib/jquery.single.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/public/main.html",
@@ -138,6 +175,32 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"clipids",
+			"ids",
+			"sort",
+			"splice",
+			"sort",
+			"draggingPoint",
+			"this",
+			"draggingPoint",
+			"trigger",
+			"drawpath",
+			"draggingPoint",
+			"circle",
+			"pointpath",
+			"this",
+			"point",
+			"line",
+			"draggingPoint",
+			"point",
+			"point[0]",
+			"circle",
+			"rcle",
+			"path",
+			".x",
+			"coords",
+			"pagex",
+			"clientx",
 			"onRemixChange",
 			"trigger",
 			" == ",
@@ -227,8 +290,650 @@
 	"groups":
 	[
 		{
+			"selected": 2,
 			"sheets":
 			[
+				{
+					"buffer": 0,
+					"settings":
+					{
+						"buffer_size": 7752,
+						"regions":
+						{
+							"match":
+							{
+								"flags": 112,
+								"regions":
+								[
+									[
+										153,
+										156
+									],
+									[
+										229,
+										232
+									],
+									[
+										437,
+										440
+									],
+									[
+										549,
+										552
+									],
+									[
+										582,
+										585
+									],
+									[
+										793,
+										796
+									],
+									[
+										809,
+										812
+									],
+									[
+										918,
+										921
+									],
+									[
+										955,
+										958
+									],
+									[
+										1023,
+										1026
+									],
+									[
+										1056,
+										1059
+									],
+									[
+										1220,
+										1223
+									],
+									[
+										1237,
+										1240
+									],
+									[
+										1368,
+										1371
+									],
+									[
+										1399,
+										1402
+									],
+									[
+										1547,
+										1550
+									],
+									[
+										1661,
+										1664
+									],
+									[
+										1862,
+										1865
+									],
+									[
+										2017,
+										2020
+									],
+									[
+										2056,
+										2059
+									],
+									[
+										2106,
+										2109
+									],
+									[
+										2299,
+										2302
+									],
+									[
+										2508,
+										2511
+									],
+									[
+										2543,
+										2546
+									],
+									[
+										2634,
+										2637
+									],
+									[
+										2803,
+										2806
+									],
+									[
+										2824,
+										2827
+									],
+									[
+										3032,
+										3035
+									],
+									[
+										3053,
+										3056
+									],
+									[
+										3262,
+										3265
+									],
+									[
+										3414,
+										3417
+									],
+									[
+										3449,
+										3452
+									],
+									[
+										3606,
+										3609
+									],
+									[
+										3728,
+										3731
+									],
+									[
+										3878,
+										3881
+									],
+									[
+										3919,
+										3922
+									],
+									[
+										3973,
+										3976
+									],
+									[
+										4179,
+										4182
+									],
+									[
+										4403,
+										4406
+									],
+									[
+										4420,
+										4423
+									],
+									[
+										4551,
+										4554
+									],
+									[
+										4582,
+										4585
+									],
+									[
+										4730,
+										4733
+									],
+									[
+										4844,
+										4847
+									],
+									[
+										5045,
+										5048
+									],
+									[
+										5200,
+										5203
+									],
+									[
+										5239,
+										5242
+									],
+									[
+										5289,
+										5292
+									],
+									[
+										5482,
+										5485
+									],
+									[
+										5631,
+										5634
+									],
+									[
+										5666,
+										5669
+									],
+									[
+										5757,
+										5760
+									],
+									[
+										5926,
+										5929
+									],
+									[
+										5947,
+										5950
+									],
+									[
+										6088,
+										6091
+									],
+									[
+										6109,
+										6112
+									],
+									[
+										6318,
+										6321
+									],
+									[
+										6470,
+										6473
+									],
+									[
+										6505,
+										6508
+									],
+									[
+										6662,
+										6665
+									],
+									[
+										6784,
+										6787
+									],
+									[
+										6934,
+										6937
+									],
+									[
+										6975,
+										6978
+									],
+									[
+										7029,
+										7032
+									],
+									[
+										7235,
+										7238
+									],
+									[
+										7430,
+										7433
+									],
+									[
+										7446,
+										7449
+									],
+									[
+										7555,
+										7558
+									],
+									[
+										7592,
+										7595
+									],
+									[
+										7660,
+										7663
+									],
+									[
+										7693,
+										7696
+									]
+								],
+								"scope": ""
+							}
+						},
+						"selection":
+						[
+							[
+								780,
+								780
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": "warning",
+								"box-model": true,
+								"box-sizing": "warning",
+								"compatible-vendor-prefixes": "warning",
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": "warning",
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": "warning",
+								"overqualified-elements": "warning",
+								"qualified-headings": "warning",
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"star-property-hack": "warning",
+								"text-indent": "warning",
+								"underscore-property-hack": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": true,
+								"zero-units": "warning"
+							},
+							"detect_indentation": false,
+							"gjslint_ignore":
+							[
+								110.0
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"browser": true,
+								"evil": true,
+								"regexdash": true,
+								"sub": true,
+								"trailing": true,
+								"wsh": true
+							},
+							"output_tag": 1,
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"result_base_dir": "",
+							"result_file_regex": "^([A-Za-z\\\\/<].*):$",
+							"result_line_regex": "^ +([0-9]+):",
+							"scroll_past_end": true,
+							"sublimelinter": true,
+							"sublimelinter_delay": 2.0,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/Default/Find Results.hidden-tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 482.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "client/js/models/Remix.js",
+					"settings":
+					{
+						"buffer_size": 1768,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": "warning",
+								"box-model": true,
+								"box-sizing": "warning",
+								"compatible-vendor-prefixes": "warning",
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": "warning",
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": "warning",
+								"overqualified-elements": "warning",
+								"qualified-headings": "warning",
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"star-property-hack": "warning",
+								"text-indent": "warning",
+								"underscore-property-hack": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": true,
+								"zero-units": "warning"
+							},
+							"gjslint_ignore":
+							[
+								110.0
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"browser": true,
+								"evil": true,
+								"regexdash": true,
+								"sub": true,
+								"trailing": true,
+								"wsh": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": true,
+							"sublimelinter_delay": 2.0,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "client/js/views/ClipManager.js",
+					"settings":
+					{
+						"buffer_size": 2854,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1666,
+								1666
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": "warning",
+								"box-model": true,
+								"box-sizing": "warning",
+								"compatible-vendor-prefixes": "warning",
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": "warning",
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": "warning",
+								"overqualified-elements": "warning",
+								"qualified-headings": "warning",
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"star-property-hack": "warning",
+								"text-indent": "warning",
+								"underscore-property-hack": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": true,
+								"zero-units": "warning"
+							},
+							"gjslint_ignore":
+							[
+								110.0
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"browser": true,
+								"evil": true,
+								"regexdash": true,
+								"sub": true,
+								"trailing": true,
+								"wsh": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": true,
+							"sublimelinter_delay": 2.0,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1690.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
 			]
 		}
 	],
@@ -278,16 +983,16 @@
 	},
 	"select_project":
 	{
-		"height": 0.0,
+		"height": 500.0,
 		"selected_items":
 		[
 		],
-		"width": 0.0
+		"width": 380.0
 	},
 	"show_minimap": true,
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 244.0,
+	"side_bar_width": 380.0,
 	"status_bar_visible": true
 }

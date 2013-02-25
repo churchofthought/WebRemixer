@@ -11,6 +11,8 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 	},
 
 	initialize: function(){
+		this.onSortUpdate = _.wrap(this.onSortUpdate, _.defer);
+
 		this.$newClip = $('<button/>').prop('class', 'new-clip').button({
 			icons: {
 				primary: 'ui-icon-plus'
@@ -71,15 +73,15 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 	},
 
 	onClipIdsChange: function(remix, clipIds){
-		var $clips = this.$clips.children('.clip');
+		var $clips = this.$clips;
 
-		$clips.each(function(){
+		$clips.children('.clip').each(function(){
 			var $this = $(this);
 
-			var order = _.indexOf(clipIds, $this.data('view').model.id);
+			var order = $this.data('view').model.get('order');
 
-			$clips.each(function(){
-				if (order < _.indexOf(clipIds, $(this).data('view').model.id)){
+			$clips.children('.clip').each(function(){
+				if (order < $(this).data('view').model.get('order')){
 					$this.insertBefore(this);
 					return false;
 				}
@@ -97,21 +99,19 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 		);
 	},
 
- onClipsAdd: function(clip){
+ 	onClipsAdd: function(clip){
 		this.listenTo(clip, 'change:' + clip.idAttribute, this.onSortUpdate);
 
 		var view = new WebRemixer.Views.Clip({
 			model: clip
 		});
 
-		var clipIds = this.model.get('remix').get('clipIds');
+		var order = clip.get('order');
 
-		var order = _.indexOf(clipIds, clip.id);
-
-		if (order !== -1){
+		if (order >= 0){
 			//insert clip in the correct position
 			this.$clips.children('.clip').each(function(){
-				if (order < _.indexOf(clipIds, $(this).data('view').model.id)){
+				if (order < $(this).data('view').model.get('order')){
 					view.$el.insertBefore(this);
 					return false;
 				}

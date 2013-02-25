@@ -8,6 +8,7 @@ WebRemixer.Models.Timeline = WebRemixer.Model.extend({
 		this.onChange = _.debounce(this.onChange, WebRemixer.Config.saveOnChangeDelay);
 
 		this.set({
+			automationData: new WebRemixer.Models.AutomationData(),
 			timelineClips : new WebRemixer.Collections.TimelineClips(),
 			selection : {
 				startTime: 0,

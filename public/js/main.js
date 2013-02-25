@@ -373,6 +373,114 @@ WebRemixer.View.prototype.$window.resize(function(){
 $(function(){
 	WebRemixer.View.prototype.$body = $(document.body);
 });
+WebRemixer.Views.AutomationData = WebRemixer.View.extend({
+	className: 'automation-data',
+	
+	events: {
+		mousedown: 'onMouseDown',
+		mousemove: 'onMouseMove',
+		mouseup: 'onMouseUp'
+	},
+
+	initialize: function(){
+		this.$svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+		this.$pointPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+		this.$pointPath.className.baseVal = 'pointPath';
+		
+		this.$svg.appendChild(this.$pointPath);
+		this.$el.append(this.$svg);
+
+		this.listenTo(this.model, 'change:points', this.onPointsChange);
+	},
+
+	pointFromEvent: function(event){
+		var offs = this.$el.offset();
+		return [event.pageX - offs.left, event.pageY - offs.top];
+	},
+
+	onMouseDown: function(event){
+		if (event.target.className.baseVal == 'point'){
+			this.$draggingPoint = event.target;
+		}
+	},
+
+	onMouseMove: function(event){
+		var mousePoint = this.pointFromEvent(event);
+
+		if (this.$draggingPoint){
+			this.$draggingPoint.setAttribute('cx', mousePoint[0]);
+			this.$draggingPoint.setAttribute('cy', mousePoint[1]);
+
+
+			var points = this.model.get('points');
+
+			var draggedPoint = this.$draggingPoint.point;
+
+			var curIndex = _.sortedIndex(points, draggedPoint, function(p){
+				return p[0];
+			});
+
+			var newIndex = _.sortedIndex(points, mousePoint, function(p){
+				return p[0];
+			});
+
+			draggedPoint[0] = mousePoint[0];
+			draggedPoint[1] = mousePoint[1];
+
+			var diff = newIndex - curIndex;
+
+			if (diff > 1){
+				points.splice(newIndex - 1, 0, points.splice(curIndex, 1)[0]);
+			}else if (diff < 0){
+				points.splice(newIndex, 0, points.splice(curIndex, 1)[0]);
+			}
+
+			this.drawPath(points);
+		}
+	},
+
+	onMouseUp: function(event){
+		if (!this.$draggingPoint){
+			this.addPoint(this.pointFromEvent(event));
+		}
+
+		this.$draggingPoint = undefined;
+	},
+
+	addPoint: function(point){
+		var points = this.model.get('points');
+
+		points.splice(_.sortedIndex(points, point, function(p){
+			return p[0];
+		}), 0, point);
+
+		this.drawPoint(point);
+		this.drawPath(points);
+	},
+
+	drawPoint: function(point){
+		var $point = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+		$point.className.baseVal = 'point';
+		$point.setAttribute('cx', point[0]);
+		$point.setAttribute('cy', point[1]);
+		$point.setAttribute('r', '.3em');
+
+		point.$point = $point;
+		$point.point = point;
+
+		this.$svg.appendChild($point);
+	},
+
+	drawPath: function(points){
+		this.$pointPath.setAttribute('d', 'M' + points.join('L'));
+	},
+
+	onPointsChange: function(automationData, points){
+
+		
+
+	}
+});
 WebRemixer.Views.Clip = WebRemixer.View.extend({
 	
 	className: 'clip',
@@ -651,6 +759,8 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 	},
 
 	initialize: function(){
+		this.onSortUpdate = _.wrap(this.onSortUpdate, _.defer);
+
 		this.$newClip = $('<button/>').prop('class', 'new-clip').button({
 			icons: {
 				primary: 'ui-icon-plus'
@@ -711,15 +821,15 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 	},
 
 	onClipIdsChange: function(remix, clipIds){
-		var $clips = this.$clips.children('.clip');
+		var $clips = this.$clips;
 
-		$clips.each(function(){
+		$clips.children('.clip').each(function(){
 			var $this = $(this);
 
-			var order = _.indexOf(clipIds, $this.data('view').model.id);
+			var order = $this.data('view').model.get('order');
 
-			$clips.each(function(){
-				if (order < _.indexOf(clipIds, $(this).data('view').model.id)){
+			$clips.children('.clip').each(function(){
+				if (order < $(this).data('view').model.get('order')){
 					$this.insertBefore(this);
 					return false;
 				}
@@ -737,21 +847,19 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 		);
 	},
 
- onClipsAdd: function(clip){
+ 	onClipsAdd: function(clip){
 		this.listenTo(clip, 'change:' + clip.idAttribute, this.onSortUpdate);
 
 		var view = new WebRemixer.Views.Clip({
 			model: clip
 		});
 
-		var clipIds = this.model.get('remix').get('clipIds');
+		var order = clip.get('order');
 
-		var order = _.indexOf(clipIds, clip.id);
-
-		if (order !== -1){
+		if (order >= 0){
 			//insert clip in the correct position
 			this.$clips.children('.clip').each(function(){
-				if (order < _.indexOf(clipIds, $(this).data('view').model.id)){
+				if (order < $(this).data('view').model.get('order')){
 					view.$el.insertBefore(this);
 					return false;
 				}
@@ -1063,12 +1171,18 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 			tolerance: 'pointer',
 			hoverClass: 'ui-state-highlight'
 		}).appendTo(this.el);
+
+		this.automationData = new WebRemixer.Views.AutomationData({
+			model: this.model.get('automationData')
+		});
+		this.automationData.$el.appendTo(this.$timelineClips);
 			
 		$('<div/>').prop('class', 'selection').appendTo(this.el);
 		
 		this.listenTo(this.model, {
 			'change:collapsed': this.onCollapsedChange,
-			'change:remix': this.onRemixChange
+			'change:remix': this.onRemixChange,
+			'change:order': this.onOrderChange
 		});
 		this.listenTo(this.model.get('timelineClips'), {
 			add: this.onTimelineClipsAdd,
@@ -1084,9 +1198,9 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 		this.$header.css('transform', 'translate3d(0,' + (-this.$window.scrollTop()) + 'px,0)');
 	},
 	
-	onTimelineIdsChange: function(remix, timelineIds){
+	onOrderChange: function(timeline, order){
 		this.$header.attr(
-			'data-title', 'Timeline ' + (_.indexOf(timelineIds, this.model.id) + 1)
+			'data-title', 'Timeline ' + (order + 1)
 		);
 	},
 	
@@ -1098,8 +1212,7 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 		
 		if (remix){
 			this.listenTo(remix, {
-				'change:selection': this.onSelectionChange,
-				'change:timelineIds': this.onTimelineIdsChange
+				'change:selection': this.onSelectionChange
 			});
 		}
 	},
@@ -1157,7 +1270,7 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 		
 		$selectedClips.each(function(){
 			$(this).data('view').duplicate(duration);
-		})
+		});
 		
 	},
 	
@@ -1188,9 +1301,9 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 
 		//make sure selection is at least 1x1 and check for the 3 types of intersections
 		if (selection.width >= 1 && selection.height >= 1 &&
-				((selection.offset.top >= offset.top && selection.offset.top <= offset.top + height)
-				|| (selection.offset.top + selection.height >= offset.top && selection.offset.top + selection.height <= offset.top + height)
-				|| (selection.offset.top <= offset.top && selection.offset.top + selection.height >= offset.top + height))) {
+				((selection.offset.top >= offset.top && selection.offset.top <= offset.top + height) ||
+				(selection.offset.top + selection.height >= offset.top && selection.offset.top + selection.height <= offset.top + height) ||
+				(selection.offset.top <= offset.top && selection.offset.top + selection.height >= offset.top + height))) {
 			$selection.css({
 				left: selection.offset.left,
 				width: selection.width
@@ -1411,15 +1524,23 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		selectableselected : 'onSelected',
 		selectableunselected : 'onUnselected',
 		selectablestop : 'onSelectStop',
-		'contextmenu .timeline-clips' : 'onContextMenu',
-		'contextmenu .selection' : 'onContextMenu',
-		mousedown : 'onMouseDown'
+		//'contextmenu .timeline-clips' : 'onContextMenu',
+		//'contextmenu .selection' : 'onContextMenu',
+		mousedown : 'onMouseDown',
+		sortupdate : 'onTimelinesSortUpdate'
 	},
 
 	initialize: function(){
-		this.$el.selectable({
-			filter: '.timeline-clip'
+		this.onTimelinesSortUpdate = _.wrap(this.onTimelinesSortUpdate, _.defer);
+
+		this.$el.sortable({
+			tolerance: 'pointer',
+			handle: '.header'
 		});
+
+		/*this.$el.selectable({
+			filter: '.timeline-clip'
+		});*/
 
 		this.$contextMenu = $('<ul/>')
 			.prop('class', 'context-menu')
@@ -1525,7 +1646,7 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		}).addClass('show');
 	},
 
-	onTimelinesSortUpdate: function(event, ui){
+	onTimelinesSortUpdate: function(timeline){
 		this.model.get('remix').set('timelineIds',
 			this.$el.children('.timeline').map(function(){
 				return $(this).data('view').model.id;
@@ -1535,22 +1656,21 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 
 
 	onTimelineIdsChange: function(remix, timelineIds){
-		var $timelines = this.$el.children('.timeline');
 
-		$timelines.each(function(){
+		var $el = this.$el;
+
+		$el.children('.timeline').each(function(){
 			var $this = $(this);
 
-			var order = _.indexOf(timelineIds, $this.data('view').model.id);
+			var order = $this.data('view').model.get('order');
 
-			$timelines.each(function(){
-				if (order < _.indexOf(timelineIds, $(this).data('view').model.id)){
+			$el.children('.timeline').each(function(){
+				if (order < $(this).data('view').model.get('order')){
 					$this.insertBefore(this);
 					return false;
 				}
 			});
-
 		});
-
 	},
 
 	onTimelinesAdd: function(timeline){
@@ -1560,14 +1680,12 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 			model: timeline
 		});
 
-		var timelineIds = timeline.get('remix').get('timelineIds');
+		var order = timeline.get('order');
 
-		var order = _.indexOf(timelineIds, timeline.id);
-
-		if (order !== -1){
+		if (order >= 0){
 			//insert timeline in the correct position
 			this.$el.children('.timeline').each(function(){
-				if (order < _.indexOf(timelineIds, $(this).data('view').model.id)){
+				if (order < $(this).data('view').model.get('order')){
 					view.$el.insertBefore(this);
 					return false;
 				}
@@ -1722,7 +1840,7 @@ WebRemixer.Views.VideoPlayer = WebRemixer.View.extend({
 		this.$video = $('<iframe/>').hide().prop({
 			id: Math.random().toString(36),
 			src: 'http://www.youtube.com/embed/' + this.model.get('video').get('sourceVideoId') +
-				 '?origin=http://' + location.host + '&enablejsapi=1&html5=1&autoplay=0&controls=0'
+				'?origin=http://' + location.host + '&enablejsapi=1&html5=1&autoplay=0&controls=0'
 		}).appendTo(this.el);
 		
 		this.player = new YT.Player(this.$video.prop('id'), {
@@ -1735,7 +1853,7 @@ WebRemixer.Views.VideoPlayer = WebRemixer.View.extend({
 		this.listenTo(this.model, {
 			'change:playing' : this.onPlayingChange,
 			'change:playTime': this.onPlayTimeChange,
-							 destroy : this.remove
+			destroy : this.remove
 		});
 	},
 	
@@ -2043,6 +2161,7 @@ WebRemixer.Models.Timeline = WebRemixer.Model.extend({
 		this.onChange = _.debounce(this.onChange, WebRemixer.Config.saveOnChangeDelay);
 
 		this.set({
+			automationData: new WebRemixer.Models.AutomationData(),
 			timelineClips : new WebRemixer.Collections.TimelineClips(),
 			selection : {
 				startTime: 0,
@@ -2343,6 +2462,12 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 		this.get('clipPlayer').set('playing', false);
 	}
 });
+WebRemixer.Models.AutomationData = WebRemixer.Model.extend({
+
+	initialize: function(){
+		this.set('points', []);
+	}
+});
 WebRemixer.Models.ClipInspector = WebRemixer.Model.extend({
 
 	initialize: function(){
@@ -2354,10 +2479,23 @@ WebRemixer.Models.ClipInspector = WebRemixer.Model.extend({
 WebRemixer.Models.ClipManager = WebRemixer.Model.extend({
 	
 	initialize: function(){
-		this.listenTo(this.get('remix').get('clips'), {
+		var remix = this.get('remix');
+
+		this.listenTo(remix.get('clips'), {
 			add: this.onClipsAdd,
 			remove: this.onClipsRemove
 		});
+
+		this.listenTo(remix, 'change:clipIds', this.onClipIdsChange);
+	},
+
+	onClipIdsChange: function(remix, clipIds){
+		var clips = remix.get('clips');
+
+		for (var i = clipIds.length; i--;){
+			var clip = clips.get(clipIds[i]);
+			if (clip) clip.set('order', i);
+		}
 	},
 
 	onClipsAdd: function(clip){
@@ -2639,10 +2777,21 @@ WebRemixer.Models.Ruler = WebRemixer.Model.extend({
 WebRemixer.Models.TimelineManager = WebRemixer.Model.extend({
 	
 	initialize: function(){
-		this.listenTo(this.get('remix').get('timelines'), {
+		var remix = this.get('remix');
+
+		this.listenTo(remix.get('timelines'), {
 			add: this.onTimelinesAdd,
 			remove: this.onTimelinesRemove
 		});
+		this.listenTo(remix, 'change:timelineIds', this.onTimelineIdsChange);
+	},
+
+	onTimelineIdsChange: function(remix, timelineIds){
+		var timelines = remix.get('timelines');
+		for (var i = timelineIds.length; i--;){
+			var timeline = timelines.get(timelineIds[i]);
+			if (timeline) timeline.set('order', i);
+		}
 	},
 
 	onTimelinesAdd: function(timeline){

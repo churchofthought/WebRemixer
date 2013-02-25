@@ -8,15 +8,23 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		selectableselected : 'onSelected',
 		selectableunselected : 'onUnselected',
 		selectablestop : 'onSelectStop',
-		'contextmenu .timeline-clips' : 'onContextMenu',
-		'contextmenu .selection' : 'onContextMenu',
-		mousedown : 'onMouseDown'
+		//'contextmenu .timeline-clips' : 'onContextMenu',
+		//'contextmenu .selection' : 'onContextMenu',
+		mousedown : 'onMouseDown',
+		sortupdate : 'onTimelinesSortUpdate'
 	},
 
 	initialize: function(){
-		this.$el.selectable({
-			filter: '.timeline-clip'
+		this.onTimelinesSortUpdate = _.wrap(this.onTimelinesSortUpdate, _.defer);
+
+		this.$el.sortable({
+			tolerance: 'pointer',
+			handle: '.header'
 		});
+
+		/*this.$el.selectable({
+			filter: '.timeline-clip'
+		});*/
 
 		this.$contextMenu = $('<ul/>')
 			.prop('class', 'context-menu')
@@ -122,7 +130,7 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		}).addClass('show');
 	},
 
-	onTimelinesSortUpdate: function(event, ui){
+	onTimelinesSortUpdate: function(timeline){
 		this.model.get('remix').set('timelineIds',
 			this.$el.children('.timeline').map(function(){
 				return $(this).data('view').model.id;
@@ -132,22 +140,21 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 
 
 	onTimelineIdsChange: function(remix, timelineIds){
-		var $timelines = this.$el.children('.timeline');
 
-		$timelines.each(function(){
+		var $el = this.$el;
+
+		$el.children('.timeline').each(function(){
 			var $this = $(this);
 
-			var order = _.indexOf(timelineIds, $this.data('view').model.id);
+			var order = $this.data('view').model.get('order');
 
-			$timelines.each(function(){
-				if (order < _.indexOf(timelineIds, $(this).data('view').model.id)){
+			$el.children('.timeline').each(function(){
+				if (order < $(this).data('view').model.get('order')){
 					$this.insertBefore(this);
 					return false;
 				}
 			});
-
 		});
-
 	},
 
 	onTimelinesAdd: function(timeline){
@@ -157,14 +164,12 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 			model: timeline
 		});
 
-		var timelineIds = timeline.get('remix').get('timelineIds');
+		var order = timeline.get('order');
 
-		var order = _.indexOf(timelineIds, timeline.id);
-
-		if (order !== -1){
+		if (order >= 0){
 			//insert timeline in the correct position
 			this.$el.children('.timeline').each(function(){
-				if (order < _.indexOf(timelineIds, $(this).data('view').model.id)){
+				if (order < $(this).data('view').model.get('order')){
 					view.$el.insertBefore(this);
 					return false;
 				}

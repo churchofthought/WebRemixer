@@ -6,7 +6,7 @@ WebRemixer.Views.VideoPlayer = WebRemixer.View.extend({
 		this.$video = $('<iframe/>').hide().prop({
 			id: Math.random().toString(36),
 			src: 'http://www.youtube.com/embed/' + this.model.get('video').get('sourceVideoId') +
-				 '?origin=http://' + location.host + '&enablejsapi=1&html5=1&autoplay=0&controls=0'
+				'?origin=http://' + location.host + '&enablejsapi=1&html5=1&autoplay=0&controls=0'
 		}).appendTo(this.el);
 		
 		this.player = new YT.Player(this.$video.prop('id'), {
@@ -19,7 +19,7 @@ WebRemixer.Views.VideoPlayer = WebRemixer.View.extend({
 		this.listenTo(this.model, {
 			'change:playing' : this.onPlayingChange,
 			'change:playTime': this.onPlayTimeChange,
-							 destroy : this.remove
+			destroy : this.remove
 		});
 	},
 	

@@ -1,4 +1,7 @@
 .timeHand
+	transform: translate3d(0,0,0)
+	transform-style: flat
+
 	margin-top: $main-menu-height
 	position: absolute
 	top: 0
@@ -6,11 +9,14 @@
 	width: 1px
 	height: 100%
 	background: #F00
-	z-index: 1
+	z-index: 3
 	box-shadow: 0 0 1px #000
 	margin-left: $timeline-header-width
 
 .ruler
+	transform: translate3d(0,0,0)
+	transform-style: flat
+
 	z-index: 2
 	background: #fff
 	margin-top: $main-menu-height
