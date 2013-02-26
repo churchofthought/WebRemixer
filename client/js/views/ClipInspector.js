@@ -16,24 +16,24 @@ WebRemixer.Views.ClipInspector = WebRemixer.View.extend({
 		});
 		
 		this.$title = $('<input type="text"/>')
-		.prop('class', 'clip-title')
+		.prop('className', 'clip-title')
 		.attr('placeholder', 'Title')
 		.appendTo(this.el);
 			
 			
 		
-		var $cutContainer = $('<div/>').prop('class', 'cut').appendTo($('<div/>').attr('data-label', 'Cut').appendTo(this.el));
+		var $cutContainer = $('<div/>').prop('className', 'cut').appendTo($('<div/>').attr('data-label', 'Cut').appendTo(this.el));
 		
-		this.$cutSlider = $('<div/>').prop('class', 'cut-slider').slider({
+		this.$cutSlider = $('<div/>').prop('className', 'cut-slider').slider({
 			range: true,
 			min: 0
 		}).appendTo($cutContainer);
 		
-		this.$cutStart = $('<span/>').prop('class', 'cut-start').appendTo($cutContainer);
-		this.$cutEnd = $('<span/>').prop('class', 'cut-end').appendTo($cutContainer);
+		this.$cutStart = $('<span/>').prop('className', 'cut-start').appendTo($cutContainer);
+		this.$cutEnd = $('<span/>').prop('className', 'cut-end').appendTo($cutContainer);
 		
 		
-		this.$video = $('<div/>').prop('class', 'clip-video').appendTo(
+		this.$video = $('<div/>').prop('className', 'clip-video').appendTo(
 			$('<div/>').attr('data-label', 'Video').appendTo(this.el)
 		);
 		

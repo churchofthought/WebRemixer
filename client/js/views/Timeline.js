@@ -9,10 +9,10 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 	initialize: function(){
 			
 		this.$header = $('<div/>')
-			.prop('class', 'header')
+			.prop('className', 'header')
 			.appendTo(this.el);
 			
-		this.$toggleHeight = $('<button/>').prop('class', 'toggle-height')
+		this.$toggleHeight = $('<button/>').prop('className', 'toggle-height')
 			.button({
 				icons: {
 					primary: 'ui-icon-circle-triangle-s'
@@ -20,19 +20,19 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 				label: 'Collapse',
 				text: false
 			}).appendTo(this.$header);
-			
-		this.$timelineClips = $('<div/>').prop('class', 'timeline-clips').droppable({
-			accept: '.clip, .timeline-clip',
-			tolerance: 'pointer',
-			hoverClass: 'ui-state-highlight'
-		}).appendTo(this.el);
 
 		this.automationData = new WebRemixer.Views.AutomationData({
 			model: this.model.get('automationData')
 		});
-		this.automationData.$el.appendTo(this.$timelineClips);
+		this.automationData.$el.appendTo(this.el);
+
+		this.$timelineClips = $('<div/>').prop('className', 'timeline-clips').droppable({
+			accept: '.clip, .timeline-clip',
+			tolerance: 'pointer',
+			hoverClass: 'ui-state-highlight'
+		}).appendTo(this.el);
 			
-		$('<div/>').prop('class', 'selection').appendTo(this.el);
+		$('<div/>').prop('className', 'selection').appendTo(this.el);
 		
 		this.listenTo(this.model, {
 			'change:collapsed': this.onCollapsedChange,

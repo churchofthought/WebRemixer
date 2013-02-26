@@ -24,3 +24,5 @@ WebRemixer.View.prototype.$window.resize(function(){
 $(function(){
 	WebRemixer.View.prototype.$body = $(document.body);
 });
+
+HTMLDocument.prototype.createSVGElement = _.partial(HTMLDocument.prototype.createElementNS, 'http://www.w3.org/2000/svg');

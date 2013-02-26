@@ -8,8 +8,8 @@ WebRemixer.Views.Ruler = WebRemixer.View.extend({
 	initialize: function() {
 		var remix = this.model.get('remix');
 
-		this.$markings = $('<div/>').prop('class', 'markings').appendTo(this.el);
-		this.$timeHand = $('<div/>').prop('class', 'timeHand').appendTo(this.options.$remix);
+		this.$markings = $('<div/>').prop('className', 'markings').appendTo(this.el);
+		this.$timeHand = $('<div/>').prop('className', 'timeHand').appendTo(this.options.$remix);
 	
 		
 		

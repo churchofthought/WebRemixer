@@ -13,7 +13,7 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 	initialize: function(){
 		this.onSortUpdate = _.wrap(this.onSortUpdate, _.defer);
 
-		this.$newClip = $('<button/>').prop('class', 'new-clip').button({
+		this.$newClip = $('<button/>').prop('className', 'new-clip').button({
 			icons: {
 				primary: 'ui-icon-plus'
 			},
@@ -21,7 +21,7 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 			text: false
 		}).appendTo(this.el);
 			
-		this.$clips = $('<div/>').prop('class', 'clips').sortable({
+		this.$clips = $('<div/>').prop('className', 'clips').sortable({
 			tolerance: 'pointer'
 		}).appendTo(this.el);
 	

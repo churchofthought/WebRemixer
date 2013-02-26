@@ -27,7 +27,7 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		});*/
 
 		this.$contextMenu = $('<ul/>')
-			.prop('class', 'context-menu')
+			.prop('className', 'context-menu')
 			.append('<li data-cmd="duplicate"><a><span class="ui-icon ui-icon-copy"></span>Duplicate</a></li>')
 			.append('<li data-cmd="delete"><a><span class="ui-icon ui-icon-close"></span>Delete</a></li>')
 			.menu({

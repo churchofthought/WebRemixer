@@ -16,15 +16,15 @@ WebRemixer.Views.Clip = WebRemixer.View.extend({
 				appendTo: document.body
 			});*/
 			
-		$('<div/>').prop('class', 'buttons').append(
-			$('<button/>').prop('class', 'inspect').button({
+		$('<div/>').prop('className', 'buttons').append(
+			$('<button/>').prop('className', 'inspect').button({
 				icons: {
 					primary: 'ui-icon-pencil'
 				},
 				label: 'Inspect',
 				text: false
 			}),
-			$('<button/>').prop('class', 'delete').button({
+			$('<button/>').prop('className', 'delete').button({
 				icons: {
 					primary: 'ui-icon-close'
 				},

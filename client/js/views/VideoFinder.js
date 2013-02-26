@@ -9,10 +9,10 @@ WebRemixer.Views.VideoFinder = WebRemixer.View.extend({
 	},
 	
 	initialize: function(){
-		this.$search = $('<input type="text"/>').prop('class', 'search').appendTo(
+		this.$search = $('<input type="text"/>').prop('className', 'search').appendTo(
 			$('<div/>').attr('data-label', 'Search').appendTo(this.el)
 		);
-		this.$searchResults = $('<div/>').prop('class', 'search-results').appendTo(this.el);
+		this.$searchResults = $('<div/>').prop('className', 'search-results').appendTo(this.el);
 		
 		
 		this.listenTo(this.model, 'change:open', this.onVisibilityChange);

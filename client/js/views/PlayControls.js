@@ -12,7 +12,7 @@ WebRemixer.Views.PlayControls = WebRemixer.View.extend({
 	initialize: function(){	
 		this.$el.append(
 		
-			$('<button/>').prop('class', 'restart').button({
+			$('<button/>').prop('className', 'restart').button({
 				text: false,
 				icons: {
 					primary: 'ui-icon-seek-start'
@@ -20,7 +20,7 @@ WebRemixer.Views.PlayControls = WebRemixer.View.extend({
 				label: 'Restart'
 			}),
 			
-			this.$play = $('<button/>').prop('class', 'play').button({
+			this.$play = $('<button/>').prop('className', 'play').button({
 				text: false,
 				icons: {
 					primary: 'ui-icon-play'
@@ -28,7 +28,7 @@ WebRemixer.Views.PlayControls = WebRemixer.View.extend({
 				label: 'Play'
 			}),
 		 
-			$('<button/>').prop('class', 'stop').button({
+			$('<button/>').prop('className', 'stop').button({
 				text: false,
 				icons: {
 					primary: 'ui-icon-stop'

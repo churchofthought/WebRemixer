@@ -7,8 +7,6 @@
 	position: relative
 	background: #fff
 	
-	overflow: hidden
-	
 	transition: .25s height
 
 	> .header
@@ -49,6 +47,16 @@
 		position: relative
 		z-index: 1
 		left: $timeline-header-width
+		overflow: hidden
+
+	> .automation-data
+		position: absolute
+		left: $timeline-header-width
+		top: 0
+		width: 100%
+		height: 100%
+		z-index: 3
+		
 	
 	> .selection
 		background: #ccc

@@ -373,6 +373,8 @@ WebRemixer.View.prototype.$window.resize(function(){
 $(function(){
 	WebRemixer.View.prototype.$body = $(document.body);
 });
+
+HTMLDocument.prototype.createSVGElement = _.partial(HTMLDocument.prototype.createElementNS, 'http://www.w3.org/2000/svg');
 WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	className: 'automation-data',
 	
@@ -383,14 +385,55 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	},
 
 	initialize: function(){
-		this.$svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-		this.$pointPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-		this.$pointPath.className.baseVal = 'pointPath';
+		this.$svg = document.createSVGElement('svg');
+
+		var $defs = document.createSVGElement('defs');
+		$defs.appendChild(this.createGridPattern());
 		
+
+		this.$pointPath = document.createSVGElement('path');
+		this.$pointPath.className.baseVal = 'pointPath';
+
+		this.$svg.appendChild($defs);
+		this.$svg.appendChild(this.createBackground());
 		this.$svg.appendChild(this.$pointPath);
 		this.$el.append(this.$svg);
 
+		this.$tooltip = $('<div/>').prop('className', 'tooltip').appendTo(this.el);
+
 		this.listenTo(this.model, 'change:points', this.onPointsChange);
+	},
+
+	createGridPattern: function(){
+		var $pattern = document.createSVGElement('pattern');
+		
+		$pattern.id = 'automation-grid';
+		$pattern.setAttribute('patternUnits', 'userSpaceOnUse');
+		$pattern.setAttribute('width', '1em');
+		$pattern.setAttribute('height', '1em');
+
+		var $rect = document.createSVGElement('rect');
+		$rect.className.baseVal = 'vertical-rule';
+		$rect.setAttribute('width', 1);
+		$rect.setAttribute('height', '100%');
+		$pattern.appendChild($rect);
+
+		$rect = document.createSVGElement('rect');
+		$rect.className.baseVal = 'horizontal-rule';
+		$rect.setAttribute('width', '100%');
+		$rect.setAttribute('height', 1);
+		$pattern.appendChild($rect);
+
+		return $pattern;
+	},
+
+	createBackground: function(){
+		var $bg = document.createSVGElement('rect');
+		$bg.className.baseVal = 'bg';
+		$bg.setAttribute('width', '100%');
+		$bg.setAttribute('height', '100%');
+
+		return $bg;
 	},
 
 	pointFromEvent: function(event){
@@ -406,6 +449,16 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 
 	onMouseMove: function(event){
 		var mousePoint = this.pointFromEvent(event);
+
+		var height = this.$el.height();
+
+		this.$tooltip.css({
+			left: mousePoint[0],
+			top: mousePoint[1]
+		}).text('(' +
+			(Math.floor(100 * mousePoint[0] / WebRemixer.PX_PER_SEC)/ 100) + ',' +
+			(Math.floor(10000 * (height - mousePoint[1]) / height) / 100) +
+		')');
 
 		if (this.$draggingPoint){
 			this.$draggingPoint.setAttribute('cx', mousePoint[0]);
@@ -459,7 +512,7 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	},
 
 	drawPoint: function(point){
-		var $point = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+		var $point = document.createSVGElement('circle');
 		$point.className.baseVal = 'point';
 		$point.setAttribute('cx', point[0]);
 		$point.setAttribute('cy', point[1]);
@@ -499,15 +552,15 @@ WebRemixer.Views.Clip = WebRemixer.View.extend({
 				appendTo: document.body
 			});*/
 			
-		$('<div/>').prop('class', 'buttons').append(
-			$('<button/>').prop('class', 'inspect').button({
+		$('<div/>').prop('className', 'buttons').append(
+			$('<button/>').prop('className', 'inspect').button({
 				icons: {
 					primary: 'ui-icon-pencil'
 				},
 				label: 'Inspect',
 				text: false
 			}),
-			$('<button/>').prop('class', 'delete').button({
+			$('<button/>').prop('className', 'delete').button({
 				icons: {
 					primary: 'ui-icon-close'
 				},
@@ -562,24 +615,24 @@ WebRemixer.Views.ClipInspector = WebRemixer.View.extend({
 		});
 		
 		this.$title = $('<input type="text"/>')
-		.prop('class', 'clip-title')
+		.prop('className', 'clip-title')
 		.attr('placeholder', 'Title')
 		.appendTo(this.el);
 			
 			
 		
-		var $cutContainer = $('<div/>').prop('class', 'cut').appendTo($('<div/>').attr('data-label', 'Cut').appendTo(this.el));
+		var $cutContainer = $('<div/>').prop('className', 'cut').appendTo($('<div/>').attr('data-label', 'Cut').appendTo(this.el));
 		
-		this.$cutSlider = $('<div/>').prop('class', 'cut-slider').slider({
+		this.$cutSlider = $('<div/>').prop('className', 'cut-slider').slider({
 			range: true,
 			min: 0
 		}).appendTo($cutContainer);
 		
-		this.$cutStart = $('<span/>').prop('class', 'cut-start').appendTo($cutContainer);
-		this.$cutEnd = $('<span/>').prop('class', 'cut-end').appendTo($cutContainer);
+		this.$cutStart = $('<span/>').prop('className', 'cut-start').appendTo($cutContainer);
+		this.$cutEnd = $('<span/>').prop('className', 'cut-end').appendTo($cutContainer);
 		
 		
-		this.$video = $('<div/>').prop('class', 'clip-video').appendTo(
+		this.$video = $('<div/>').prop('className', 'clip-video').appendTo(
 			$('<div/>').attr('data-label', 'Video').appendTo(this.el)
 		);
 		
@@ -761,7 +814,7 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 	initialize: function(){
 		this.onSortUpdate = _.wrap(this.onSortUpdate, _.defer);
 
-		this.$newClip = $('<button/>').prop('class', 'new-clip').button({
+		this.$newClip = $('<button/>').prop('className', 'new-clip').button({
 			icons: {
 				primary: 'ui-icon-plus'
 			},
@@ -769,7 +822,7 @@ WebRemixer.Views.ClipManager = WebRemixer.View.extend({
 			text: false
 		}).appendTo(this.el);
 			
-		this.$clips = $('<div/>').prop('class', 'clips').sortable({
+		this.$clips = $('<div/>').prop('className', 'clips').sortable({
 			tolerance: 'pointer'
 		}).appendTo(this.el);
 	
@@ -928,7 +981,7 @@ WebRemixer.Views.PlayControls = WebRemixer.View.extend({
 	initialize: function(){	
 		this.$el.append(
 		
-			$('<button/>').prop('class', 'restart').button({
+			$('<button/>').prop('className', 'restart').button({
 				text: false,
 				icons: {
 					primary: 'ui-icon-seek-start'
@@ -936,7 +989,7 @@ WebRemixer.Views.PlayControls = WebRemixer.View.extend({
 				label: 'Restart'
 			}),
 			
-			this.$play = $('<button/>').prop('class', 'play').button({
+			this.$play = $('<button/>').prop('className', 'play').button({
 				text: false,
 				icons: {
 					primary: 'ui-icon-play'
@@ -944,7 +997,7 @@ WebRemixer.Views.PlayControls = WebRemixer.View.extend({
 				label: 'Play'
 			}),
 		 
-			$('<button/>').prop('class', 'stop').button({
+			$('<button/>').prop('className', 'stop').button({
 				text: false,
 				icons: {
 					primary: 'ui-icon-stop'
@@ -1015,7 +1068,7 @@ WebRemixer.Views.Remix = WebRemixer.View.extend({
 
 
 	initialize: function(){
-		this.$title = $('<input type="text"/>').prop('class', 'title').attr('placeholder', 'Title Your Remix').appendTo(this.el);
+		this.$title = $('<input type="text"/>').prop('className', 'title').attr('placeholder', 'Title Your Remix').appendTo(this.el);
 			
 		this.mainMenu = new WebRemixer.Views.MainMenu({
 			model: this.model.get('mainMenu')
@@ -1086,8 +1139,8 @@ WebRemixer.Views.Ruler = WebRemixer.View.extend({
 	initialize: function() {
 		var remix = this.model.get('remix');
 
-		this.$markings = $('<div/>').prop('class', 'markings').appendTo(this.el);
-		this.$timeHand = $('<div/>').prop('class', 'timeHand').appendTo(this.options.$remix);
+		this.$markings = $('<div/>').prop('className', 'markings').appendTo(this.el);
+		this.$timeHand = $('<div/>').prop('className', 'timeHand').appendTo(this.options.$remix);
 	
 		
 		
@@ -1154,10 +1207,10 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 	initialize: function(){
 			
 		this.$header = $('<div/>')
-			.prop('class', 'header')
+			.prop('className', 'header')
 			.appendTo(this.el);
 			
-		this.$toggleHeight = $('<button/>').prop('class', 'toggle-height')
+		this.$toggleHeight = $('<button/>').prop('className', 'toggle-height')
 			.button({
 				icons: {
 					primary: 'ui-icon-circle-triangle-s'
@@ -1165,19 +1218,19 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 				label: 'Collapse',
 				text: false
 			}).appendTo(this.$header);
-			
-		this.$timelineClips = $('<div/>').prop('class', 'timeline-clips').droppable({
-			accept: '.clip, .timeline-clip',
-			tolerance: 'pointer',
-			hoverClass: 'ui-state-highlight'
-		}).appendTo(this.el);
 
 		this.automationData = new WebRemixer.Views.AutomationData({
 			model: this.model.get('automationData')
 		});
-		this.automationData.$el.appendTo(this.$timelineClips);
+		this.automationData.$el.appendTo(this.el);
+
+		this.$timelineClips = $('<div/>').prop('className', 'timeline-clips').droppable({
+			accept: '.clip, .timeline-clip',
+			tolerance: 'pointer',
+			hoverClass: 'ui-state-highlight'
+		}).appendTo(this.el);
 			
-		$('<div/>').prop('class', 'selection').appendTo(this.el);
+		$('<div/>').prop('className', 'selection').appendTo(this.el);
 		
 		this.listenTo(this.model, {
 			'change:collapsed': this.onCollapsedChange,
@@ -1379,9 +1432,9 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 			'</ul>'
 		).menu();*/
 		
-		this.$loopIndicator = $('<div/>').prop('class', 'loop-indicator').appendTo(this.el);
+		this.$loopIndicator = $('<div/>').prop('className', 'loop-indicator').appendTo(this.el);
 		
-		var $buttons = $('<div/>').prop('class', 'buttons');
+		var $buttons = $('<div/>').prop('className', 'buttons');
 		
 		var loopId = Math.random().toString(36);
 		var $loopLabel = $('<label/>').attr('for', loopId).appendTo($buttons);
@@ -1399,7 +1452,7 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 				text: false
 			}),
 			
-			$('<button/>').prop('class', 'duplicate').button({
+			$('<button/>').prop('className', 'duplicate').button({
 				icons: {
 					primary: 'ui-icon-copy'
 				},
@@ -1407,7 +1460,7 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 				text: false
 			}),
 			
-			$('<button/>').prop('class', 'delete').button({
+			$('<button/>').prop('className', 'delete').button({
 				icons: {
 					primary: 'ui-icon-close'
 				},
@@ -1543,7 +1596,7 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		});*/
 
 		this.$contextMenu = $('<ul/>')
-			.prop('class', 'context-menu')
+			.prop('className', 'context-menu')
 			.append('<li data-cmd="duplicate"><a><span class="ui-icon ui-icon-copy"></span>Duplicate</a></li>')
 			.append('<li data-cmd="delete"><a><span class="ui-icon ui-icon-close"></span>Delete</a></li>')
 			.menu({
@@ -1738,10 +1791,10 @@ WebRemixer.Views.VideoFinder = WebRemixer.View.extend({
 	},
 	
 	initialize: function(){
-		this.$search = $('<input type="text"/>').prop('class', 'search').appendTo(
+		this.$search = $('<input type="text"/>').prop('className', 'search').appendTo(
 			$('<div/>').attr('data-label', 'Search').appendTo(this.el)
 		);
-		this.$searchResults = $('<div/>').prop('class', 'search-results').appendTo(this.el);
+		this.$searchResults = $('<div/>').prop('className', 'search-results').appendTo(this.el);
 		
 		
 		this.listenTo(this.model, 'change:open', this.onVisibilityChange);

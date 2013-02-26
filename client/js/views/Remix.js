@@ -9,7 +9,7 @@ WebRemixer.Views.Remix = WebRemixer.View.extend({
 
 
 	initialize: function(){
-		this.$title = $('<input type="text"/>').prop('class', 'title').attr('placeholder', 'Title Your Remix').appendTo(this.el);
+		this.$title = $('<input type="text"/>').prop('className', 'title').attr('placeholder', 'Title Your Remix').appendTo(this.el);
 			
 		this.mainMenu = new WebRemixer.Views.MainMenu({
 			model: this.model.get('mainMenu')

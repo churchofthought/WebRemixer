@@ -35,9 +35,9 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 			'</ul>'
 		).menu();*/
 		
-		this.$loopIndicator = $('<div/>').prop('class', 'loop-indicator').appendTo(this.el);
+		this.$loopIndicator = $('<div/>').prop('className', 'loop-indicator').appendTo(this.el);
 		
-		var $buttons = $('<div/>').prop('class', 'buttons');
+		var $buttons = $('<div/>').prop('className', 'buttons');
 		
 		var loopId = Math.random().toString(36);
 		var $loopLabel = $('<label/>').attr('for', loopId).appendTo($buttons);
@@ -55,7 +55,7 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 				text: false
 			}),
 			
-			$('<button/>').prop('class', 'duplicate').button({
+			$('<button/>').prop('className', 'duplicate').button({
 				icons: {
 					primary: 'ui-icon-copy'
 				},
@@ -63,7 +63,7 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 				text: false
 			}),
 			
-			$('<button/>').prop('class', 'delete').button({
+			$('<button/>').prop('className', 'delete').button({
 				icons: {
 					primary: 'ui-icon-close'
 				},
