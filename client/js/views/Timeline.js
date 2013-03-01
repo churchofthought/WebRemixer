@@ -66,9 +66,7 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 		}
 		
 		if (remix){
-			this.listenTo(remix, {
-				'change:selection': this.onSelectionChange
-			});
+			this.listenTo(remix, 'change:selection', this.onSelectionChange);
 		}
 	},
 	

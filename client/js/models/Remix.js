@@ -35,7 +35,8 @@ WebRemixer.Models.Remix = WebRemixer.Model.extend({
 		this.set({
 			 clipManager: new WebRemixer.Models.ClipManager(opts),
 			 timelineManager: new WebRemixer.Models.TimelineManager(opts),
-			 playerManager: new WebRemixer.Models.PlayerManager(opts)
+			 playerManager: new WebRemixer.Models.PlayerManager(opts),
+			 selection: {}
 		});
 		
 		this.listenTo(this, 'change', this.onChange);

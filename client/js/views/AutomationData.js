@@ -65,8 +65,11 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	},
 
 	onMouseDown: function(event){
+		this.mousedownPoint = this.pointFromEvent(event);
 		if (event.target.className.baseVal == 'point'){
 			this.$draggingPoint = event.target;
+			event.stopPropagation();
+			event.preventDefault();
 		}
 	},
 
@@ -84,6 +87,9 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 		')');
 
 		if (this.$draggingPoint){
+			event.stopPropagation();
+			event.preventDefault();
+
 			this.$draggingPoint.setAttribute('cx', mousePoint[0]);
 			this.$draggingPoint.setAttribute('cy', mousePoint[1]);
 
@@ -116,10 +122,14 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	},
 
 	onMouseUp: function(event){
-		if (!this.$draggingPoint){
-			this.addPoint(this.pointFromEvent(event));
+		if (this.mousedownPoint && !this.$draggingPoint){
+			var point = this.pointFromEvent(event);
+			if (_.isEqual(this.mousedownPoint, point)){
+				this.addPoint(point);
+			}
 		}
 
+		this.mousedownPoint = undefined;
 		this.$draggingPoint = undefined;
 	},
 

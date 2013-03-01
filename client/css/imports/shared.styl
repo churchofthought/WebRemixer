@@ -8,6 +8,9 @@ $video-height = 10em
 $clip-width = $video-width
 $clip-height = $video-height
 
+*
+	outline: none
+
 body
 	font-size: 16px
 	font-family: Monaco, sans-serif
@@ -15,8 +18,9 @@ body
 .ui-dialog
 	position: fixed !important
 
-*
-	outline: none
+.ui-selectable-helper
+	pointer-events: none
+	background: none
 
 .ui-button
 	box-sizing: border-box

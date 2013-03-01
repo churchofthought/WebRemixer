@@ -442,8 +442,11 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	},
 
 	onMouseDown: function(event){
+		this.mousedownPoint = this.pointFromEvent(event);
 		if (event.target.className.baseVal == 'point'){
 			this.$draggingPoint = event.target;
+			event.stopPropagation();
+			event.preventDefault();
 		}
 	},
 
@@ -461,6 +464,9 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 		')');
 
 		if (this.$draggingPoint){
+			event.stopPropagation();
+			event.preventDefault();
+
 			this.$draggingPoint.setAttribute('cx', mousePoint[0]);
 			this.$draggingPoint.setAttribute('cy', mousePoint[1]);
 
@@ -493,10 +499,14 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	},
 
 	onMouseUp: function(event){
-		if (!this.$draggingPoint){
-			this.addPoint(this.pointFromEvent(event));
+		if (this.mousedownPoint && !this.$draggingPoint){
+			var point = this.pointFromEvent(event);
+			if (_.isEqual(this.mousedownPoint, point)){
+				this.addPoint(point);
+			}
 		}
 
+		this.mousedownPoint = undefined;
 		this.$draggingPoint = undefined;
 	},
 
@@ -1264,9 +1274,7 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 		}
 		
 		if (remix){
-			this.listenTo(remix, {
-				'change:selection': this.onSelectionChange
-			});
+			this.listenTo(remix, 'change:selection', this.onSelectionChange);
 		}
 	},
 	
@@ -1577,8 +1585,8 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		selectableselected : 'onSelected',
 		selectableunselected : 'onUnselected',
 		selectablestop : 'onSelectStop',
-		//'contextmenu .timeline-clips' : 'onContextMenu',
-		//'contextmenu .selection' : 'onContextMenu',
+		'contextmenu .timeline-clips' : 'onContextMenu',
+		'contextmenu .selection' : 'onContextMenu',
 		mousedown : 'onMouseDown',
 		sortupdate : 'onTimelinesSortUpdate'
 	},
@@ -1591,9 +1599,9 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 			handle: '.header'
 		});
 
-		/*this.$el.selectable({
+		this.$el.selectable({
 			filter: '.timeline-clip'
-		});*/
+		});
 
 		this.$contextMenu = $('<ul/>')
 			.prop('className', 'context-menu')
@@ -1674,19 +1682,27 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 	
 	/* TODO :: make more efficient! */
 	updateSelection: function(repeat){
-		this.model.get('remix').set('selection', {
-			offset: this.$helper.offset(),
-			width: this.$helper.width(),
-			height: this.$helper.height()
-		});
+		var remix = this.model.get('remix');
+		var $helper = this.$helper;
+		var selection = remix.get('selection');
+
+		var updateSelectionProc = function(){
+			selection.offset = $helper.offset();
+			selection.width = $helper.width();
+			selection.height = $helper.height();
+			remix.trigger('change:selection', remix, selection);
+		};
+
+		updateSelectionProc();
+
 		if (repeat){
-			this.updateSelectionTimeoutID = _.delay(this.updateSelection, 50, true);
+			this.updateSelectionIntervalID = setInterval(updateSelectionProc, 50);
 		}
 	},
 
 	onSelectStop: function(event, ui){
 		this.updateSelection();
-		clearTimeout(this.updateSelectionTimeoutID);
+		clearInterval(this.updateSelectionIntervalID);
 	},
 
 	onContextMenu: function(event){
@@ -2169,7 +2185,8 @@ WebRemixer.Models.Remix = WebRemixer.Model.extend({
 		this.set({
 			 clipManager: new WebRemixer.Models.ClipManager(opts),
 			 timelineManager: new WebRemixer.Models.TimelineManager(opts),
-			 playerManager: new WebRemixer.Models.PlayerManager(opts)
+			 playerManager: new WebRemixer.Models.PlayerManager(opts),
+			 selection: {}
 		});
 		
 		this.listenTo(this, 'change', this.onChange);
@@ -2214,7 +2231,7 @@ WebRemixer.Models.Timeline = WebRemixer.Model.extend({
 		this.onChange = _.debounce(this.onChange, WebRemixer.Config.saveOnChangeDelay);
 
 		this.set({
-			automationData: new WebRemixer.Models.AutomationData(),
+			automationData: new WebRemixer.Models.AutomationData({timeline: this}),
 			timelineClips : new WebRemixer.Collections.TimelineClips(),
 			selection : {
 				startTime: 0,
