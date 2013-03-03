@@ -46,11 +46,11 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 
 		this.onRemixChange(this.model, this.model.get('remix'));
 
-		this.$window.scroll(this.onScroll);
+		WebRemixer.Util.$window.scroll(this.onScroll);
 	},
 
 	onScroll: function(){
-		this.$header.css('transform', 'translate3d(0,' + (-this.$window.scrollTop()) + 'px,0)');
+		this.$header.css('transform', 'translate3d(0,' + (-WebRemixer.Util.$window.scrollTop()) + 'px,0)');
 	},
 	
 	onOrderChange: function(timeline, order){

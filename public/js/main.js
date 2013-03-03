@@ -6,18 +6,19 @@ var WebRemixer = {
 	Models: {},
 	Collections: {}
 };
-WebRemixer.preloadDelay = .5;
 WebRemixer.EMS_PER_SEC = 8;
 $(function(){
 	WebRemixer.PX_PER_SEC = WebRemixer.EMS_PER_SEC * parseFloat($(document.body).css('fontSize'));
 });
 
-
-// model save delay
-WebRemixer.Config.saveOnChangeDelay = 500;
-
 // models
 WebRemixer.Models.idAttribute = '_id';
+
+
+// -- configurable constants -- //
+// model save delay
+WebRemixer.Config.saveOnChangeDelay = 500;
+WebRemixer.Config.preloadDelay = .5;
 (function(){
 	// keep qsl function as a closure with context variable "selector"
 	// faster to set the variable "selector", than creating a closure everytime
@@ -311,42 +312,18 @@ WebRemixer.Routers.Remix = Backbone.Router.extend({
 	}
 
 });
-WebRemixer.Util.intersects = function(lineClip1, lineClip2){
-	var start1 = lineClip1.get('startTime');
-	var end1 = start1 + lineClip1.get('duration') + WebRemixer.preloadDelay;
-	
-	var start2 = lineClip2.get('startTime');
-	var end2 = start2 + lineClip2.get('duration');
+// give every view access to common elements and window width / height
+WebRemixer.Util.$window = $(window);
+WebRemixer.Util.$html = $(document.documentElement);
 
-	if (
-		// if second clip starts within the first clip  
-		(start2 > start1 && start2 < end1)
-		
-		// if second clip ends within the first clip
-		|| (end2 > start1 && end2 < end1)
-		
-		// if second clip is large enough to contain the first clip
-		|| (start2 <= start1 && end2 >= end1)
-		
-	){ 
-		return true;
-	}
-	
-};
+WebRemixer.Util.$window.resize(function(){
+	WebRemixer.Util.winWidth = WebRemixer.Util.$window.width();
+	WebRemixer.Util.winHeight = WebRemixer.Util.$window.height();
+}).trigger('resize');
 
-WebRemixer.Util.createOrUpdateModels = function(Model, dataArr){
-	for (var i = dataArr.length; i--;){
-		var dat = dataArr[i];
-			
-		var existing = WebRemixer.Models.all.get(dat[WebRemixer.Models.idAttribute]);
-		
-		if (existing){
-			existing.set( existing.parse(dat) );
-		}else{
-			new Model( dat, {parse: true});
-		}
-	}
-};
+$(function(){
+	WebRemixer.Util.$body = $(document.body);
+});
 WebRemixer.View = Backbone.View.extend({
 	constructor: function(){
 		_.bindAll(this);
@@ -359,25 +336,10 @@ WebRemixer.View = Backbone.View.extend({
 	}
 });
 
-// give every view access to common elements and window width / height
-_.extend(WebRemixer.View.prototype, {
-	$window: $(window),
-	$html: $(document.documentElement)
-});
-
-WebRemixer.View.prototype.$window.resize(function(){
-	WebRemixer.View.prototype.windowWidth = WebRemixer.View.prototype.$window.width();
-	WebRemixer.View.prototype.windowHeight = WebRemixer.View.prototype.$window.height();
-}).trigger('resize');
-
-$(function(){
-	WebRemixer.View.prototype.$body = $(document.body);
-});
-
 HTMLDocument.prototype.createSVGElement = _.partial(HTMLDocument.prototype.createElementNS, 'http://www.w3.org/2000/svg');
 WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	className: 'automation-data',
-	
+
 	events: {
 		mousedown: 'onMouseDown',
 		mousemove: 'onMouseMove',
@@ -389,7 +351,7 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 
 		var $defs = document.createSVGElement('defs');
 		$defs.appendChild(this.createGridPattern());
-		
+
 
 		this.$pointPath = document.createSVGElement('path');
 		this.$pointPath.className.baseVal = 'pointPath';
@@ -406,7 +368,7 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 
 	createGridPattern: function(){
 		var $pattern = document.createSVGElement('pattern');
-		
+
 		$pattern.id = 'automation-grid';
 		$pattern.setAttribute('patternUnits', 'userSpaceOnUse');
 		$pattern.setAttribute('width', '1em');
@@ -540,7 +502,7 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 
 	onPointsChange: function(automationData, points){
 
-		
+
 
 	}
 });
@@ -1164,11 +1126,11 @@ WebRemixer.Views.Ruler = WebRemixer.View.extend({
 
 		this.onPlayTimeChange(remix, remix.get('playTime'));
 	
-		this.$window.scroll(this.onScroll);
+		WebRemixer.Util.$window.scroll(this.onScroll);
 	},
 
 	onScroll: function(){
-		this.$el.css('transform', 'translate3d(0,' + this.$window.scrollTop() + 'px,0)');
+		this.$el.css('transform', 'translate3d(0,' + WebRemixer.Util.$window.scrollTop() + 'px,0)');
 	},
 	
 	onClick: function(event){
@@ -1190,9 +1152,9 @@ WebRemixer.Views.Ruler = WebRemixer.View.extend({
 	
 	onPlayTimeChange: function(remix, playTime){
 		
-		if (this.$body){
-			this.$body.add(this.$html).stop(true, true).animate({
-				scrollLeft: Math.max(0, WebRemixer.PX_PER_SEC * playTime + this.$el.prop('offsetLeft') - this.windowWidth / 2)
+		if (WebRemixer.Util.$body){
+			WebRemixer.Util.$body.add(WebRemixer.Util.$html).stop(true, true).animate({
+				scrollLeft: Math.max(0, WebRemixer.PX_PER_SEC * playTime + this.$el.prop('offsetLeft') - WebRemixer.Util.winWidth / 2)
 			});
 		}
 
@@ -1254,11 +1216,11 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 
 		this.onRemixChange(this.model, this.model.get('remix'));
 
-		this.$window.scroll(this.onScroll);
+		WebRemixer.Util.$window.scroll(this.onScroll);
 	},
 
 	onScroll: function(){
-		this.$header.css('transform', 'translate3d(0,' + (-this.$window.scrollTop()) + 'px,0)');
+		this.$header.css('transform', 'translate3d(0,' + (-WebRemixer.Util.$window.scrollTop()) + 'px,0)');
 	},
 	
 	onOrderChange: function(timeline, order){
@@ -2083,6 +2045,19 @@ WebRemixer.Model = Backbone.Model.extend({
 	}
 });
 
+WebRemixer.Model.createOrUpdate = function(dataArr){
+	for (var i = dataArr.length; i--;){
+		var dat = dataArr[i];
+		var existing = WebRemixer.Models.all.get(dat[this.prototype.idAttribute]);
+
+		if (existing){
+			existing.set( existing.parse(dat) );
+		}else{
+			new this( dat, {parse: true});
+		}
+	}
+};
+
 
 
 
@@ -2172,7 +2147,7 @@ WebRemixer.Models.Remix = WebRemixer.Model.extend({
 		if (!_.isArray(this.get('clipIds'))){
 			this.set('clipIds', []);
 		}
-		
+
 		this.set({
 						mainMenu: new WebRemixer.Models.MainMenu(opts),
 				playControls: new WebRemixer.Models.PlayControls(opts),
@@ -2211,11 +2186,11 @@ WebRemixer.Models.Remix = WebRemixer.Model.extend({
 	},
 	
 	onFetchedChildren: function(res){
-		WebRemixer.Util.createOrUpdateModels(WebRemixer.Models.Clip, res.clips);
+		WebRemixer.Models.Clip.createOrUpdate(res.clips);
 		
-		WebRemixer.Util.createOrUpdateModels(WebRemixer.Models.Timeline, res.timelines);
+		WebRemixer.Models.Timeline.createOrUpdate(res.timelines);
 		
-		WebRemixer.Util.createOrUpdateModels(WebRemixer.Models.TimelineClip, res.timelineClips);
+		WebRemixer.Models.TimelineClip.createOrUpdate(res.timelineClips);
 
 		this.trigger('fetchedChildren');
 	}
@@ -2468,7 +2443,7 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 		
 		if (playing){
 			if (delay >= 0){
-				this.playTimeout = setTimeout(this.prepareToPlay, Math.max(0, delay - WebRemixer.preloadDelay) * 1000);
+				this.playTimeout = setTimeout(this.prepareToPlay, Math.max(0, delay - WebRemixer.Config.preloadDelay) * 1000);
 			}else if (-delay <= this.get('duration')){
 				this.play();
 			}
@@ -2530,7 +2505,27 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 			this.playTimeout = undefined; 
 		}
 		this.get('clipPlayer').set('playing', false);
+	},
+
+	intersects: function(lineClip){
+		var start1 = this.get('startTime');
+		var end1 = start1 + this.get('duration') + WebRemixer.Config.preloadDelay;
+		
+		var start2 = lineClip.get('startTime');
+		var end2 = start2 + lineClip.get('duration');
+
+		return (
+			// if second clip starts within the first clip  
+			(start2 > start1 && start2 < end1) ||
+
+			// if second clip ends within the first clip
+			(end2 > start1 && end2 < end1) ||
+
+			// if second clip is large enough to contain the first clip
+			(start2 <= start1 && end2 >= end1)
+		);
 	}
+
 });
 WebRemixer.Models.AutomationData = WebRemixer.Model.extend({
 
@@ -2650,7 +2645,7 @@ WebRemixer.Models.ClipPlayer = WebRemixer.Model.extend({
 		if (this.get('loop')){
 			var timeTillLoop = clipDuration - playTime;
 			this.loopTime = new Date() * 1 + timeTillLoop * 1000;
-			this.loopTimeout = setTimeout(this.prepareToLoop, Math.max(0, timeTillLoop - WebRemixer.preloadDelay) * 1000);
+			this.loopTimeout = setTimeout(this.prepareToLoop, Math.max(0, timeTillLoop - WebRemixer.Config.preloadDelay) * 1000);
 		}
 		
 		this.set({
@@ -2743,55 +2738,55 @@ WebRemixer.Models.PlayerManager = WebRemixer.Model.extend({
 
 	initialize: function(){
 		this.allocatePlayers = _.debounce(this.allocatePlayers, 250);
-	
+
 		this.set({
 			videoPlayersByVideo: {},
 			timelineClipsByVideo: {}
 		});
-				
+
 		this.listenTo(this.get('remix').get('timelines'), {
 			add: this.onTimelinesAdd
 		});
 	},
-	
+
 	onTimelinesAdd: function(timeline){
 		this.listenTo(timeline.get('timelineClips'), {
 			add: this.onTimelineClipsAdd,
 			remove: this.onTimelineClipsRemove
 		});
 	},
-	
+
 	allocatePlayers: function(){
 		var timelineClipsByVideo = this.get('timelineClipsByVideo');
 		for (var cid in timelineClipsByVideo){
 			var timelineClips = timelineClipsByVideo[cid];
-			
+
 			var needed = 0;
 			for (var i = timelineClips.length; i--; ){
 				var curr = timelineClips.at(i);
 				var intersections = 0;
 				for (var z = timelineClips.length; z--; ){
 					var other = timelineClips.at(z);
-					if (WebRemixer.Util.intersects(curr, other)){
+					if (curr.intersects(other)){
 						intersections += (other.get('loop') && other.get('duration') > other.get('clip').get('cutDuration')) ? 2 : 1;
 					}
 				}
 				needed = Math.max(needed, intersections);
 			}
-			
+
 			this.allocatePlayersForVideo(timelineClips.video, needed);
 		}
 	},
-	
+
 	allocatePlayersForVideo: function(video, needed){
 		var videoPlayersByVideo = this.get('videoPlayersByVideo');
-	
+
 		var videoPlayers = videoPlayersByVideo[video.cid];
-		
+
 		if (!videoPlayers){
 			videoPlayers = videoPlayersByVideo[video.cid] = new WebRemixer.Collections.VideoPlayers();
 		}
-		
+
 		if (videoPlayers.length < needed){
 			do {
 				var videoPlayer =
@@ -2799,7 +2794,7 @@ WebRemixer.Models.PlayerManager = WebRemixer.Model.extend({
 						video: video
 					});
 				videoPlayers.add(videoPlayer);
-				
+
 				//instantiate view so flash/html5 videoPlayer gets appended to dom
 				new WebRemixer.Views.VideoPlayer({
 					el: $('<div/>').appendTo(document.body),
@@ -2812,32 +2807,32 @@ WebRemixer.Models.PlayerManager = WebRemixer.Model.extend({
 			} while (videoPlayers.length > needed);
 		}
 	},
-	
+
 	onTimelineClipsAdd: function(timelineClip){
 		var video = timelineClip.get('clip').get('video');
 		var timelineClipsByVideo = this.get('timelineClipsByVideo');
-	
+
 		var timelineClips = timelineClipsByVideo[video.cid];
 		if (!timelineClips){
 			timelineClips = timelineClipsByVideo[video.cid] = new WebRemixer.Collections.TimelineClips();
 			timelineClips.video = video;
 		}
-		
+
 		timelineClips.add(timelineClip);
 
 		this.listenTo(timelineClip, 'change destroy', this.allocatePlayers);
 
 		this.allocatePlayers();
 	},
-	
+
 	onTimelineClipsRemove: function(timelineClip){
 		this.stopListening(timelineClip);
-	
+
 		this.get('timelineClipsByVideo')[timelineClip.get('clip').get('video').cid].remove(timelineClip);
-		
+
 		this.allocatePlayers();
 	}
-	
+
 });
 WebRemixer.Models.Ruler = WebRemixer.Model.extend({
 	initialize: function(){

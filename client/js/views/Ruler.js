@@ -23,11 +23,11 @@ WebRemixer.Views.Ruler = WebRemixer.View.extend({
 
 		this.onPlayTimeChange(remix, remix.get('playTime'));
 	
-		this.$window.scroll(this.onScroll);
+		WebRemixer.Util.$window.scroll(this.onScroll);
 	},
 
 	onScroll: function(){
-		this.$el.css('transform', 'translate3d(0,' + this.$window.scrollTop() + 'px,0)');
+		this.$el.css('transform', 'translate3d(0,' + WebRemixer.Util.$window.scrollTop() + 'px,0)');
 	},
 	
 	onClick: function(event){
@@ -49,9 +49,9 @@ WebRemixer.Views.Ruler = WebRemixer.View.extend({
 	
 	onPlayTimeChange: function(remix, playTime){
 		
-		if (this.$body){
-			this.$body.add(this.$html).stop(true, true).animate({
-				scrollLeft: Math.max(0, WebRemixer.PX_PER_SEC * playTime + this.$el.prop('offsetLeft') - this.windowWidth / 2)
+		if (WebRemixer.Util.$body){
+			WebRemixer.Util.$body.add(WebRemixer.Util.$html).stop(true, true).animate({
+				scrollLeft: Math.max(0, WebRemixer.PX_PER_SEC * playTime + this.$el.prop('offsetLeft') - WebRemixer.Util.winWidth / 2)
 			});
 		}
 

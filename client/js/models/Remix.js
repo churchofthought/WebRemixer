@@ -22,7 +22,7 @@ WebRemixer.Models.Remix = WebRemixer.Model.extend({
 		if (!_.isArray(this.get('clipIds'))){
 			this.set('clipIds', []);
 		}
-		
+
 		this.set({
 						mainMenu: new WebRemixer.Models.MainMenu(opts),
 				playControls: new WebRemixer.Models.PlayControls(opts),
@@ -61,11 +61,11 @@ WebRemixer.Models.Remix = WebRemixer.Model.extend({
 	},
 	
 	onFetchedChildren: function(res){
-		WebRemixer.Util.createOrUpdateModels(WebRemixer.Models.Clip, res.clips);
+		WebRemixer.Models.Clip.createOrUpdate(res.clips);
 		
-		WebRemixer.Util.createOrUpdateModels(WebRemixer.Models.Timeline, res.timelines);
+		WebRemixer.Models.Timeline.createOrUpdate(res.timelines);
 		
-		WebRemixer.Util.createOrUpdateModels(WebRemixer.Models.TimelineClip, res.timelineClips);
+		WebRemixer.Models.TimelineClip.createOrUpdate(res.timelineClips);
 
 		this.trigger('fetchedChildren');
 	}

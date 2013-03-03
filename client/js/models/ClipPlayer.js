@@ -69,7 +69,7 @@ WebRemixer.Models.ClipPlayer = WebRemixer.Model.extend({
 		if (this.get('loop')){
 			var timeTillLoop = clipDuration - playTime;
 			this.loopTime = new Date() * 1 + timeTillLoop * 1000;
-			this.loopTimeout = setTimeout(this.prepareToLoop, Math.max(0, timeTillLoop - WebRemixer.preloadDelay) * 1000);
+			this.loopTimeout = setTimeout(this.prepareToLoop, Math.max(0, timeTillLoop - WebRemixer.Config.preloadDelay) * 1000);
 		}
 		
 		this.set({

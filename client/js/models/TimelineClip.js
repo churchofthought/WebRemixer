@@ -83,7 +83,7 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 		
 		if (playing){
 			if (delay >= 0){
-				this.playTimeout = setTimeout(this.prepareToPlay, Math.max(0, delay - WebRemixer.preloadDelay) * 1000);
+				this.playTimeout = setTimeout(this.prepareToPlay, Math.max(0, delay - WebRemixer.Config.preloadDelay) * 1000);
 			}else if (-delay <= this.get('duration')){
 				this.play();
 			}
@@ -145,5 +145,25 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 			this.playTimeout = undefined; 
 		}
 		this.get('clipPlayer').set('playing', false);
+	},
+
+	intersects: function(lineClip){
+		var start1 = this.get('startTime');
+		var end1 = start1 + this.get('duration') + WebRemixer.Config.preloadDelay;
+		
+		var start2 = lineClip.get('startTime');
+		var end2 = start2 + lineClip.get('duration');
+
+		return (
+			// if second clip starts within the first clip  
+			(start2 > start1 && start2 < end1) ||
+
+			// if second clip ends within the first clip
+			(end2 > start1 && end2 < end1) ||
+
+			// if second clip is large enough to contain the first clip
+			(start2 <= start1 && end2 >= end1)
+		);
 	}
+
 });

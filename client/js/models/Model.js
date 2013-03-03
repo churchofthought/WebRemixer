@@ -109,6 +109,19 @@ WebRemixer.Model = Backbone.Model.extend({
 	}
 });
 
+WebRemixer.Model.createOrUpdate = function(dataArr){
+	for (var i = dataArr.length; i--;){
+		var dat = dataArr[i];
+		var existing = WebRemixer.Models.all.get(dat[this.prototype.idAttribute]);
+
+		if (existing){
+			existing.set( existing.parse(dat) );
+		}else{
+			new this( dat, {parse: true});
+		}
+	}
+};
+
 
 
 

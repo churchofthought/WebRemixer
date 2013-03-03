@@ -1,6 +1,6 @@
 WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	className: 'automation-data',
-	
+
 	events: {
 		mousedown: 'onMouseDown',
 		mousemove: 'onMouseMove',
@@ -12,7 +12,7 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 
 		var $defs = document.createSVGElement('defs');
 		$defs.appendChild(this.createGridPattern());
-		
+
 
 		this.$pointPath = document.createSVGElement('path');
 		this.$pointPath.className.baseVal = 'pointPath';
@@ -29,7 +29,7 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 
 	createGridPattern: function(){
 		var $pattern = document.createSVGElement('pattern');
-		
+
 		$pattern.id = 'automation-grid';
 		$pattern.setAttribute('patternUnits', 'userSpaceOnUse');
 		$pattern.setAttribute('width', '1em');
@@ -163,7 +163,7 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 
 	onPointsChange: function(automationData, points){
 
-		
+
 
 	}
 });
