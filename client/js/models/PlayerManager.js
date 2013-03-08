@@ -65,7 +65,6 @@ WebRemixer.Models.PlayerManager = WebRemixer.Model.extend({
 
 				//instantiate view so flash/html5 videoPlayer gets appended to dom
 				new WebRemixer.Views.VideoPlayer({
-					el: $('<div/>').appendTo(document.body),
 					model: videoPlayer
 				});
 			} while (videoPlayers.length < needed);

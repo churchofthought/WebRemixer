@@ -4,12 +4,13 @@
 
 	background-size: contain !important
 	height: $timeline-height
-	min-height: @height
-	max-height: @height
 	box-sizing: border-box
 	border: 1px solid $border-color
 	overflow: hidden
 	transition: .5s border
+
+	&.ui-draggable-dragging
+		opacity: .5
 	
 	> .loop-indicator
 		position: absolute

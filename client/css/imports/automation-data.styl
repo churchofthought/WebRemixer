@@ -1,5 +1,14 @@
 .automation-data
 
+	transition: .5s all
+
+	pointer-events: none
+	background: none
+
+	&.hidden
+		opacity: 0
+		visibility: hidden
+
 	> .tooltip
 		margin-top: .5em
 		margin-left: .5em
@@ -12,7 +21,7 @@
 		font-family: monospace
 		border: 1px solid rgba(0,0,0,0.5);
 
-	&:not(:hover)
+	.timeline-clips:not(:hover) > &
 		> .tooltip
 			visibility: hidden
 
@@ -24,14 +33,15 @@
 			fill: url(#automation-grid)
 
 		> .point
-			stroke: #000
-			stroke-width: .1em
-			fill: #F00
+			stroke: #fff
+			stroke-width: .25em
+			fill: #3cc2ff;
+			pointer-events: all
 
 		> .pointPath
 			fill: none
-			stroke: #000
-			stroke-width: .1em
+			stroke: #3cc2ff;
+			stroke-width: .15em
 
 #automation-grid
 	> rect

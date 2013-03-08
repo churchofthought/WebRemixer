@@ -95,37 +95,28 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 	},
 	
 	onSelectStart: function(){
-		_.defer(this.afterSelectStart);
+		setTimeout(this.afterSelectStart, 0);
 	},
 	
 	afterSelectStart: function(){
 		this.$helper = $.single('body > .ui-selectable-helper');
-		this.updateSelection(true);
+		this.updateSelectionInterval = setInterval(this.updateSelection, 0);
 	},
 	
-	/* TODO :: make more efficient! */
 	updateSelection: function(repeat){
 		var remix = this.model.get('remix');
-		var $helper = this.$helper;
 		var selection = remix.get('selection');
 
-		var updateSelectionProc = function(){
-			selection.offset = $helper.offset();
-			selection.width = $helper.width();
-			selection.height = $helper.height();
-			remix.trigger('change:selection', remix, selection);
-		};
-
-		updateSelectionProc();
-
-		if (repeat){
-			this.updateSelectionIntervalID = setInterval(updateSelectionProc, 50);
-		}
+		selection.offset = this.$helper.offset();
+		selection.width = this.$helper.width();
+		selection.height = this.$helper.height();
+		remix.trigger('change:selection', remix, selection);
 	},
 
 	onSelectStop: function(event, ui){
 		this.updateSelection();
-		clearInterval(this.updateSelectionIntervalID);
+		clearInterval(this.updateSelectionInterval);
+		this.updateSelectionInterval = undefined;
 	},
 
 	onContextMenu: function(event){

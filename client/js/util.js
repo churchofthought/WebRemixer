@@ -9,4 +9,7 @@ WebRemixer.Util.$window.resize(function(){
 
 $(function(){
 	WebRemixer.Util.$body = $(document.body);
+	WebRemixer.PX_PER_SEC = WebRemixer.EMS_PER_SEC * parseFloat(WebRemixer.Util.$body.css('fontSize'));
 });
+
+HTMLDocument.prototype.createSVGElement = _.partial(HTMLDocument.prototype.createElementNS, 'http://www.w3.org/2000/svg');

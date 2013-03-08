@@ -7,9 +7,6 @@ var WebRemixer = {
 	Collections: {}
 };
 WebRemixer.EMS_PER_SEC = 8;
-$(function(){
-	WebRemixer.PX_PER_SEC = WebRemixer.EMS_PER_SEC * parseFloat($(document.body).css('fontSize'));
-});
 
 // models
 WebRemixer.Models.idAttribute = '_id';
@@ -323,7 +320,10 @@ WebRemixer.Util.$window.resize(function(){
 
 $(function(){
 	WebRemixer.Util.$body = $(document.body);
+	WebRemixer.PX_PER_SEC = WebRemixer.EMS_PER_SEC * parseFloat(WebRemixer.Util.$body.css('fontSize'));
 });
+
+HTMLDocument.prototype.createSVGElement = _.partial(HTMLDocument.prototype.createElementNS, 'http://www.w3.org/2000/svg');
 WebRemixer.View = Backbone.View.extend({
 	constructor: function(){
 		_.bindAll(this);
@@ -335,18 +335,21 @@ WebRemixer.View = Backbone.View.extend({
 			.data('view', this);
 	}
 });
-
-HTMLDocument.prototype.createSVGElement = _.partial(HTMLDocument.prototype.createElementNS, 'http://www.w3.org/2000/svg');
 WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	className: 'automation-data',
 
-	events: {
-		mousedown: 'onMouseDown',
-		mousemove: 'onMouseMove',
-		mouseup: 'onMouseUp'
+	initialize: function(options){
+
+		this.$timelineClips = options.$timelineClips;
+
+		// we need to be appended to dom to get the pointMinY and pointRangeY
+		setTimeout(this.init, 0);
 	},
 
-	initialize: function(){
+	init: function(){
+		this.pointMinY = this.$timelineClips.height();
+		this.pointRangeY = this.pointMinY * 0.8;
+
 		this.$svg = document.createSVGElement('svg');
 
 		var $defs = document.createSVGElement('defs');
@@ -363,7 +366,11 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 
 		this.$tooltip = $('<div/>').prop('className', 'tooltip').appendTo(this.el);
 
-		this.listenTo(this.model, 'change:points', this.onPointsChange);
+		var timeline = this.model.get('timeline');
+
+		this.listenTo(timeline, 'change:selectedAutomationPoints', this.onPointsChange);
+
+		this.onPointsChange(timeline, timeline.get('selectedAutomationPoints'));
 	},
 
 	createGridPattern: function(){
@@ -405,7 +412,7 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 
 	onMouseDown: function(event){
 		this.mousedownPoint = this.pointFromEvent(event);
-		if (event.target.className.baseVal == 'point'){
+		if (event.target.className.baseVal === 'point'){
 			this.$draggingPoint = event.target;
 			event.stopPropagation();
 			event.preventDefault();
@@ -414,39 +421,33 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 
 	onMouseMove: function(event){
 		var mousePoint = this.pointFromEvent(event);
-
-		var height = this.$el.height();
+		var realPoint =  [
+			mousePoint[0] / WebRemixer.PX_PER_SEC,
+			100 * ((this.pointMinY - mousePoint[1]) / this.pointRangeY)
+		];
 
 		this.$tooltip.css({
 			left: mousePoint[0],
 			top: mousePoint[1]
 		}).text('(' +
-			(Math.floor(100 * mousePoint[0] / WebRemixer.PX_PER_SEC)/ 100) + ',' +
-			(Math.floor(10000 * (height - mousePoint[1]) / height) / 100) +
+			(Math.floor(100 * realPoint[0]) / 100) + ',' +
+			(Math.floor(100 * realPoint[1]) / 100) +
 		')');
 
 		if (this.$draggingPoint){
-			event.stopPropagation();
-			event.preventDefault();
+			var points = this.model.get('timeline').get('selectedAutomationPoints');
 
 			this.$draggingPoint.setAttribute('cx', mousePoint[0]);
 			this.$draggingPoint.setAttribute('cy', mousePoint[1]);
 
-
-			var points = this.model.get('points');
-
 			var draggedPoint = this.$draggingPoint.point;
 
-			var curIndex = _.sortedIndex(points, draggedPoint, function(p){
-				return p[0];
-			});
+			var curIndex = _.sortedIndex(points, draggedPoint, 0);
 
-			var newIndex = _.sortedIndex(points, mousePoint, function(p){
-				return p[0];
-			});
+			var newIndex = _.sortedIndex(points, realPoint, 0);
 
-			draggedPoint[0] = mousePoint[0];
-			draggedPoint[1] = mousePoint[1];
+			draggedPoint[0] = realPoint[0];
+			draggedPoint[1] = realPoint[1];
 
 			var diff = newIndex - curIndex;
 
@@ -464,20 +465,23 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 		if (this.mousedownPoint && !this.$draggingPoint){
 			var point = this.pointFromEvent(event);
 			if (_.isEqual(this.mousedownPoint, point)){
+				point[0] /= WebRemixer.PX_PER_SEC;
+				point[1] = 100 * ((this.pointMinY - point[1]) / this.pointRangeY)
 				this.addPoint(point);
 			}
 		}
+
+		// TODO this shouldn't fire change all the time
+		this.firePointsChange();
 
 		this.mousedownPoint = undefined;
 		this.$draggingPoint = undefined;
 	},
 
 	addPoint: function(point){
-		var points = this.model.get('points');
+		var points = this.model.get('timeline').get('selectedAutomationPoints');
 
-		points.splice(_.sortedIndex(points, point, function(p){
-			return p[0];
-		}), 0, point);
+		points.splice(_.sortedIndex(points, point, 0), 0, point);
 
 		this.drawPoint(point);
 		this.drawPath(points);
@@ -486,9 +490,9 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	drawPoint: function(point){
 		var $point = document.createSVGElement('circle');
 		$point.className.baseVal = 'point';
-		$point.setAttribute('cx', point[0]);
-		$point.setAttribute('cy', point[1]);
-		$point.setAttribute('r', '.3em');
+		$point.setAttribute('cx', point[0] * WebRemixer.PX_PER_SEC);
+		$point.setAttribute('cy', this.pointMinY - this.pointRangeY * point[1] / 100 );
+		$point.setAttribute('r', '.35em');
 
 		point.$point = $point;
 		$point.point = point;
@@ -496,14 +500,56 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 		this.$svg.appendChild($point);
 	},
 
-	drawPath: function(points){
-		this.$pointPath.setAttribute('d', 'M' + points.join('L'));
+	pointToCoordStr: function(point){
+		var coordStr = (point[0] * WebRemixer.PX_PER_SEC);
+		coordStr += ',';
+		coordStr += (this.pointMinY - this.pointRangeY * point[1] / 100);
+
+		return coordStr;
 	},
 
-	onPointsChange: function(automationData, points){
+	drawPath: function(points){
+		var path = 'M';
+		path += this.pointToCoordStr(this.model.get('timeline').get('automationEndPoint'));
+		for (var i = points.length; i--;){
+			path += 'L';
+			path += this.pointToCoordStr(points[i]);
+		}
+		path += 'L';
+		path += this.pointToCoordStr([0,100]);
+		this.$pointPath.setAttribute('d', path);
+	},
 
+	firePointsChange: function(){
+		var timeline = this.model.get('timeline');
+		var selectedAutomation = timeline.get('selectedAutomation') + 'Automation';
+		timeline.trigger('change change:' + selectedAutomation, timeline, timeline.get('selectedAutomationPoints'));
+	},
 
+	onPointsChange: function(timeline, points){
+		this.$timelineClips.unbind('.automationData');
 
+		if (!points){
+			this.$el.addClass('hidden');
+			return;
+		}
+		var $points = this.$svg.getElementsByClassName('point');
+		for (var i = $points.length; i--;){
+			this.$svg.removeChild($points[i]);
+		}
+
+		this.$el.removeClass('hidden');
+
+		this.$timelineClips.bind({
+			'mousedown.automationData': this.onMouseDown,
+			'mousemove.automationData': this.onMouseMove,
+			'mouseup.automationData': this.onMouseUp
+		});
+
+		for (i = points.length; i--;){
+			this.drawPoint(points[i]);
+		}
+		this.drawPath(points);
 	}
 });
 WebRemixer.Views.Clip = WebRemixer.View.extend({
@@ -1173,14 +1219,28 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 	
 	events: {
 		'click .toggle-height' : 'onToggleHeightClick',
-		'drop .timeline-clips' : 'onDrop'
+		'drop .timeline-clips' : 'onDrop',
+		'change .automation-selector': 'onAutomationSelectorChange'
 	},
 
 	initialize: function(){
-			
+
 		this.$header = $('<div/>')
 			.prop('className', 'header')
 			.appendTo(this.el);
+
+		this.$automationSelector = $('<select/>').prop('className', 'automation-selector').append(
+			$('<option/>').val('').text('-'),
+			$('<option/>').val('volume').text('Volume')
+		).appendTo(this.$header);
+
+		this.$automationValue = $('<div/>').prop('className', 'automation-value').slider({
+			orientation: 'vertical',
+			range: 'min',
+			disabled: true,
+			min: 0,
+			max: 100
+		}).appendTo(this.$header);
 			
 		this.$toggleHeight = $('<button/>').prop('className', 'toggle-height')
 			.button({
@@ -1191,23 +1251,25 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 				text: false
 			}).appendTo(this.$header);
 
-		this.automationData = new WebRemixer.Views.AutomationData({
-			model: this.model.get('automationData')
-		});
-		this.automationData.$el.appendTo(this.el);
-
 		this.$timelineClips = $('<div/>').prop('className', 'timeline-clips').droppable({
 			accept: '.clip, .timeline-clip',
 			tolerance: 'pointer',
 			hoverClass: 'ui-state-highlight'
 		}).appendTo(this.el);
+
+		this.automationData = new WebRemixer.Views.AutomationData({
+			model: this.model.get('automationData'),
+			$timelineClips: this.$timelineClips
+		});
+		this.$timelineClips.append(this.automationData.el);
 			
 		$('<div/>').prop('className', 'selection').appendTo(this.el);
 		
 		this.listenTo(this.model, {
 			'change:collapsed': this.onCollapsedChange,
 			'change:remix': this.onRemixChange,
-			'change:order': this.onOrderChange
+			'change:order': this.onOrderChange,
+			'change:selectedAutomation': this.onSelectedAutomationChange
 		});
 		this.listenTo(this.model.get('timelineClips'), {
 			add: this.onTimelineClipsAdd,
@@ -1215,8 +1277,25 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 		});
 
 		this.onRemixChange(this.model, this.model.get('remix'));
+		this.onSelectedAutomationChange(this.model, this.model.get('selectedAutomation'));
+		this.onAutomationSelectorChange();
+		this.onCollapsedChange(this.model, this.model.get('collapsed'));
 
 		WebRemixer.Util.$window.scroll(this.onScroll);
+	},
+
+	onSelectedAutomationChange: function(timeline, selectedAutomation){
+		this.$automationSelector.val(selectedAutomation);
+	},
+
+	onAutomationSelectorChange: function(){
+		var selectedAutomation = this.$automationSelector.val();
+		if (selectedAutomation){
+			this.$automationValue.removeClass('hidden');
+		}else{
+			this.$automationValue.addClass('hidden');
+		}
+		this.model.set('selectedAutomation', selectedAutomation);
 	},
 
 	onScroll: function(){
@@ -1236,8 +1315,29 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 		}
 		
 		if (remix){
-			this.listenTo(remix, 'change:selection', this.onSelectionChange);
+			this.listenTo(remix, {
+				'change:selection': this.onSelectionChange,
+				'change:playTime': this.onPlayTimeChange
+			});
 		}
+	},
+
+	onPlayTimeChange: function(remix, playTime){
+		var points = this.model.get('selectedAutomationPoints');
+		if (!points) return;
+
+		var idx = _.sortedIndex(points, [playTime], 0);
+
+		if (idx === -1){
+			return;
+		}
+
+		var firstPoint = points[idx - 1] || [0,100];
+		var secondPoint = points[idx] || this.model.get('automationEndPoint');
+
+		var delta = (playTime - firstPoint[0]) / (secondPoint[0] - firstPoint[0]);
+
+		this.$automationValue.slider('option', 'value', firstPoint[1] + delta * (secondPoint[1] - firstPoint[1]));
 	},
 	
 	onTimelineClipsAdd: function(timelineClip){
@@ -1634,37 +1734,28 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 	},
 	
 	onSelectStart: function(){
-		_.defer(this.afterSelectStart);
+		setTimeout(this.afterSelectStart, 0);
 	},
 	
 	afterSelectStart: function(){
 		this.$helper = $.single('body > .ui-selectable-helper');
-		this.updateSelection(true);
+		this.updateSelectionInterval = setInterval(this.updateSelection, 0);
 	},
 	
-	/* TODO :: make more efficient! */
 	updateSelection: function(repeat){
 		var remix = this.model.get('remix');
-		var $helper = this.$helper;
 		var selection = remix.get('selection');
 
-		var updateSelectionProc = function(){
-			selection.offset = $helper.offset();
-			selection.width = $helper.width();
-			selection.height = $helper.height();
-			remix.trigger('change:selection', remix, selection);
-		};
-
-		updateSelectionProc();
-
-		if (repeat){
-			this.updateSelectionIntervalID = setInterval(updateSelectionProc, 50);
-		}
+		selection.offset = this.$helper.offset();
+		selection.width = this.$helper.width();
+		selection.height = this.$helper.height();
+		remix.trigger('change:selection', remix, selection);
 	},
 
 	onSelectStop: function(event, ui){
 		this.updateSelection();
-		clearInterval(this.updateSelectionIntervalID);
+		clearInterval(this.updateSelectionInterval);
+		this.updateSelectionInterval = undefined;
 	},
 
 	onContextMenu: function(event){
@@ -1867,11 +1958,13 @@ WebRemixer.Views.VideoPlayer = WebRemixer.View.extend({
 	className: 'video-player',
 	
 	initialize: function(){
+
+		WebRemixer.Util.$body.append(this.el);
 		
-		this.$video = $('<iframe/>').hide().prop({
+		this.$video = $('<iframe/>').prop({
 			id: Math.random().toString(36),
 			src: 'http://www.youtube.com/embed/' + this.model.get('video').get('sourceVideoId') +
-				'?origin=http://' + location.host + '&enablejsapi=1&html5=1&autoplay=0&controls=0'
+				'?origin=http://' + location.host + '&enablejsapi=1&html5=0&autoplay=1&controls=0'
 		}).appendTo(this.el);
 		
 		this.player = new YT.Player(this.$video.prop('id'), {
@@ -1950,7 +2043,7 @@ WebRemixer.Model = Backbone.Model.extend({
 		Backbone.Model.apply(this, arguments);
 
 		if (!this.isNew()){
-			this.prevJSON = this.toJSON();
+			this.prevJSON = _.clone(this.toJSON(), true);
 		}
 
 	},
@@ -2110,7 +2203,7 @@ WebRemixer.Model.createOrUpdate = function(dataArr){
 			}
 		}
 
-		this.prevJSON = curAttrs;
+		this.prevJSON = _.clone(curAttrs, true);
 
 		if (this.isNew()){
 			this.beingCreated = true;
@@ -2200,10 +2293,14 @@ WebRemixer.Models.Timeline = WebRemixer.Model.extend({
 
 	urlRoot: 'timelines',
 	
-	includeInJSON: {remix: WebRemixer.Models.Remix},
+	includeInJSON: {remix: WebRemixer.Models.Remix, collapsed: Boolean, volumeAutomation: Array, selectedAutomation: String},
 
 	initialize: function(){
 		this.onChange = _.debounce(this.onChange, WebRemixer.Config.saveOnChangeDelay);
+
+		if (!this.get('volumeAutomation')){
+			this.set('volumeAutomation', []);
+		}
 
 		this.set({
 			automationData: new WebRemixer.Models.AutomationData({timeline: this}),
@@ -2211,7 +2308,8 @@ WebRemixer.Models.Timeline = WebRemixer.Model.extend({
 			selection : {
 				startTime: 0,
 				duration: 0
-			}
+			},
+			automationEndPoint: [0,100]
 		});
 		 
 		this.listenTo(this.get('timelineClips'), {
@@ -2221,10 +2319,16 @@ WebRemixer.Models.Timeline = WebRemixer.Model.extend({
 
 		this.listenTo(this, {
 			change: this.onChange,
+			'change:selectedAutomation': this.onSelectedAutomationChange,
 			'change:remix': this.onRemixChange
 		});
 
+		this.onSelectedAutomationChange(this, this.get('selectedAutomation'));
 		this.onRemixChange(this, this.get('remix'));
+	},
+
+	onSelectedAutomationChange: function(timeline, selectedAutomation){
+		this.set('selectedAutomationPoints', this.get(selectedAutomation + 'Automation'));
 	},
 	
 	onChange: function(){
@@ -2245,7 +2349,14 @@ WebRemixer.Models.Timeline = WebRemixer.Model.extend({
 			timelines.add(this);
 			
 			this.listenTo(remix, 'change' + remix.idAttribute, this.onChange);
+			this.listenTo(remix, 'change:duration', this.onRemixDurationChange);
+
+			this.onRemixDurationChange(remix, remix.get('duration'));
 		}
+	},
+
+	onRemixDurationChange: function(remix, duration){
+		this.get('automationEndPoint')[0] = duration;
 	},
 	
 	onTimelineClipsAdd: function(timelineClip){
@@ -2530,7 +2641,7 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 WebRemixer.Models.AutomationData = WebRemixer.Model.extend({
 
 	initialize: function(){
-		this.set('points', []);
+		
 	}
 });
 WebRemixer.Models.ClipInspector = WebRemixer.Model.extend({
@@ -2716,11 +2827,9 @@ WebRemixer.Models.PlayControls = WebRemixer.Model.extend({
 	play: function(){
 		var remix = this.get('remix');
 
-		var playStartTime = this.playStartTime = (new Date()).getTime() - remix.get('playTime') * 1000;
+		this.playStartTime = (new Date()).getTime() - remix.get('playTime') * 1000;
 
-		this.playInterval = setInterval(function(){
-			remix.set('playTime', ((new Date()).getTime() - playStartTime) / 1000);
-		}, 0);
+		this.playInterval = setInterval(this.updatePlayTime, 0);
 	},
 	
 	pause: function(){
@@ -2797,7 +2906,6 @@ WebRemixer.Models.PlayerManager = WebRemixer.Model.extend({
 
 				//instantiate view so flash/html5 videoPlayer gets appended to dom
 				new WebRemixer.Views.VideoPlayer({
-					el: $('<div/>').appendTo(document.body),
 					model: videoPlayer
 				});
 			} while (videoPlayers.length < needed);

@@ -14,7 +14,7 @@ WebRemixer.Model = Backbone.Model.extend({
 		Backbone.Model.apply(this, arguments);
 
 		if (!this.isNew()){
-			this.prevJSON = this.toJSON();
+			this.prevJSON = _.clone(this.toJSON(), true);
 		}
 
 	},
@@ -174,7 +174,7 @@ WebRemixer.Model.createOrUpdate = function(dataArr){
 			}
 		}
 
-		this.prevJSON = curAttrs;
+		this.prevJSON = _.clone(curAttrs, true);
 
 		if (this.isNew()){
 			this.beingCreated = true;

@@ -3,14 +3,28 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 	
 	events: {
 		'click .toggle-height' : 'onToggleHeightClick',
-		'drop .timeline-clips' : 'onDrop'
+		'drop .timeline-clips' : 'onDrop',
+		'change .automation-selector': 'onAutomationSelectorChange'
 	},
 
 	initialize: function(){
-			
+
 		this.$header = $('<div/>')
 			.prop('className', 'header')
 			.appendTo(this.el);
+
+		this.$automationSelector = $('<select/>').prop('className', 'automation-selector').append(
+			$('<option/>').val('').text('-'),
+			$('<option/>').val('volume').text('Volume')
+		).appendTo(this.$header);
+
+		this.$automationValue = $('<div/>').prop('className', 'automation-value').slider({
+			orientation: 'vertical',
+			range: 'min',
+			disabled: true,
+			min: 0,
+			max: 100
+		}).appendTo(this.$header);
 			
 		this.$toggleHeight = $('<button/>').prop('className', 'toggle-height')
 			.button({
@@ -21,23 +35,25 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 				text: false
 			}).appendTo(this.$header);
 
-		this.automationData = new WebRemixer.Views.AutomationData({
-			model: this.model.get('automationData')
-		});
-		this.automationData.$el.appendTo(this.el);
-
 		this.$timelineClips = $('<div/>').prop('className', 'timeline-clips').droppable({
 			accept: '.clip, .timeline-clip',
 			tolerance: 'pointer',
 			hoverClass: 'ui-state-highlight'
 		}).appendTo(this.el);
+
+		this.automationData = new WebRemixer.Views.AutomationData({
+			model: this.model.get('automationData'),
+			$timelineClips: this.$timelineClips
+		});
+		this.$timelineClips.append(this.automationData.el);
 			
 		$('<div/>').prop('className', 'selection').appendTo(this.el);
 		
 		this.listenTo(this.model, {
 			'change:collapsed': this.onCollapsedChange,
 			'change:remix': this.onRemixChange,
-			'change:order': this.onOrderChange
+			'change:order': this.onOrderChange,
+			'change:selectedAutomation': this.onSelectedAutomationChange
 		});
 		this.listenTo(this.model.get('timelineClips'), {
 			add: this.onTimelineClipsAdd,
@@ -45,8 +61,25 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 		});
 
 		this.onRemixChange(this.model, this.model.get('remix'));
+		this.onSelectedAutomationChange(this.model, this.model.get('selectedAutomation'));
+		this.onAutomationSelectorChange();
+		this.onCollapsedChange(this.model, this.model.get('collapsed'));
 
 		WebRemixer.Util.$window.scroll(this.onScroll);
+	},
+
+	onSelectedAutomationChange: function(timeline, selectedAutomation){
+		this.$automationSelector.val(selectedAutomation);
+	},
+
+	onAutomationSelectorChange: function(){
+		var selectedAutomation = this.$automationSelector.val();
+		if (selectedAutomation){
+			this.$automationValue.removeClass('hidden');
+		}else{
+			this.$automationValue.addClass('hidden');
+		}
+		this.model.set('selectedAutomation', selectedAutomation);
 	},
 
 	onScroll: function(){
@@ -66,8 +99,29 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 		}
 		
 		if (remix){
-			this.listenTo(remix, 'change:selection', this.onSelectionChange);
+			this.listenTo(remix, {
+				'change:selection': this.onSelectionChange,
+				'change:playTime': this.onPlayTimeChange
+			});
 		}
+	},
+
+	onPlayTimeChange: function(remix, playTime){
+		var points = this.model.get('selectedAutomationPoints');
+		if (!points) return;
+
+		var idx = _.sortedIndex(points, [playTime], 0);
+
+		if (idx === -1){
+			return;
+		}
+
+		var firstPoint = points[idx - 1] || [0,100];
+		var secondPoint = points[idx] || this.model.get('automationEndPoint');
+
+		var delta = (playTime - firstPoint[0]) / (secondPoint[0] - firstPoint[0]);
+
+		this.$automationValue.slider('option', 'value', firstPoint[1] + delta * (secondPoint[1] - firstPoint[1]));
 	},
 	
 	onTimelineClipsAdd: function(timelineClip){

@@ -9,5 +9,3 @@ WebRemixer.View = Backbone.View.extend({
 			.data('view', this);
 	}
 });
-
-HTMLDocument.prototype.createSVGElement = _.partial(HTMLDocument.prototype.createElementNS, 'http://www.w3.org/2000/svg');

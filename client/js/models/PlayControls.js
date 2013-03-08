@@ -22,11 +22,9 @@ WebRemixer.Models.PlayControls = WebRemixer.Model.extend({
 	play: function(){
 		var remix = this.get('remix');
 
-		var playStartTime = this.playStartTime = (new Date()).getTime() - remix.get('playTime') * 1000;
+		this.playStartTime = (new Date()).getTime() - remix.get('playTime') * 1000;
 
-		this.playInterval = setInterval(function(){
-			remix.set('playTime', ((new Date()).getTime() - playStartTime) / 1000);
-		}, 0);
+		this.playInterval = setInterval(this.updatePlayTime, 0);
 	},
 	
 	pause: function(){
