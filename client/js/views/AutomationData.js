@@ -10,8 +10,10 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	},
 
 	init: function(){
-		this.pointMinY = this.$timelineClips.height();
-		this.pointRangeY = this.pointMinY * 0.8;
+		var height = this.$timelineClips.height();
+
+		this.pointMinY = height * 0.8;
+		this.pointRangeY = height * 0.6;
 
 		this.$svg = document.createSVGElement('svg');
 
@@ -31,9 +33,9 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 
 		var timeline = this.model.get('timeline');
 
-		this.listenTo(timeline, 'change:selectedAutomationPoints', this.onPointsChange);
+		this.listenTo(timeline, 'change:selectedAutomation', this.onSelectedAutomationChange);
 
-		this.onPointsChange(timeline, timeline.get('selectedAutomationPoints'));
+		this.onSelectedAutomationChange(timeline, timeline.get('selectedAutomation'));
 	},
 
 	createGridPattern: function(){
@@ -62,31 +64,42 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	createBackground: function(){
 		var $bg = document.createSVGElement('rect');
 		$bg.className.baseVal = 'bg';
+		$bg.setAttribute('y', '20%');
 		$bg.setAttribute('width', '100%');
-		$bg.setAttribute('height', '100%');
+		$bg.setAttribute('height', '60%');
 
 		return $bg;
 	},
 
 	pointFromEvent: function(event){
 		var offs = this.$el.offset();
-		return [event.pageX - offs.left, event.pageY - offs.top];
+		return [Math.max(0, event.pageX - offs.left), Math.max(this.pointMinY - this.pointRangeY, Math.min(this.pointMinY, event.pageY - offs.top))];
 	},
 
 	onMouseDown: function(event){
 		this.mousedownPoint = this.pointFromEvent(event);
 		if (event.target.className.baseVal === 'point'){
-			this.$draggingPoint = event.target;
 			event.stopPropagation();
-			event.preventDefault();
+			this.$draggedPoint = event.target;
+		}else{
+			this.$draggedPoint = undefined;
 		}
+
+		this.$timelineClips.unbind('mousemove.automationData');
+		WebRemixer.Util.$body.bind({
+			'mousemove.automationData': this.onMouseMove,
+			'mouseup.automationData': this.onMouseUp
+		});
 	},
 
 	onMouseMove: function(event){
 		var mousePoint = this.pointFromEvent(event);
+
+		var timeline = this.model.get('timeline');
+
 		var realPoint =  [
-			mousePoint[0] / WebRemixer.PX_PER_SEC,
-			100 * ((this.pointMinY - mousePoint[1]) / this.pointRangeY)
+			Math.max(0, Math.min(timeline.get('remix').get('duration'), mousePoint[0] / WebRemixer.PX_PER_SEC)),
+			Math.max(0, Math.min(100, 100 * ((this.pointMinY - mousePoint[1]) / this.pointRangeY)))
 		];
 
 		this.$tooltip.css({
@@ -97,27 +110,27 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 			(Math.floor(100 * realPoint[1]) / 100) +
 		')');
 
-		if (this.$draggingPoint){
-			var points = this.model.get('timeline').get('selectedAutomationPoints');
+		if (this.$draggedPoint){
+			var points = timeline.get(timeline.get('selectedAutomation'));
 
-			this.$draggingPoint.setAttribute('cx', mousePoint[0]);
-			this.$draggingPoint.setAttribute('cy', mousePoint[1]);
+			this.$draggedPoint.setAttribute('cx', mousePoint[0]);
+			this.$draggedPoint.setAttribute('cy', mousePoint[1]);
 
-			var draggedPoint = this.$draggingPoint.point;
+			var draggedPoint = points[this.$draggedPoint.idx];
 
-			var curIndex = _.sortedIndex(points, draggedPoint, 0);
+			var curIndex = _.sortedIndex(points, draggedPoint, '0');
 
-			var newIndex = _.sortedIndex(points, realPoint, 0);
+			var newIndex = _.sortedIndex(points, realPoint, '0');
 
 			draggedPoint[0] = realPoint[0];
 			draggedPoint[1] = realPoint[1];
 
 			var diff = newIndex - curIndex;
 
-			if (diff > 1){
-				points.splice(newIndex - 1, 0, points.splice(curIndex, 1)[0]);
-			}else if (diff < 0){
+			if (diff && diff !== 1){
+				if (diff > 1) --newIndex;
 				points.splice(newIndex, 0, points.splice(curIndex, 1)[0]);
+				this.$draggedPoint.idx = newIndex;
 			}
 
 			this.drawPath(points);
@@ -125,40 +138,54 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	},
 
 	onMouseUp: function(event){
-		if (this.mousedownPoint && !this.$draggingPoint){
-			var point = this.pointFromEvent(event);
-			if (_.isEqual(this.mousedownPoint, point)){
-				point[0] /= WebRemixer.PX_PER_SEC;
-				point[1] = 100 * ((this.pointMinY - point[1]) / this.pointRangeY)
-				this.addPoint(point);
+		if (this.mousedownPoint){
+			if (this.$draggedPoint){
+				this.onMouseMove(event);
+			}else{
+				var point = this.pointFromEvent(event);
+				if (_.isEqual(this.mousedownPoint, point)){
+					point[0] /= WebRemixer.PX_PER_SEC;
+					point[1] = 100 * ((this.pointMinY - point[1]) / this.pointRangeY);
+					this.addPoint(point);
+				}
 			}
 		}
 
-		// TODO this shouldn't fire change all the time
-		this.firePointsChange();
-
 		this.mousedownPoint = undefined;
-		this.$draggingPoint = undefined;
+		this.$draggedPoint = undefined;
+
+
+
+		var timeline = this.model.get('timeline');
+		var points = timeline.get(timeline.get('selectedAutomation'));
+
+		this.render(points);
+
+		timeline.trigger('change');
+
+		WebRemixer.Util.$body.unbind('.automationData');
+		this.$timelineClips.bind('mousemove.automationData', this.onMouseMove);
 	},
 
 	addPoint: function(point){
-		var points = this.model.get('timeline').get('selectedAutomationPoints');
+		var timeline = this.model.get('timeline');
+		var points = timeline.get(timeline.get('selectedAutomation'));
 
-		points.splice(_.sortedIndex(points, point, 0), 0, point);
+		var idx = _.sortedIndex(points, point, '0');
 
-		this.drawPoint(point);
-		this.drawPath(points);
+		points.splice(idx, 0, point);
+
+		this.render(points);
 	},
 
-	drawPoint: function(point){
+	drawPoint: function(point, idx){
 		var $point = document.createSVGElement('circle');
 		$point.className.baseVal = 'point';
 		$point.setAttribute('cx', point[0] * WebRemixer.PX_PER_SEC);
 		$point.setAttribute('cy', this.pointMinY - this.pointRangeY * point[1] / 100 );
 		$point.setAttribute('r', '.35em');
 
-		point.$point = $point;
-		$point.point = point;
+		$point.idx = idx;
 
 		this.$svg.appendChild($point);
 	},
@@ -173,7 +200,7 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 
 	drawPath: function(points){
 		var path = 'M';
-		path += this.pointToCoordStr(this.model.get('timeline').get('automationEndPoint'));
+		path += this.pointToCoordStr([this.model.get('timeline').get('remix').get('duration'), 100]);
 		for (var i = points.length; i--;){
 			path += 'L';
 			path += this.pointToCoordStr(points[i]);
@@ -183,15 +210,27 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 		this.$pointPath.setAttribute('d', path);
 	},
 
-	firePointsChange: function(){
-		var timeline = this.model.get('timeline');
-		var selectedAutomation = timeline.get('selectedAutomation') + 'Automation';
-		timeline.trigger('change change:' + selectedAutomation, timeline, timeline.get('selectedAutomationPoints'));
+	onAutomationPointsChange: function(timeline, automationPoints){
+		this.render(automationPoints);
 	},
 
-	onPointsChange: function(timeline, points){
+	onSelectedAutomationChange: function(timeline, selectedAutomation){
+		this.stopListening(timeline, 'change:' + timeline.previous('selectedAutomation'));
+		this.listenTo(timeline, 'change:' + selectedAutomation, this.onAutomationPointsChange);
+
 		this.$timelineClips.unbind('.automationData');
 
+		if (selectedAutomation){
+			this.$timelineClips.bind({
+				'mousedown.automationData' : this.onMouseDown,
+				'mousemove.automationData' : this.onMouseMove
+			});
+		}
+
+		this.render(timeline.get(selectedAutomation));
+	},
+
+	render: function(points){
 		if (!points){
 			this.$el.addClass('hidden');
 			return;
@@ -203,15 +242,10 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 
 		this.$el.removeClass('hidden');
 
-		this.$timelineClips.bind({
-			'mousedown.automationData': this.onMouseDown,
-			'mousemove.automationData': this.onMouseMove,
-			'mouseup.automationData': this.onMouseUp
-		});
-
 		for (i = points.length; i--;){
-			this.drawPoint(points[i]);
+			this.drawPoint(points[i], i);
 		}
+
 		this.drawPath(points);
 	}
 });

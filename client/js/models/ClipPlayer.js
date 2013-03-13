@@ -3,8 +3,16 @@ WebRemixer.Models.ClipPlayer = WebRemixer.Model.extend({
 	initialize: function(){
 		this.listenTo(this, {
 			'change:playing': this.onPlayingChange,
-			'change:playTime': this.onPlayTimeChange
+			'change:playTime': this.onPlayTimeChange,
+			'change:volume': this.onVolumeChange
 		});
+	},
+
+	onVolumeChange: function(clipPlayer, vol){
+		var videoPlayer = this.get('videoPlayer');
+		if (videoPlayer){
+			videoPlayer.set('volume', vol);
+		}
 	},
 	
 	getFreePlayer: function(){

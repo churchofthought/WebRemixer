@@ -10,19 +10,19 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 	},
 	
 	initialize: function(){
-		var grid = [WebRemixer.PX_PER_SEC / 8, 1];
+		//var grid = [WebRemixer.PX_PER_SEC / 8, 1];
 
 		this.$el.draggable({
 			containment: '.timelines',
 			stack: '.' + this.className,
 			snap: '.timeline',
 //      snapTolerance: WebRemixer.PX_PER_SEC / 16,
-			grid: grid,
+			//grid: grid,
 			helper: this.getDraggableHelper
 		}).resizable({
 			//containment: 'parent',
 			handles: 'e,w',
-			grid: grid
+			//grid: grid
 		}).css(
 			'position', 'absolute'
 		);

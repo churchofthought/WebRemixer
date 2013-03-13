@@ -116,6 +116,10 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 			clearTimeout(this.playTimeout);
 			this.playTimeout = undefined; 
 		}
+		if (this.automateInterval){
+			clearTimeout(this.automateInterval);
+			this.automateInterval = undefined;
+		}
 		
 		var remix = this.get('remix');
 		
@@ -128,6 +132,8 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 		if (pauseDelay >= 0){
 			var loop = this.get('loop') && this.get('duration') > this.get('clip').get('cutDuration');
 			 
+			this.automate();
+			this.automateInterval = setInterval(this.automate, 0);
 			this.get('clipPlayer').set({
 				loop: loop,
 				playTime: loop ? passed % this.get('clip').get('cutDuration') : passed,
@@ -138,11 +144,19 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 			this.pause();
 		}
 	},
+
+	automate: function(){
+		this.get('clipPlayer').set('volume', this.get('timeline').get('automation').volume);
+	},
 	
 	pause: function(){
 		if (this.playTimeout){
 			clearTimeout(this.playTimeout);
-			this.playTimeout = undefined; 
+			this.playTimeout = undefined;
+		}
+		if (this.automateInterval){
+			clearInterval(this.automateInterval);
+			this.automateInterval = undefined;
 		}
 		this.get('clipPlayer').set('playing', false);
 	},

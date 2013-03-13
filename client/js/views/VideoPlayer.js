@@ -21,6 +21,7 @@ WebRemixer.Views.VideoPlayer = WebRemixer.View.extend({
 		this.listenTo(this.model, {
 			'change:playing' : this.onPlayingChange,
 			'change:playTime': this.onPlayTimeChange,
+			'change:volume': this.onVolumeChange,
 			destroy : this.remove
 		});
 	},
@@ -28,37 +29,22 @@ WebRemixer.Views.VideoPlayer = WebRemixer.View.extend({
 	onPlayTimeChange: function(videoPlayer, playTime){
 		// check to make sure playTime is not undefined
 		if (playTime >= 0){
-			this.seek(playTime);
+			this.player.seekTo(playTime, true);
 			this.model.set('playTime', undefined, {silent: true});
 		}
 	},
 	
 	onPlayingChange: function(videoPlayer, playing){
 		if (playing){
-			this.play();
+			this.player.playVideo();
 		}else{
-			this.pause();
+			this.player.pauseVideo();
 		}
 	},
-	
-	seek: function(t){
-		this.player.seekTo(t, true);
-	},
-	
-	play: function(t){
-		this.player.playVideo();
-	},
-	
-	pause: function(){
-		this.player.pauseVideo();
-	},
-	
-	setVolume: function(vol){
+
+	onVolumeChange: function(videoPlayer, vol){
+		console.log(vol);
 		this.player.setVolume(vol);
-	},
-	
-	getVolume: function(){
-		return this.player.getVolume();
 	},
 
 	onPlayerReady: function(){
@@ -67,7 +53,7 @@ WebRemixer.Views.VideoPlayer = WebRemixer.View.extend({
 	
 	onPlayerStateChange: function(event){
 		if (event.data != YT.PlayerState.PAUSED && !this.model.get('playing')){
-			this.pause();
+			this.player.pauseVideo();
 		}
 	}
 });

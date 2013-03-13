@@ -29,7 +29,7 @@ Schemas.TimelineClip    = mongoose.Schema({
 Schemas.Timeline = mongoose.Schema({
 	remix: {ref: 'Remix', type: mongoose.Schema.Types.ObjectId},
 	collapsed: Boolean,
-	volumeAutomation: Array,
+	volume: Array,
 	selectedAutomation: String
 });
 

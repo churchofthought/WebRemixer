@@ -107,23 +107,12 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 	},
 
 	onPlayTimeChange: function(remix, playTime){
-		var points = this.model.get('selectedAutomationPoints');
-		if (!points) return;
-
-		var idx = _.sortedIndex(points, [playTime], 0);
-
-		if (idx === -1){
-			return;
+		var selectedAutomation = this.model.get('selectedAutomation');
+		if (selectedAutomation){
+			this.$automationValue.slider('option', 'value', this.model.get('automation')[selectedAutomation]);
 		}
-
-		var firstPoint = points[idx - 1] || [0,100];
-		var secondPoint = points[idx] || this.model.get('automationEndPoint');
-
-		var delta = (playTime - firstPoint[0]) / (secondPoint[0] - firstPoint[0]);
-
-		this.$automationValue.slider('option', 'value', firstPoint[1] + delta * (secondPoint[1] - firstPoint[1]));
 	},
-	
+
 	onTimelineClipsAdd: function(timelineClip){
 		var $timelineClip = $.single('#' + timelineClip.cid);
 
