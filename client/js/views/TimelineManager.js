@@ -8,8 +8,8 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		selectableselected : 'onSelected',
 		selectableunselected : 'onUnselected',
 		selectablestop : 'onSelectStop',
-		'contextmenu .timeline-clips' : 'onContextMenu',
-		'contextmenu .selection' : 'onContextMenu',
+		//'contextmenu .timeline-clips' : 'onContextMenu',
+		//'contextmenu .selection' : 'onContextMenu',
 		mousedown : 'onMouseDown',
 		sortupdate : 'onTimelinesSortUpdate'
 	},

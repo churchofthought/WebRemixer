@@ -10,10 +10,9 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	},
 
 	init: function(){
-		var height = this.$timelineClips.height();
 
-		this.pointMinY = height * 0.8;
-		this.pointRangeY = height * 0.6;
+		this.pointMinY = 80; 
+		this.pointRangeY = 60;
 
 		this.$svg = document.createSVGElement('svg');
 
@@ -33,9 +32,19 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 
 		var timeline = this.model.get('timeline');
 
-		this.listenTo(timeline, 'change:selectedAutomation', this.onSelectedAutomationChange);
+		this.listenTo(timeline, {
+			'change:selectedAutomation': this.onSelectedAutomationChange,
+			'change:collapsed': _.bind(setTimeout, window, this.onTimelineCollapsedChange, 250)
+		});
 
+		this.onTimelineCollapsedChange();
 		this.onSelectedAutomationChange(timeline, timeline.get('selectedAutomation'));
+	},
+
+	onTimelineCollapsedChange: function(){
+		this.height = this.$timelineClips.height();
+		this.pointRangeYAbs = this.height * this.pointRangeY / 100;
+		this.pointMinYAbs = this.height * this.pointMinY / 100;
 	},
 
 	createGridPattern: function(){
@@ -73,7 +82,7 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 
 	pointFromEvent: function(event){
 		var offs = this.$el.offset();
-		return [Math.max(0, event.pageX - offs.left), Math.max(this.pointMinY - this.pointRangeY, Math.min(this.pointMinY, event.pageY - offs.top))];
+		return [Math.max(0, event.pageX - offs.left), Math.max(this.pointMinYAbs - this.pointRangeYAbs, Math.min(this.pointMinYAbs, event.pageY - offs.top))];
 	},
 
 	onMouseDown: function(event){
@@ -99,7 +108,7 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 
 		var realPoint =  [
 			Math.max(0, Math.min(timeline.get('remix').get('duration'), mousePoint[0] / WebRemixer.PX_PER_SEC)),
-			Math.max(0, Math.min(100, 100 * ((this.pointMinY - mousePoint[1]) / this.pointRangeY)))
+			Math.max(0, Math.min(100, 100 * ((this.pointMinYAbs - mousePoint[1]) / this.pointRangeYAbs)))
 		];
 
 		this.$tooltip.css({
@@ -114,7 +123,7 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 			var points = timeline.get(timeline.get('selectedAutomation'));
 
 			this.$draggedPoint.setAttribute('cx', mousePoint[0]);
-			this.$draggedPoint.setAttribute('cy', mousePoint[1]);
+			this.$draggedPoint.setAttribute('cy', (this.pointMinY - this.pointRangeY * realPoint[1] / 100 ) + '%');
 
 			var draggedPoint = points[this.$draggedPoint.idx];
 
@@ -145,7 +154,7 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 				var point = this.pointFromEvent(event);
 				if (_.isEqual(this.mousedownPoint, point)){
 					point[0] /= WebRemixer.PX_PER_SEC;
-					point[1] = 100 * ((this.pointMinY - point[1]) / this.pointRangeY);
+					point[1] = 100 * ((this.pointMinYAbs - point[1]) / this.pointRangeYAbs);
 					this.addPoint(point);
 				}
 			}
@@ -182,7 +191,7 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 		var $point = document.createSVGElement('circle');
 		$point.className.baseVal = 'point';
 		$point.setAttribute('cx', point[0] * WebRemixer.PX_PER_SEC);
-		$point.setAttribute('cy', this.pointMinY - this.pointRangeY * point[1] / 100 );
+		$point.setAttribute('cy', (this.pointMinY - this.pointRangeY * point[1] / 100 ) + '%' );
 		$point.setAttribute('r', '.35em');
 
 		$point.idx = idx;
@@ -190,24 +199,36 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 		this.$svg.appendChild($point);
 	},
 
-	pointToCoordStr: function(point){
-		var coordStr = (point[0] * WebRemixer.PX_PER_SEC);
-		coordStr += ',';
-		coordStr += (this.pointMinY - this.pointRangeY * point[1] / 100);
-
-		return coordStr;
+	appendLine: function(pointA, pointB){
+		var $line = document.createSVGElement('line');
+		$line.className.baseVal = 'connector';
+		$line.setAttribute('x1', pointA[0] * WebRemixer.PX_PER_SEC);
+		$line.setAttribute('x2', pointB[0] * WebRemixer.PX_PER_SEC);
+		$line.setAttribute('y1', (this.pointMinY - this.pointRangeY * pointA[1] / 100 ) + '%');
+		$line.setAttribute('y2', (this.pointMinY - this.pointRangeY * pointB[1] / 100 ) + '%');
+		this.$svg.appendChild($line);
 	},
 
+	// TODO, CONVERT SVG PATH INTO A SERIES OF LINES
 	drawPath: function(points){
-		var path = 'M';
-		path += this.pointToCoordStr([this.model.get('timeline').get('remix').get('duration'), 100]);
-		for (var i = points.length; i--;){
-			path += 'L';
-			path += this.pointToCoordStr(points[i]);
+		var $lines = this.$svg.getElementsByClassName('connector');
+		for (var i = $lines.length; i--;){
+			this.$svg.removeChild($lines[i]);
 		}
-		path += 'L';
-		path += this.pointToCoordStr([0,100]);
-		this.$pointPath.setAttribute('d', path);
+
+		var startPoint = [0,100];
+		var endPoint = [this.model.get('timeline').get('remix').get('duration'), 100];
+
+		var i = points.length - 1;
+		if (i){
+			this.appendLine(startPoint, points[0]);
+			this.appendLine(points[i], endPoint);
+			while (--i !== -1){
+				this.appendLine(points[i], points[i+1]);
+			}
+		}else{
+			this.appendLine(startPoint, endPoint);
+		}
 	},
 
 	onAutomationPointsChange: function(timeline, automationPoints){

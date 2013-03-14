@@ -5,6 +5,8 @@
 	pointer-events: none
 	background: none
 
+	height: 100%
+
 	&.hidden
 		opacity: 0
 		visibility: hidden
@@ -38,10 +40,15 @@
 			fill: #3cc2ff;
 			pointer-events: all
 
-		> .pointPath
-			fill: none
+			.timeline.collapsed &
+				stroke-width: .2em
+
+		> .connector
 			stroke: #3cc2ff;
 			stroke-width: .15em
+
+			.timeline.collapsed &
+				stroke-width: .1em
 
 #automation-grid
 	> rect

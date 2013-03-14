@@ -59,17 +59,14 @@ WebRemixer.Model = Backbone.Model.extend({
 		// we can pull the models from the model cache
 
 		var curJSON = this.toJSON();
-		var prevJSON = _.clone(this.prevJSON);
-
-		// update prevJSON with the state from the server
-		_.extend(this.prevJSON, response);
+		var responseClone = _.clone(response, true);
 
 		for (var attr in response){
 			var AttrType = this.includeInJSON[attr];
 			if (!AttrType) continue;
 
 			// if attribute has changed locally, don't use the value from the server
-			if (!_.isEqual(curJSON[attr], prevJSON[attr])){
+			if (!_.isEqual(curJSON[attr], this.prevJSON[attr])){
 				response[attr] = curJSON[attr];
 				continue;
 			}
@@ -103,6 +100,9 @@ WebRemixer.Model = Backbone.Model.extend({
 
 			response[attr] = existing;
 		}
+
+		// update prevJSON with the state from the server
+		_.extend(this.prevJSON, responseClone);
 
 		return response;
 
