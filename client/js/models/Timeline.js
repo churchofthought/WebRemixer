@@ -7,8 +7,11 @@ WebRemixer.Models.Timeline = WebRemixer.Model.extend({
 	initialize: function(){
 		this.onChange = _.debounce(this.onChange, WebRemixer.Config.saveOnChangeDelay);
 
-		if (!this.get('volume')){
-			this.set('volume', []);
+		for (var i = WebRemixer.Automations.length; i--;){
+			var automationName = WebRemixer.Automations[i];
+			if (!this.get(automationName)){
+				this.set(automationName, []);
+			}
 		}
 
 		this.set({
@@ -18,8 +21,7 @@ WebRemixer.Models.Timeline = WebRemixer.Model.extend({
 			selection : {
 				startTime: 0,
 				duration: 0
-			},
-			automationEndPoint: [0,100]
+			}
 		});
 		 
 		this.listenTo(this.get('timelineClips'), {
@@ -60,7 +62,10 @@ WebRemixer.Models.Timeline = WebRemixer.Model.extend({
 	onRemixPlayTimeChange: function(remix, playTime){
 		var automation = this.get('automation');
 
-		automation.volume = this.getAutomationValue(playTime, 'volume');
+		for (var i = WebRemixer.Automations.length; i--;){
+			var automationName = WebRemixer.Automations[i];
+			automation[automationName] = this.getAutomationValue(playTime, automationName);
+		}
 	},
 
 	getAutomationValue: function(playTime, automationName){

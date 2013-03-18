@@ -8,9 +8,8 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		selectableselected : 'onSelected',
 		selectableunselected : 'onUnselected',
 		selectablestop : 'onSelectStop',
-		//'contextmenu .timeline-clips' : 'onContextMenu',
-		//'contextmenu .selection' : 'onContextMenu',
-		mousedown : 'onMouseDown',
+		'contextmenu .timeline-clips' : 'onContextMenu',
+		'contextmenu .selection' : 'onContextMenu',
 		sortupdate : 'onTimelinesSortUpdate'
 	},
 
@@ -28,12 +27,17 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 
 		this.$contextMenu = $('<ul/>')
 			.prop('className', 'context-menu')
-			.append('<li data-cmd="duplicate"><a><span class="ui-icon ui-icon-copy"></span>Duplicate</a></li>')
+			.append('<li data-cmd="duplicateAll"><a><span class="ui-icon ui-icon-copy"></span>Duplicate</a></li>')
+			.append('<li data-cmd="duplicateCurAutomation"><a><span class="ui-icon ui-icon-copy"></span>Duplicate Current Automation</a></li>')
+			.append('<li data-cmd="duplicateAllAutomation"><a><span class="ui-icon ui-icon-copy"></span>Duplicate All Automation</a></li>')
+			.append('<li data-cmd="duplicateClips"><a><span class="ui-icon ui-icon-copy"></span>Duplicate Clips</a></li>')
 			.append('<li data-cmd="delete"><a><span class="ui-icon ui-icon-close"></span>Delete</a></li>')
 			.menu({
 				select: this.onMenuSelect
 			})
 			.appendTo(document.body);
+
+		this.$modalOverlay = $('<div/>').prop('className', 'modal-overlay').appendTo(document.body);
 			
 		var remix = this.model.get('remix');
 
@@ -45,23 +49,16 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 	},
 
 	onMenuSelect : function(event, ui){
-	
+		this.$modalOverlay.removeClass('show');
 		this.$contextMenu.removeClass('show');
-		
-		switch (ui.item.attr('data-cmd')){
-			case 'duplicate':
-				this.$el.children('.timeline').each(function(){
-					$(this).data('view').duplicateSelection();
-				});
-				this.shiftSelectionRight();
-			break;
-			
-			case 'delete':
-				this.$el.children('.timeline').each(function(){
-					$(this).data('view').deleteSelection();
-				});
-			break;
-			
+
+
+		var action = ui-item.attr('data-cmd');
+
+		this.model.get('remix').trigger(action);
+
+		if (action.indexOf('duplicate') !== -1){
+			this.shiftSelectionRight();
 		}
 	},
 	
@@ -69,15 +66,14 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		var remix = this.model.get('remix');
 
 		var curSelection = remix.get('selection');
+
+		if (!curSelection.offset) return;
+
 		curSelection.offset.left += curSelection.width;
 
 		remix.trigger('change:selection', remix, curSelection);
 	},
-	
-	onMouseDown: function(){
-		this.$contextMenu.removeClass('show');
-	},
-	
+
 	onSelecting: function(event, ui){
 		$(ui.selecting).data('view').model.set('selected', true);
 	},
@@ -127,6 +123,20 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 			left: event.pageX,
 			top: event.pageY
 		}).addClass('show');
+		this.$modalOverlay.addClass('show');
+
+		WebRemixer.Util.$body.one('mousedown', this.onMouseDown);
+	},
+
+	onMouseDown: function(event){
+		if (this.$contextMenu[0] === event.target || $.contains(this.$contextMenu[0], event.target)){
+			return;
+		}
+
+		event.stopPropagation();
+		event.preventDefault();
+		this.$contextMenu.removeClass('show');
+		this.$modalOverlay.removeClass('show');
 	},
 
 	onTimelinesSortUpdate: function(timeline){

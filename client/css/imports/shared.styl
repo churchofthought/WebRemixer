@@ -20,6 +20,17 @@ body
 	user-select: all
 
 
+.modal-overlay
+	position: fixed
+	left: 0
+	top: 0
+	width: 100%
+	height: 100%
+	background: rgba(0,0,0,0.01)
+	z-index: 4
+
+	&:not(.show)
+		visibility: hidden
 
 .ui-dialog
 	position: fixed !important

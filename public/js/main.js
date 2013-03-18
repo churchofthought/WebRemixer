@@ -8,6 +8,8 @@ var WebRemixer = {
 };
 WebRemixer.EMS_PER_SEC = 8;
 
+WebRemixer.Automations = ['volume'];
+
 // models
 WebRemixer.Models.idAttribute = '_id';
 
@@ -348,20 +350,21 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 
 	init: function(){
 
-		this.pointMinY = 80; 
-		this.pointRangeY = 60;
+		this.pointMinY = 81; 
+		this.pointRangeY = 61;
 
 		this.$svg = document.createSVGElement('svg');
 
 		var $defs = document.createSVGElement('defs');
-		$defs.appendChild(this.createGridPattern());
+		var $pattern = this.createGridPattern();
+		$defs.appendChild($pattern);
 
 
 		this.$pointPath = document.createSVGElement('path');
 		this.$pointPath.className.baseVal = 'pointPath';
 
 		this.$svg.appendChild($defs);
-		this.$svg.appendChild(this.createBackground());
+		this.$svg.appendChild(this.createBackground($pattern));
 		this.$svg.appendChild(this.$pointPath);
 		this.$el.append(this.$svg);
 
@@ -387,7 +390,7 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	createGridPattern: function(){
 		var $pattern = document.createSVGElement('pattern');
 
-		$pattern.id = 'automation-grid';
+		$pattern.id = Math.random().toString(36);
 		$pattern.setAttribute('patternUnits', 'userSpaceOnUse');
 		$pattern.setAttribute('width', '1em');
 		$pattern.setAttribute('height', '1em');
@@ -407,12 +410,13 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 		return $pattern;
 	},
 
-	createBackground: function(){
+	createBackground: function($pattern){
 		var $bg = document.createSVGElement('rect');
 		$bg.className.baseVal = 'bg';
-		$bg.setAttribute('y', '20%');
+		$bg.setAttribute('y', (this.pointMinY - this.pointRangeY) + '%');
 		$bg.setAttribute('width', '100%');
-		$bg.setAttribute('height', '60%');
+		$bg.setAttribute('height', this.pointRangeY + '%');
+		$bg.setAttribute('fill', 'url("#' + $pattern.id + '")');
 
 		return $bg;
 	},
@@ -423,6 +427,10 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	},
 
 	onMouseDown: function(event){
+		if (event.which !== 1){
+			return;
+		}
+		
 		this.mousedownPoint = this.pointFromEvent(event);
 		if (event.target.className.baseVal === 'point'){
 			event.stopPropagation();
@@ -502,15 +510,14 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 
 
 
-		var timeline = this.model.get('timeline');
-		var points = timeline.get(timeline.get('selectedAutomation'));
-
-		this.render(points);
-
-		timeline.trigger('change');
+		
 
 		WebRemixer.Util.$body.unbind('.automationData');
 		this.$timelineClips.bind('mousemove.automationData', this.onMouseMove);
+
+		var timeline = this.model.get('timeline');
+		var selectedAutomation = timeline.get('selectedAutomation');
+		timeline.trigger('change change:' + selectedAutomation, timeline, timeline.get(selectedAutomation));
 	},
 
 	addPoint: function(point){
@@ -556,16 +563,12 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 		var startPoint = [0,100];
 		var endPoint = [this.model.get('timeline').get('remix').get('duration'), 100];
 
+		// clever way to always have a line from start-to-end
+		// and start-to-1stpoint-...-nthpoint-to-end
 		var i = points.length - 1;
-		if (i){
-			this.appendLine(startPoint, points[0]);
-			this.appendLine(points[i], endPoint);
-			while (--i !== -1){
-				this.appendLine(points[i], points[i+1]);
-			}
-		}else{
-			this.appendLine(startPoint, endPoint);
-		}
+		do {
+			this.appendLine(points[i] || startPoint, points[i+1] || endPoint);
+		} while (i-- !== -1);
 	},
 
 	onAutomationPointsChange: function(timeline, automationPoints){
@@ -579,26 +582,22 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 		this.$timelineClips.unbind('.automationData');
 
 		if (selectedAutomation){
+			this.$el.removeClass('hidden');
 			this.$timelineClips.bind({
 				'mousedown.automationData' : this.onMouseDown,
 				'mousemove.automationData' : this.onMouseMove
 			});
+			this.render(timeline.get(selectedAutomation));
+		}else{
+			this.$el.addClass('hidden');
 		}
-
-		this.render(timeline.get(selectedAutomation));
 	},
 
 	render: function(points){
-		if (!points){
-			this.$el.addClass('hidden');
-			return;
-		}
 		var $points = this.$svg.getElementsByClassName('point');
 		for (var i = $points.length; i--;){
 			this.$svg.removeChild($points[i]);
 		}
-
-		this.$el.removeClass('hidden');
 
 		for (i = points.length; i--;){
 			this.drawPoint(points[i], i);
@@ -1285,9 +1284,16 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 			.appendTo(this.el);
 
 		this.$automationSelector = $('<select/>').prop('className', 'automation-selector').append(
-			$('<option/>').val('').text('-'),
-			$('<option/>').val('volume').text('Volume')
-		).appendTo(this.$header);
+			$('<option/>').val('').text('-')
+		);
+
+		for (var i = WebRemixer.Automations.length; i--;){
+			var automationName = WebRemixer.Automations[i];
+			$('<option/>').val(automationName).text(automationName.charAt(0).toUpperCase() + automationName.slice(1))
+				.appendTo(this.$automationSelector);
+		}
+
+		this.$automationSelector.appendTo(this.$header);
 
 		this.$automationValue = $('<div/>').prop('className', 'automation-value').slider({
 			orientation: 'vertical',
@@ -1431,14 +1437,51 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 	
 	duplicateSelection: function(){
 		var $selectedClips = this.getSelectedClips();
-		if (!$selectedClips) return;
-		
+
 		var duration = this.model.get('selection').duration;
 		
 		$selectedClips.each(function(){
 			$(this).data('view').duplicate(duration);
 		});
+	},
+
+	duplicateSelectionSelectedAutomation: function(){
+		this.duplicateSelectionAutomation(this.model.get('selectedAutomation'), this.model.get('selection'));
+	},
+
+	duplicateSelectionAllAutomation: function(){
+		var selection = this.model.get('selection');
+
+		for (var i = WebRemixer.Automations.length; i--;){
+			this.duplicateSelectionAutomation(WebRemixer.Automations[i], selection);
+		}
+	},
+
+	duplicateSelectionAutomation: function(automationName, selection){
+		var points = this.model.get(automationName);
 		
+		var endTime = selection.startTime + selection.duration;
+
+		var lookupPoint = [selection.startTime];
+		var i = _.sortedIndex(points, lookupPoint, '0');
+
+		lookupPoint[0] += selection.duration;
+		var endingIdx = _.sortedIndex(points, lookupPoint, '0');
+
+		lookupPoint[0] += selection.duration;
+		var dupeEndingIdx = _.sortedIndex(points, lookupPoint, '0');
+
+		var spliceArgs = [endingIdx, dupeEndingIdx - endingIdx];
+		while (i < endingIdx){
+			var point = points[i];
+			spliceArgs.push([point[0] + selection.duration, point[1]]);
+			++i;
+		}
+
+		if (spliceArgs.length > 2){
+			Array.prototype.splice.apply(points, spliceArgs);
+			this.model.trigger('change change:' + automationName, this.model, points);
+		}
 	},
 	
 	deleteSelection: function(){
@@ -1451,12 +1494,7 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 	},
 	
 	getSelectedClips: function(){
-		var selection = this.model.get('selection');
-		if (!selection) return;
-		
-		var $selectedClips = this.$timelineClips.find('.timeline-clip.ui-selected');
-
-		return $selectedClips.size() && $selectedClips;
+		return this.$timelineClips.find('.timeline-clip.ui-selected');
 	},
 	
 	onSelectionChange: function(remix, selection){
@@ -1691,9 +1729,8 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		selectableselected : 'onSelected',
 		selectableunselected : 'onUnselected',
 		selectablestop : 'onSelectStop',
-		//'contextmenu .timeline-clips' : 'onContextMenu',
-		//'contextmenu .selection' : 'onContextMenu',
-		mousedown : 'onMouseDown',
+		'contextmenu .timeline-clips' : 'onContextMenu',
+		'contextmenu .selection' : 'onContextMenu',
 		sortupdate : 'onTimelinesSortUpdate'
 	},
 
@@ -1711,12 +1748,17 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 
 		this.$contextMenu = $('<ul/>')
 			.prop('className', 'context-menu')
-			.append('<li data-cmd="duplicate"><a><span class="ui-icon ui-icon-copy"></span>Duplicate</a></li>')
+			.append('<li data-cmd="duplicateAll"><a><span class="ui-icon ui-icon-copy"></span>Duplicate</a></li>')
+			.append('<li data-cmd="duplicateCurAutomation"><a><span class="ui-icon ui-icon-copy"></span>Duplicate Current Automation</a></li>')
+			.append('<li data-cmd="duplicateAllAutomation"><a><span class="ui-icon ui-icon-copy"></span>Duplicate All Automation</a></li>')
+			.append('<li data-cmd="duplicateClips"><a><span class="ui-icon ui-icon-copy"></span>Duplicate Clips</a></li>')
 			.append('<li data-cmd="delete"><a><span class="ui-icon ui-icon-close"></span>Delete</a></li>')
 			.menu({
 				select: this.onMenuSelect
 			})
 			.appendTo(document.body);
+
+		this.$modalOverlay = $('<div/>').prop('className', 'modal-overlay').appendTo(document.body);
 			
 		var remix = this.model.get('remix');
 
@@ -1728,23 +1770,16 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 	},
 
 	onMenuSelect : function(event, ui){
-	
+		this.$modalOverlay.removeClass('show');
 		this.$contextMenu.removeClass('show');
-		
-		switch (ui.item.attr('data-cmd')){
-			case 'duplicate':
-				this.$el.children('.timeline').each(function(){
-					$(this).data('view').duplicateSelection();
-				});
-				this.shiftSelectionRight();
-			break;
-			
-			case 'delete':
-				this.$el.children('.timeline').each(function(){
-					$(this).data('view').deleteSelection();
-				});
-			break;
-			
+
+
+		var action = ui-item.attr('data-cmd');
+
+		this.model.get('remix').trigger(action);
+
+		if (action.indexOf('duplicate') !== -1){
+			this.shiftSelectionRight();
 		}
 	},
 	
@@ -1752,15 +1787,14 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		var remix = this.model.get('remix');
 
 		var curSelection = remix.get('selection');
+
+		if (!curSelection.offset) return;
+
 		curSelection.offset.left += curSelection.width;
 
 		remix.trigger('change:selection', remix, curSelection);
 	},
-	
-	onMouseDown: function(){
-		this.$contextMenu.removeClass('show');
-	},
-	
+
 	onSelecting: function(event, ui){
 		$(ui.selecting).data('view').model.set('selected', true);
 	},
@@ -1810,6 +1844,20 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 			left: event.pageX,
 			top: event.pageY
 		}).addClass('show');
+		this.$modalOverlay.addClass('show');
+
+		WebRemixer.Util.$body.one('mousedown', this.onMouseDown);
+	},
+
+	onMouseDown: function(event){
+		if (this.$contextMenu[0] === event.target || $.contains(this.$contextMenu[0], event.target)){
+			return;
+		}
+
+		event.stopPropagation();
+		event.preventDefault();
+		this.$contextMenu.removeClass('show');
+		this.$modalOverlay.removeClass('show');
 	},
 
 	onTimelinesSortUpdate: function(timeline){
@@ -2043,7 +2091,6 @@ WebRemixer.Views.VideoPlayer = WebRemixer.View.extend({
 	},
 
 	onVolumeChange: function(videoPlayer, vol){
-		console.log(vol);
 		this.player.setVolume(vol);
 	},
 
@@ -2328,8 +2375,11 @@ WebRemixer.Models.Timeline = WebRemixer.Model.extend({
 	initialize: function(){
 		this.onChange = _.debounce(this.onChange, WebRemixer.Config.saveOnChangeDelay);
 
-		if (!this.get('volume')){
-			this.set('volume', []);
+		for (var i = WebRemixer.Automations.length; i--;){
+			var automationName = WebRemixer.Automations[i];
+			if (!this.get(automationName)){
+				this.set(automationName, []);
+			}
 		}
 
 		this.set({
@@ -2339,8 +2389,7 @@ WebRemixer.Models.Timeline = WebRemixer.Model.extend({
 			selection : {
 				startTime: 0,
 				duration: 0
-			},
-			automationEndPoint: [0,100]
+			}
 		});
 		 
 		this.listenTo(this.get('timelineClips'), {
@@ -2381,7 +2430,10 @@ WebRemixer.Models.Timeline = WebRemixer.Model.extend({
 	onRemixPlayTimeChange: function(remix, playTime){
 		var automation = this.get('automation');
 
-		automation.volume = this.getAutomationValue(playTime, 'volume');
+		for (var i = WebRemixer.Automations.length; i--;){
+			var automationName = WebRemixer.Automations[i];
+			automation[automationName] = this.getAutomationValue(playTime, automationName);
+		}
 	},
 
 	getAutomationValue: function(playTime, automationName){

@@ -11,20 +11,21 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 
 	init: function(){
 
-		this.pointMinY = 80; 
-		this.pointRangeY = 60;
+		this.pointMinY = 81; 
+		this.pointRangeY = 61;
 
 		this.$svg = document.createSVGElement('svg');
 
 		var $defs = document.createSVGElement('defs');
-		$defs.appendChild(this.createGridPattern());
+		var $pattern = this.createGridPattern();
+		$defs.appendChild($pattern);
 
 
 		this.$pointPath = document.createSVGElement('path');
 		this.$pointPath.className.baseVal = 'pointPath';
 
 		this.$svg.appendChild($defs);
-		this.$svg.appendChild(this.createBackground());
+		this.$svg.appendChild(this.createBackground($pattern));
 		this.$svg.appendChild(this.$pointPath);
 		this.$el.append(this.$svg);
 
@@ -50,7 +51,7 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	createGridPattern: function(){
 		var $pattern = document.createSVGElement('pattern');
 
-		$pattern.id = 'automation-grid';
+		$pattern.id = Math.random().toString(36);
 		$pattern.setAttribute('patternUnits', 'userSpaceOnUse');
 		$pattern.setAttribute('width', '1em');
 		$pattern.setAttribute('height', '1em');
@@ -70,12 +71,13 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 		return $pattern;
 	},
 
-	createBackground: function(){
+	createBackground: function($pattern){
 		var $bg = document.createSVGElement('rect');
 		$bg.className.baseVal = 'bg';
-		$bg.setAttribute('y', '20%');
+		$bg.setAttribute('y', (this.pointMinY - this.pointRangeY) + '%');
 		$bg.setAttribute('width', '100%');
-		$bg.setAttribute('height', '60%');
+		$bg.setAttribute('height', this.pointRangeY + '%');
+		$bg.setAttribute('fill', 'url("#' + $pattern.id + '")');
 
 		return $bg;
 	},
@@ -86,6 +88,10 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	},
 
 	onMouseDown: function(event){
+		if (event.which !== 1){
+			return;
+		}
+		
 		this.mousedownPoint = this.pointFromEvent(event);
 		if (event.target.className.baseVal === 'point'){
 			event.stopPropagation();
@@ -165,15 +171,14 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 
 
 
-		var timeline = this.model.get('timeline');
-		var points = timeline.get(timeline.get('selectedAutomation'));
-
-		this.render(points);
-
-		timeline.trigger('change');
+		
 
 		WebRemixer.Util.$body.unbind('.automationData');
 		this.$timelineClips.bind('mousemove.automationData', this.onMouseMove);
+
+		var timeline = this.model.get('timeline');
+		var selectedAutomation = timeline.get('selectedAutomation');
+		timeline.trigger('change change:' + selectedAutomation, timeline, timeline.get(selectedAutomation));
 	},
 
 	addPoint: function(point){
@@ -219,16 +224,12 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 		var startPoint = [0,100];
 		var endPoint = [this.model.get('timeline').get('remix').get('duration'), 100];
 
+		// clever way to always have a line from start-to-end
+		// and start-to-1stpoint-...-nthpoint-to-end
 		var i = points.length - 1;
-		if (i){
-			this.appendLine(startPoint, points[0]);
-			this.appendLine(points[i], endPoint);
-			while (--i !== -1){
-				this.appendLine(points[i], points[i+1]);
-			}
-		}else{
-			this.appendLine(startPoint, endPoint);
-		}
+		do {
+			this.appendLine(points[i] || startPoint, points[i+1] || endPoint);
+		} while (i-- !== -1);
 	},
 
 	onAutomationPointsChange: function(timeline, automationPoints){
@@ -242,26 +243,22 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 		this.$timelineClips.unbind('.automationData');
 
 		if (selectedAutomation){
+			this.$el.removeClass('hidden');
 			this.$timelineClips.bind({
 				'mousedown.automationData' : this.onMouseDown,
 				'mousemove.automationData' : this.onMouseMove
 			});
+			this.render(timeline.get(selectedAutomation));
+		}else{
+			this.$el.addClass('hidden');
 		}
-
-		this.render(timeline.get(selectedAutomation));
 	},
 
 	render: function(points){
-		if (!points){
-			this.$el.addClass('hidden');
-			return;
-		}
 		var $points = this.$svg.getElementsByClassName('point');
 		for (var i = $points.length; i--;){
 			this.$svg.removeChild($points[i]);
 		}
-
-		this.$el.removeClass('hidden');
 
 		for (i = points.length; i--;){
 			this.drawPoint(points[i], i);

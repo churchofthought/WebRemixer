@@ -43,7 +43,6 @@ WebRemixer.Views.VideoPlayer = WebRemixer.View.extend({
 	},
 
 	onVolumeChange: function(videoPlayer, vol){
-		console.log(vol);
 		this.player.setVolume(vol);
 	},
 

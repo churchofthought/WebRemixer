@@ -14,9 +14,16 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 			.appendTo(this.el);
 
 		this.$automationSelector = $('<select/>').prop('className', 'automation-selector').append(
-			$('<option/>').val('').text('-'),
-			$('<option/>').val('volume').text('Volume')
-		).appendTo(this.$header);
+			$('<option/>').val('').text('-')
+		);
+
+		for (var i = WebRemixer.Automations.length; i--;){
+			var automationName = WebRemixer.Automations[i];
+			$('<option/>').val(automationName).text(automationName.charAt(0).toUpperCase() + automationName.slice(1))
+				.appendTo(this.$automationSelector);
+		}
+
+		this.$automationSelector.appendTo(this.$header);
 
 		this.$automationValue = $('<div/>').prop('className', 'automation-value').slider({
 			orientation: 'vertical',
@@ -160,14 +167,51 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 	
 	duplicateSelection: function(){
 		var $selectedClips = this.getSelectedClips();
-		if (!$selectedClips) return;
-		
+
 		var duration = this.model.get('selection').duration;
 		
 		$selectedClips.each(function(){
 			$(this).data('view').duplicate(duration);
 		});
+	},
+
+	duplicateSelectionSelectedAutomation: function(){
+		this.duplicateSelectionAutomation(this.model.get('selectedAutomation'), this.model.get('selection'));
+	},
+
+	duplicateSelectionAllAutomation: function(){
+		var selection = this.model.get('selection');
+
+		for (var i = WebRemixer.Automations.length; i--;){
+			this.duplicateSelectionAutomation(WebRemixer.Automations[i], selection);
+		}
+	},
+
+	duplicateSelectionAutomation: function(automationName, selection){
+		var points = this.model.get(automationName);
 		
+		var endTime = selection.startTime + selection.duration;
+
+		var lookupPoint = [selection.startTime];
+		var i = _.sortedIndex(points, lookupPoint, '0');
+
+		lookupPoint[0] += selection.duration;
+		var endingIdx = _.sortedIndex(points, lookupPoint, '0');
+
+		lookupPoint[0] += selection.duration;
+		var dupeEndingIdx = _.sortedIndex(points, lookupPoint, '0');
+
+		var spliceArgs = [endingIdx, dupeEndingIdx - endingIdx];
+		while (i < endingIdx){
+			var point = points[i];
+			spliceArgs.push([point[0] + selection.duration, point[1]]);
+			++i;
+		}
+
+		if (spliceArgs.length > 2){
+			Array.prototype.splice.apply(points, spliceArgs);
+			this.model.trigger('change change:' + automationName, this.model, points);
+		}
 	},
 	
 	deleteSelection: function(){
@@ -180,12 +224,7 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 	},
 	
 	getSelectedClips: function(){
-		var selection = this.model.get('selection');
-		if (!selection) return;
-		
-		var $selectedClips = this.$timelineClips.find('.timeline-clip.ui-selected');
-
-		return $selectedClips.size() && $selectedClips;
+		return this.$timelineClips.find('.timeline-clip.ui-selected');
 	},
 	
 	onSelectionChange: function(remix, selection){

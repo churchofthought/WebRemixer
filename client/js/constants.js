@@ -1,5 +1,7 @@
 WebRemixer.EMS_PER_SEC = 8;
 
+WebRemixer.Automations = ['volume'];
+
 // models
 WebRemixer.Models.idAttribute = '_id';
 
