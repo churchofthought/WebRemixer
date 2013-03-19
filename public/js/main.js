@@ -427,13 +427,17 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	},
 
 	onMouseDown: function(event){
+		this.originalClickTarget = event.target;
+
 		if (event.which !== 1){
 			return;
 		}
-		
+
+		var shouldBubble = true;
+
 		this.mousedownPoint = this.pointFromEvent(event);
 		if (event.target.className.baseVal === 'point'){
-			event.stopPropagation();
+			shouldBubble = false;
 			this.$draggedPoint = event.target;
 		}else{
 			this.$draggedPoint = undefined;
@@ -444,6 +448,8 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 			'mousemove.automationData': this.onMouseMove,
 			'mouseup.automationData': this.onMouseUp
 		});
+
+		return shouldBubble;
 	},
 
 	onMouseMove: function(event){
@@ -491,7 +497,9 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 		}
 	},
 
-	onMouseUp: function(event){
+	onClick: function(event){
+		console.log('click motha fucka');
+
 		if (this.mousedownPoint){
 			if (this.$draggedPoint){
 				this.onMouseMove(event);
@@ -519,6 +527,15 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 		var selectedAutomation = timeline.get('selectedAutomation');
 		timeline.trigger('change change:' + selectedAutomation, timeline, timeline.get(selectedAutomation));
 	},
+
+	onMouseUp: function(event){
+		// don't duplicate event, click already handled the same element
+		if (event.target !== this.originalClickTarget){
+			this.onClick(event);
+		}
+	},
+
+
 
 	addPoint: function(point){
 		var timeline = this.model.get('timeline');
@@ -585,7 +602,8 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 			this.$el.removeClass('hidden');
 			this.$timelineClips.bind({
 				'mousedown.automationData' : this.onMouseDown,
-				'mousemove.automationData' : this.onMouseMove
+				'mousemove.automationData' : this.onMouseMove,
+				'click.automationData': this.onClick
 			});
 			this.render(timeline.get(selectedAutomation));
 		}else{
@@ -1378,7 +1396,8 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 		if (remix){
 			this.listenTo(remix, {
 				'change:selection': this.onSelectionChange,
-				'change:playTime': this.onPlayTimeChange
+				'change:playTime': this.onPlayTimeChange,
+				'duplicate': this.onDuplicate
 			});
 		}
 	},
@@ -1436,45 +1455,42 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 	},
 	
 	duplicateSelection: function(){
-		var $selectedClips = this.getSelectedClips();
-
-		var duration = this.model.get('selection').duration;
-		
-		$selectedClips.each(function(){
-			$(this).data('view').duplicate(duration);
-		});
-	},
-
-	duplicateSelectionSelectedAutomation: function(){
-		this.duplicateSelectionAutomation(this.model.get('selectedAutomation'), this.model.get('selection'));
-	},
-
-	duplicateSelectionAllAutomation: function(){
 		var selection = this.model.get('selection');
 
+		var $selectedClips = this.getSelectedClips();
+		
+		$selectedClips.each(function(){
+			var timelineClip = $(this).data('view').model;
+			var clone = timelineClip.clone();
+			clone.set('startTime', clone.get('startTime') + selection.duration);
+			if (timelineClip.get('selected')){
+				timelineClip.set('selected', false);
+			}
+		});
+
 		for (var i = WebRemixer.Automations.length; i--;){
-			this.duplicateSelectionAutomation(WebRemixer.Automations[i], selection);
+			this.duplicateAutomation(WebRemixer.Automations[i], selection.startTime, selection.duration);
 		}
 	},
 
-	duplicateSelectionAutomation: function(automationName, selection){
+	duplicateAutomation: function(automationName, startTime, duration){
 		var points = this.model.get(automationName);
 		
-		var endTime = selection.startTime + selection.duration;
+		var endTime = startTime + duration;
 
-		var lookupPoint = [selection.startTime];
+		var lookupPoint = [startTime];
 		var i = _.sortedIndex(points, lookupPoint, '0');
 
-		lookupPoint[0] += selection.duration;
+		lookupPoint[0] += duration;
 		var endingIdx = _.sortedIndex(points, lookupPoint, '0');
 
-		lookupPoint[0] += selection.duration;
+		lookupPoint[0] += duration;
 		var dupeEndingIdx = _.sortedIndex(points, lookupPoint, '0');
 
 		var spliceArgs = [endingIdx, dupeEndingIdx - endingIdx];
 		while (i < endingIdx){
 			var point = points[i];
-			spliceArgs.push([point[0] + selection.duration, point[1]]);
+			spliceArgs.push([point[0] + duration, point[1]]);
 			++i;
 		}
 
@@ -1554,7 +1570,7 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 		dragstop: 'onDragStop',
 		resizestop: 'onResizeStop',
 		'click .toggle-loop': 'toggleLoop',
-		'click .duplicate': 'duplicate',
+		'click .duplicate': 'onDuplicateClick',
 		'click .delete': 'del'
 	},
 	
@@ -1634,6 +1650,15 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 
 		this.onSelectedChange(this.model, this.model.get('selected'));
 	},
+
+	onDuplicateClick: function(event){
+		var clone = this.model.clone();
+		clone.set('startTime', clone.get('startTime') + clone.get('duration'));
+		if (this.model.get('selected')){
+			this.model.set('selected', false);
+		}
+		return false;
+	},
 	
 	onSelectedChange: function(timelineClip, selected){
 		if (selected){
@@ -1670,27 +1695,12 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 	
 	toggleLoop: function(){
 		this.model.set('loop', !this.model.get('loop'));
-	},
-	
-	duplicate: function(timeDelta){
-		var selected = this.model.get('selected');
-	
-		var clone = new WebRemixer.Models.TimelineClip({
-			timeline: this.model.get('timeline'),
-			clip: this.model.get('clip'),
-			startTime: this.model.get('startTime') + (typeof timeDelta === 'number' && timeDelta || this.model.get('duration')),
-			duration: this.model.get('duration'),
-			loop: this.model.get('loop'),
-			selected: selected
-		});
-
-		if (selected){
-			this.model.set('selected', false);
-		}   
+		return false;
 	},
 	
 	del: function(){
 		this.model.destroy();
+		return false;
 	},
 	
 	onTimelineChange: function(){
@@ -1748,10 +1758,7 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 
 		this.$contextMenu = $('<ul/>')
 			.prop('className', 'context-menu')
-			.append('<li data-cmd="duplicateAll"><a><span class="ui-icon ui-icon-copy"></span>Duplicate</a></li>')
-			.append('<li data-cmd="duplicateCurAutomation"><a><span class="ui-icon ui-icon-copy"></span>Duplicate Current Automation</a></li>')
-			.append('<li data-cmd="duplicateAllAutomation"><a><span class="ui-icon ui-icon-copy"></span>Duplicate All Automation</a></li>')
-			.append('<li data-cmd="duplicateClips"><a><span class="ui-icon ui-icon-copy"></span>Duplicate Clips</a></li>')
+			.append('<li data-cmd="duplicate"><a><span class="ui-icon ui-icon-copy"></span>Duplicate</a></li>')
 			.append('<li data-cmd="delete"><a><span class="ui-icon ui-icon-close"></span>Delete</a></li>')
 			.menu({
 				select: this.onMenuSelect
@@ -1778,7 +1785,7 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 
 		this.model.get('remix').trigger(action);
 
-		if (action.indexOf('duplicate') !== -1){
+		if (action === 'duplicate'){
 			this.shiftSelectionRight();
 		}
 	},
@@ -1821,6 +1828,8 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 	},
 	
 	updateSelection: function(repeat){
+		if (!this.$helper) return;
+
 		var remix = this.model.get('remix');
 		var selection = remix.get('selection');
 
@@ -1837,8 +1846,6 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 	},
 
 	onContextMenu: function(event){
-		event.stopPropagation();
-		event.preventDefault();
 		
 		this.$contextMenu.css({
 			left: event.pageX,
@@ -1847,6 +1854,8 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		this.$modalOverlay.addClass('show');
 
 		WebRemixer.Util.$body.one('mousedown', this.onMouseDown);
+
+		return false;
 	},
 
 	onMouseDown: function(event){
@@ -1854,10 +1863,10 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 			return;
 		}
 
-		event.stopPropagation();
-		event.preventDefault();
 		this.$contextMenu.removeClass('show');
 		this.$modalOverlay.removeClass('show');
+
+		return false;
 	},
 
 	onTimelinesSortUpdate: function(timeline){
@@ -2590,11 +2599,23 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 		this.listenTo(this, {
 			change: this.onChange,
 			'change:timeline': this.onTimelineChange,
-			'change:remix': this.onRemixChange
+			'change:remix': this.onRemixChange,
+			'duplicate': this.onDuplicate
 		});
 
 		this.onTimelineChange(this, this.get('timeline'));
 		this.onRemixChange(this, this.get('remix'));
+	},
+
+	clone: function(){
+		return new WebRemixer.Models.TimelineClip({
+			timeline: this.get('timeline'),
+			clip: this.get('clip'),
+			startTime: this.get('startTime'),
+			duration: this.get('duration'),
+			loop: this.get('loop'),
+			selected: this.get('selected')
+		});
 	},
 
 	onChange: function(){

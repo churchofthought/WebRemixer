@@ -29,11 +29,23 @@ WebRemixer.Models.TimelineClip = WebRemixer.Model.extend({
 		this.listenTo(this, {
 			change: this.onChange,
 			'change:timeline': this.onTimelineChange,
-			'change:remix': this.onRemixChange
+			'change:remix': this.onRemixChange,
+			'duplicate': this.onDuplicate
 		});
 
 		this.onTimelineChange(this, this.get('timeline'));
 		this.onRemixChange(this, this.get('remix'));
+	},
+
+	clone: function(){
+		return new WebRemixer.Models.TimelineClip({
+			timeline: this.get('timeline'),
+			clip: this.get('clip'),
+			startTime: this.get('startTime'),
+			duration: this.get('duration'),
+			loop: this.get('loop'),
+			selected: this.get('selected')
+		});
 	},
 
 	onChange: function(){

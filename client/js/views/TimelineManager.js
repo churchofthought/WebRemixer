@@ -27,10 +27,7 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 
 		this.$contextMenu = $('<ul/>')
 			.prop('className', 'context-menu')
-			.append('<li data-cmd="duplicateAll"><a><span class="ui-icon ui-icon-copy"></span>Duplicate</a></li>')
-			.append('<li data-cmd="duplicateCurAutomation"><a><span class="ui-icon ui-icon-copy"></span>Duplicate Current Automation</a></li>')
-			.append('<li data-cmd="duplicateAllAutomation"><a><span class="ui-icon ui-icon-copy"></span>Duplicate All Automation</a></li>')
-			.append('<li data-cmd="duplicateClips"><a><span class="ui-icon ui-icon-copy"></span>Duplicate Clips</a></li>')
+			.append('<li data-cmd="duplicate"><a><span class="ui-icon ui-icon-copy"></span>Duplicate</a></li>')
 			.append('<li data-cmd="delete"><a><span class="ui-icon ui-icon-close"></span>Delete</a></li>')
 			.menu({
 				select: this.onMenuSelect
@@ -57,7 +54,7 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 
 		this.model.get('remix').trigger(action);
 
-		if (action.indexOf('duplicate') !== -1){
+		if (action === 'duplicate'){
 			this.shiftSelectionRight();
 		}
 	},
@@ -100,6 +97,8 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 	},
 	
 	updateSelection: function(repeat){
+		if (!this.$helper) return;
+
 		var remix = this.model.get('remix');
 		var selection = remix.get('selection');
 
@@ -116,8 +115,6 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 	},
 
 	onContextMenu: function(event){
-		event.stopPropagation();
-		event.preventDefault();
 		
 		this.$contextMenu.css({
 			left: event.pageX,
@@ -126,6 +123,8 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		this.$modalOverlay.addClass('show');
 
 		WebRemixer.Util.$body.one('mousedown', this.onMouseDown);
+
+		return false;
 	},
 
 	onMouseDown: function(event){
@@ -133,10 +132,10 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 			return;
 		}
 
-		event.stopPropagation();
-		event.preventDefault();
 		this.$contextMenu.removeClass('show');
 		this.$modalOverlay.removeClass('show');
+
+		return false;
 	},
 
 	onTimelinesSortUpdate: function(timeline){

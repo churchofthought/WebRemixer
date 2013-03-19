@@ -88,13 +88,17 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	},
 
 	onMouseDown: function(event){
+		this.originalClickTarget = event.target;
+
 		if (event.which !== 1){
 			return;
 		}
-		
+
+		var shouldBubble = true;
+
 		this.mousedownPoint = this.pointFromEvent(event);
 		if (event.target.className.baseVal === 'point'){
-			event.stopPropagation();
+			shouldBubble = false;
 			this.$draggedPoint = event.target;
 		}else{
 			this.$draggedPoint = undefined;
@@ -105,6 +109,8 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 			'mousemove.automationData': this.onMouseMove,
 			'mouseup.automationData': this.onMouseUp
 		});
+
+		return shouldBubble;
 	},
 
 	onMouseMove: function(event){
@@ -152,7 +158,9 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 		}
 	},
 
-	onMouseUp: function(event){
+	onClick: function(event){
+		console.log('click motha fucka');
+
 		if (this.mousedownPoint){
 			if (this.$draggedPoint){
 				this.onMouseMove(event);
@@ -180,6 +188,15 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 		var selectedAutomation = timeline.get('selectedAutomation');
 		timeline.trigger('change change:' + selectedAutomation, timeline, timeline.get(selectedAutomation));
 	},
+
+	onMouseUp: function(event){
+		// don't duplicate event, click already handled the same element
+		if (event.target !== this.originalClickTarget){
+			this.onClick(event);
+		}
+	},
+
+
 
 	addPoint: function(point){
 		var timeline = this.model.get('timeline');
@@ -246,7 +263,8 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 			this.$el.removeClass('hidden');
 			this.$timelineClips.bind({
 				'mousedown.automationData' : this.onMouseDown,
-				'mousemove.automationData' : this.onMouseMove
+				'mousemove.automationData' : this.onMouseMove,
+				'click.automationData': this.onClick
 			});
 			this.render(timeline.get(selectedAutomation));
 		}else{

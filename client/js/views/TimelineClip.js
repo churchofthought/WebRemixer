@@ -5,7 +5,7 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 		dragstop: 'onDragStop',
 		resizestop: 'onResizeStop',
 		'click .toggle-loop': 'toggleLoop',
-		'click .duplicate': 'duplicate',
+		'click .duplicate': 'onDuplicateClick',
 		'click .delete': 'del'
 	},
 	
@@ -85,6 +85,15 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 
 		this.onSelectedChange(this.model, this.model.get('selected'));
 	},
+
+	onDuplicateClick: function(event){
+		var clone = this.model.clone();
+		clone.set('startTime', clone.get('startTime') + clone.get('duration'));
+		if (this.model.get('selected')){
+			this.model.set('selected', false);
+		}
+		return false;
+	},
 	
 	onSelectedChange: function(timelineClip, selected){
 		if (selected){
@@ -121,27 +130,12 @@ WebRemixer.Views.TimelineClip = WebRemixer.View.extend({
 	
 	toggleLoop: function(){
 		this.model.set('loop', !this.model.get('loop'));
-	},
-	
-	duplicate: function(timeDelta){
-		var selected = this.model.get('selected');
-	
-		var clone = new WebRemixer.Models.TimelineClip({
-			timeline: this.model.get('timeline'),
-			clip: this.model.get('clip'),
-			startTime: this.model.get('startTime') + (typeof timeDelta === 'number' && timeDelta || this.model.get('duration')),
-			duration: this.model.get('duration'),
-			loop: this.model.get('loop'),
-			selected: selected
-		});
-
-		if (selected){
-			this.model.set('selected', false);
-		}   
+		return false;
 	},
 	
 	del: function(){
 		this.model.destroy();
+		return false;
 	},
 	
 	onTimelineChange: function(){

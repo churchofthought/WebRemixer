@@ -108,7 +108,8 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 		if (remix){
 			this.listenTo(remix, {
 				'change:selection': this.onSelectionChange,
-				'change:playTime': this.onPlayTimeChange
+				'change:playTime': this.onPlayTimeChange,
+				'duplicate': this.onDuplicate
 			});
 		}
 	},
@@ -166,45 +167,42 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 	},
 	
 	duplicateSelection: function(){
-		var $selectedClips = this.getSelectedClips();
-
-		var duration = this.model.get('selection').duration;
-		
-		$selectedClips.each(function(){
-			$(this).data('view').duplicate(duration);
-		});
-	},
-
-	duplicateSelectionSelectedAutomation: function(){
-		this.duplicateSelectionAutomation(this.model.get('selectedAutomation'), this.model.get('selection'));
-	},
-
-	duplicateSelectionAllAutomation: function(){
 		var selection = this.model.get('selection');
 
+		var $selectedClips = this.getSelectedClips();
+		
+		$selectedClips.each(function(){
+			var timelineClip = $(this).data('view').model;
+			var clone = timelineClip.clone();
+			clone.set('startTime', clone.get('startTime') + selection.duration);
+			if (timelineClip.get('selected')){
+				timelineClip.set('selected', false);
+			}
+		});
+
 		for (var i = WebRemixer.Automations.length; i--;){
-			this.duplicateSelectionAutomation(WebRemixer.Automations[i], selection);
+			this.duplicateAutomation(WebRemixer.Automations[i], selection.startTime, selection.duration);
 		}
 	},
 
-	duplicateSelectionAutomation: function(automationName, selection){
+	duplicateAutomation: function(automationName, startTime, duration){
 		var points = this.model.get(automationName);
 		
-		var endTime = selection.startTime + selection.duration;
+		var endTime = startTime + duration;
 
-		var lookupPoint = [selection.startTime];
+		var lookupPoint = [startTime];
 		var i = _.sortedIndex(points, lookupPoint, '0');
 
-		lookupPoint[0] += selection.duration;
+		lookupPoint[0] += duration;
 		var endingIdx = _.sortedIndex(points, lookupPoint, '0');
 
-		lookupPoint[0] += selection.duration;
+		lookupPoint[0] += duration;
 		var dupeEndingIdx = _.sortedIndex(points, lookupPoint, '0');
 
 		var spliceArgs = [endingIdx, dupeEndingIdx - endingIdx];
 		while (i < endingIdx){
 			var point = points[i];
-			spliceArgs.push([point[0] + selection.duration, point[1]]);
+			spliceArgs.push([point[0] + duration, point[1]]);
 			++i;
 		}
 
