@@ -159,8 +159,6 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	},
 
 	onClick: function(event){
-		console.log('click motha fucka');
-
 		if (this.mousedownPoint){
 			if (this.$draggedPoint){
 				this.onMouseMove(event);

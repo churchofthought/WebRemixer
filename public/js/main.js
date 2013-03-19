@@ -498,8 +498,6 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	},
 
 	onClick: function(event){
-		console.log('click motha fucka');
-
 		if (this.mousedownPoint){
 			if (this.$draggedPoint){
 				this.onMouseMove(event);
@@ -1397,7 +1395,7 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 			this.listenTo(remix, {
 				'change:selection': this.onSelectionChange,
 				'change:playTime': this.onPlayTimeChange,
-				'duplicate': this.onDuplicate
+				'duplicate': this.duplicateSelection
 			});
 		}
 	},
@@ -1781,7 +1779,7 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		this.$contextMenu.removeClass('show');
 
 
-		var action = ui-item.attr('data-cmd');
+		var action = ui.item.attr('data-cmd');
 
 		this.model.get('remix').trigger(action);
 

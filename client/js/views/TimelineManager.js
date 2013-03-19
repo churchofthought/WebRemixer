@@ -50,7 +50,7 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		this.$contextMenu.removeClass('show');
 
 
-		var action = ui-item.attr('data-cmd');
+		var action = ui.item.attr('data-cmd');
 
 		this.model.get('remix').trigger(action);
 

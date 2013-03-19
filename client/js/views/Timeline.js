@@ -109,7 +109,7 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 			this.listenTo(remix, {
 				'change:selection': this.onSelectionChange,
 				'change:playTime': this.onPlayTimeChange,
-				'duplicate': this.onDuplicate
+				'duplicate': this.duplicateSelection
 			});
 		}
 	},
