@@ -88,6 +88,7 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	},
 
 	onMouseDown: function(event){
+		this.remixHasSelection = this.model.get('timeline').get('remix').get('selection').width;
 		this.originalClickTarget = event.target;
 
 		if (event.which !== 1){
@@ -162,7 +163,7 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 		if (this.mousedownPoint){
 			if (this.$draggedPoint){
 				this.onMouseMove(event);
-			}else{
+			}else if (!this.remixHasSelection){
 				var point = this.pointFromEvent(event);
 				if (_.isEqual(this.mousedownPoint, point)){
 					point[0] /= WebRemixer.PX_PER_SEC;

@@ -50,6 +50,7 @@ WebRemixer.Models.Timeline = WebRemixer.Model.extend({
 	
 		if (remix){
 			var timelines = remix.get('timelines');
+			this.set('order', _.indexOf(remix.get('timelineIds'), this.id));
 
 			timelines.add(this);
 			

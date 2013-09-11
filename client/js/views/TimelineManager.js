@@ -28,6 +28,7 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		this.$contextMenu = $('<ul/>')
 			.prop('className', 'context-menu')
 			.append('<li data-cmd="duplicate"><a><span class="ui-icon ui-icon-copy"></span>Duplicate</a></li>')
+			.append('<li data-cmd="copy"><a><span class="ui-icon ui-icon-copy"></span>Copy</li>')
 			.append('<li data-cmd="delete"><a><span class="ui-icon ui-icon-close"></span>Delete</a></li>')
 			.menu({
 				select: this.onMenuSelect
@@ -52,10 +53,24 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 
 		var action = ui.item.attr('data-cmd');
 
+		if (action == 'copy'){
+			this.copySelection();
+			return;
+		}
+
 		this.model.get('remix').trigger(action);
 
 		if (action === 'duplicate'){
 			this.shiftSelectionRight();
+		}
+	},
+
+	copySelection: function(){
+		var clipboard = [];
+
+		var timelines = this.model.get('remix').get('timelines');
+		for (var i = timelines.length; i--;){
+			var timeline = timelines[i];
 		}
 	},
 	

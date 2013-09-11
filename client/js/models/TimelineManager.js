@@ -1,6 +1,8 @@
 WebRemixer.Models.TimelineManager = WebRemixer.Model.extend({
 	
 	initialize: function(){
+		this.set('clipboard', []);
+
 		var remix = this.get('remix');
 
 		this.listenTo(remix.get('timelines'), {

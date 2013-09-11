@@ -306,8 +306,6 @@ WebRemixer.Routers.Remix = Backbone.Router.extend({
 		new WebRemixer.Views.Remix({
 			model: remix
 		}).$el.appendTo(document.body);
-		
-		remix.fetch();
 	}
 
 });
@@ -427,6 +425,7 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 	},
 
 	onMouseDown: function(event){
+		this.remixHasSelection = this.model.get('timeline').get('remix').get('selection').width;
 		this.originalClickTarget = event.target;
 
 		if (event.which !== 1){
@@ -501,7 +500,7 @@ WebRemixer.Views.AutomationData = WebRemixer.View.extend({
 		if (this.mousedownPoint){
 			if (this.$draggedPoint){
 				this.onMouseMove(event);
-			}else{
+			}else if (!this.remixHasSelection){
 				var point = this.pointFromEvent(event);
 				if (_.isEqual(this.mousedownPoint, point)){
 					point[0] /= WebRemixer.PX_PER_SEC;
@@ -1353,6 +1352,7 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 			remove: this.onTimelineClipsRemove
 		});
 
+		this.onOrderChange(this.model, this.model.get('order'));
 		this.onRemixChange(this.model, this.model.get('remix'));
 		this.onSelectedAutomationChange(this.model, this.model.get('selectedAutomation'));
 		this.onAutomationSelectorChange();
@@ -1395,7 +1395,8 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 			this.listenTo(remix, {
 				'change:selection': this.onSelectionChange,
 				'change:playTime': this.onPlayTimeChange,
-				'duplicate': this.duplicateSelection
+				'duplicate': this.duplicateSelection,
+				'delete': this.deleteSelection
 			});
 		}
 	},
@@ -1757,6 +1758,7 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 		this.$contextMenu = $('<ul/>')
 			.prop('className', 'context-menu')
 			.append('<li data-cmd="duplicate"><a><span class="ui-icon ui-icon-copy"></span>Duplicate</a></li>')
+			.append('<li data-cmd="copy"><a><span class="ui-icon ui-icon-copy"></span>Copy</li>')
 			.append('<li data-cmd="delete"><a><span class="ui-icon ui-icon-close"></span>Delete</a></li>')
 			.menu({
 				select: this.onMenuSelect
@@ -1781,10 +1783,24 @@ WebRemixer.Views.TimelineManager = WebRemixer.View.extend({
 
 		var action = ui.item.attr('data-cmd');
 
+		if (action == 'copy'){
+			this.copySelection();
+			return;
+		}
+
 		this.model.get('remix').trigger(action);
 
 		if (action === 'duplicate'){
 			this.shiftSelectionRight();
+		}
+	},
+
+	copySelection: function(){
+		var clipboard = [];
+
+		var timelines = this.model.get('remix').get('timelines');
+		for (var i = timelines.length; i--;){
+			var timeline = timelines[i];
 		}
 	},
 	
@@ -2363,6 +2379,8 @@ WebRemixer.Models.Remix = WebRemixer.Model.extend({
 	},
 	
 	onFetchedChildren: function(res){
+		WebRemixer.Models.Remix.createOrUpdate([res.remix]);
+
 		WebRemixer.Models.Clip.createOrUpdate(res.clips);
 		
 		WebRemixer.Models.Timeline.createOrUpdate(res.timelines);
@@ -2425,6 +2443,7 @@ WebRemixer.Models.Timeline = WebRemixer.Model.extend({
 	
 		if (remix){
 			var timelines = remix.get('timelines');
+			this.set('order', _.indexOf(remix.get('timelineIds'), this.id));
 
 			timelines.add(this);
 			
@@ -2535,6 +2554,7 @@ WebRemixer.Models.Clip = WebRemixer.Model.extend({
 	
 		if (remix){
 			var clips = remix.get('clips');
+			this.set('order', _.indexOf(remix.get('clipIds'), this.id));
 
 			clips.add(this);
 
@@ -3081,6 +3101,8 @@ WebRemixer.Models.Ruler = WebRemixer.Model.extend({
 WebRemixer.Models.TimelineManager = WebRemixer.Model.extend({
 	
 	initialize: function(){
+		this.set('clipboard', []);
+
 		var remix = this.get('remix');
 
 		this.listenTo(remix.get('timelines'), {
@@ -3117,13 +3139,22 @@ WebRemixer.Models.VideoPlayer = WebRemixer.Model.extend({
 	
 });
 WebRemixer.Collections.Clips = Backbone.Collection.extend({
-	model: WebRemixer.Models.Clip
+	model: WebRemixer.Models.Clip,
+	comparator: function(clip){
+		return clip.get('order');
+	}
 });
 WebRemixer.Collections.TimelineClips = Backbone.Collection.extend({
-	model: WebRemixer.Models.TimelineClip
+	model: WebRemixer.Models.TimelineClip,
+	comparator: function(timelineClip){
+		return timelineClip.get('startTime');
+	}
 });
 WebRemixer.Collections.Timelines = Backbone.Collection.extend({
-	model: WebRemixer.Models.Timeline
+	model: WebRemixer.Models.Timeline,
+	comparator: function(timeline){
+		return timeline.get('order');
+	}
 });
 WebRemixer.Collections.VideoPlayers = Backbone.Collection.extend({
 	model: WebRemixer.Models.VideoPlayer

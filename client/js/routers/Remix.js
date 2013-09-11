@@ -32,8 +32,6 @@ WebRemixer.Routers.Remix = Backbone.Router.extend({
 		new WebRemixer.Views.Remix({
 			model: remix
 		}).$el.appendTo(document.body);
-		
-		remix.fetch();
 	}
 
 });

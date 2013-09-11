@@ -4,6 +4,82 @@
 		"selected_items":
 		[
 			[
+				"duplicate",
+				"duplicateSelection"
+			],
+			[
+				"dupli",
+				"duplicateSelectionAutomation"
+			],
+			[
+				"on",
+				"onMouseMove"
+			],
+			[
+				"timeli",
+				"timelineClips"
+			],
+			[
+				"se",
+				"selectedAutomation"
+			],
+			[
+				"selected",
+				"selectedAutomation"
+			],
+			[
+				"pause",
+				"pauseVideo"
+			],
+			[
+				"aut",
+				"automateInterval"
+			],
+			[
+				"selec",
+				"selectedAutomation"
+			],
+			[
+				"get",
+				"getAutomationValue"
+			],
+			[
+				"sele",
+				"selectedAutomation"
+			],
+			[
+				"fire",
+				"fire"
+			],
+			[
+				"upd",
+				"updateSelectionInterval"
+			],
+			[
+				"auto",
+				"automationEndPoint"
+			],
+			[
+				"selcted",
+				"selectedAutomationPoints"
+			],
+			[
+				"onr",
+				"onRemixDurationChange"
+			],
+			[
+				"onRemix",
+				"onRemixDurationChange"
+			],
+			[
+				"moused",
+				"mousedownPoint"
+			],
+			[
+				"autom",
+				"automationSelector"
+			],
+			[
 				"onTimeline",
 				"onTimelineIdsChange"
 			]
@@ -11,69 +87,11 @@
 	},
 	"buffers":
 	[
-		{
-			"file": "client/js/views/AutomationData.js",
-			"settings":
-			{
-				"buffer_size": 3865,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "client/css/imports/automation-data.styl",
-			"settings":
-			{
-				"buffer_size": 588,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "client/css/imports/timeline.styl",
-			"settings":
-			{
-				"buffer_size": 1135,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "client/js/views/Timeline.js",
-			"settings":
-			{
-				"buffer_size": 5109,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "Searching 74 files for \"appendTo(this.$el)\"\n\n/Volumes/YTR/home/andrew/WebRemixer/client/js/views/AutomationData.js:\n   23  		this.$el.append(this.$svg);\n   24  \n   25: 		this.$tooltip = $('<div/>').prop('className', 'tooltip').appendTo(this.$el);\n   26  \n   27  		this.listenTo(this.model, 'change:points', this.onPointsChange);\n\n1 match in 1 file\n\n\nSearching 74 files for \"options.\"\n\n/Volumes/YTR/home/andrew/WebRemixer/client/js/views/AutomationData.js:\n   19  		this.$tooltip = $('<div/>').prop('className', 'tooltip').appendTo(this.el);\n   20  \n   21: 		options.$timeline.bind({\n   22  			mousedown: this.onMouseDown,\n   23  			mousemove: this.onMouseMove,\n\n/Volumes/YTR/home/andrew/WebRemixer/client/js/views/Ruler.js:\n   10  \n   11  		this.$markings = $('<div/>').prop('className', 'markings').appendTo(this.el);\n   12: 		this.$timeHand = $('<div/>').prop('className', 'timeHand').appendTo(this.options.$remix);\n   13  	\n   14  		\n\n/Volumes/YTR/home/andrew/WebRemixer/public/js/jquery.ui.menubar.js:\n   33  	_create: function() {\n   34  		var that = this;\n   35: 		this.menuItems = this.element.children( this.options.items );\n   36  		this.items = this.menuItems.children( \"button, a\" );\n   37  \n   ..\n   47  		this._focusable( this.items );\n   48  		this._hoverable( this.items );\n   49: 		this.items.siblings( this.options.menuElement )\n   50  			.menu({\n   51  				position: {\n   52: 					within: this.options.position.within\n   53  				},\n   54  				select: function( event, ui ) {\n   ..\n   59  					that._trigger( \"select\", event, ui );\n   60  				},\n   61: 				menus: that.options.menuElement\n   62  			})\n   63  			.hide()\n   ..\n   86  			var input = $(this),\n   87  				// TODO menu var is only used on two places, doesn't quite justify the .each\n   88: 				menu = input.next( that.options.menuElement );\n   89  \n   90  			// might be a non-menu button\n   ..\n  103  						return;\n  104  					}\n  105: 					if ( ( that.open && event.type === \"mouseenter\" ) || event.type === \"click\" || that.options.autoExpand ) {\n  106: 						if( that.options.autoExpand ) {\n  107  							clearTimeout( that.closeTimer );\n  108  						}\n  ...\n  133  \n  134  				// TODO review if these options (menuIcon and buttons) are a good choice, maybe they can be merged\n  135: 				if ( that.options.menuIcon ) {\n  136  					input.addClass( \"ui-state-default\" ).append( \"<span class='ui-button-icon-secondary ui-icon ui-icon-triangle-1-s'></span>\" );\n  137  					input.removeClass( \"ui-button-text-only\" ).addClass( \"ui-button-text-icon-secondary\" );\n  ...\n  151  				.wrapInner( \"<span class='ui-button-text'></span>\" );\n  152  \n  153: 			if ( that.options.buttons ) {\n  154  				input.removeClass( \"ui-menubar-link\" ).addClass( \"ui-state-default\" );\n  155  			}\n  ...\n  173  			},\n  174  			\"mouseleave .ui-menubar-item\": function( event ) {\n  175: 				if ( that.options.autoExpand ) {\n  176  					that.closeTimer = setTimeout( function() {\n  177  						that._close( event );\n  ...\n  264  			.position( $.extend({\n  265  				of: button\n  266: 			}, this.options.position ) )\n  267  			.removeAttr( \"aria-hidden\" )\n  268  			.attr( \"aria-expanded\", \"true\" )\n  ...\n  298  			wrapItem;\n  299  		if ( this.open ) {\n  300: 			next = this.active.closest( \".ui-menubar-item\" )[ direction + \"All\" ]( this.options.items ).first().children( \".ui-menu\" ).eq( 0 );\n  301  			wrapItem = this.menuItems[ filter ]().children( \".ui-menu\" ).eq( 0 );\n  302  		} else {\n  303  			if ( event ) {\n  304: 				next = $( event.target ).closest( \".ui-menubar-item\" )[ direction + \"All\" ]( this.options.items ).children( \".ui-menubar-link\" ).eq( 0 );\n  305  				wrapItem = this.menuItems[ filter ]().children( \".ui-menubar-link\" ).eq( 0 );\n  306  			} else {\n\n/Volumes/YTR/home/andrew/WebRemixer/public/js/main.js:\n 1115  \n 1116  		this.$markings = $('<div/>').prop('className', 'markings').appendTo(this.el);\n 1117: 		this.$timeHand = $('<div/>').prop('className', 'timeHand').appendTo(this.options.$remix);\n 1118  	\n 1119  		\n\n16 matches across 4 files\n",
-			"settings":
-			{
-				"buffer_size": 4019,
-				"line_ending": "Unix",
-				"name": "Find Results",
-				"scratch": true
-			}
-		},
-		{
-			"file": "client/css/imports/ruler.styl",
-			"settings":
-			{
-				"buffer_size": 1883,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "client/css/imports/shared.styl",
-			"settings":
-			{
-				"buffer_size": 654,
-				"line_ending": "Unix"
-			}
-		}
 	],
 	"build_system": "",
 	"command_palette":
 	{
-		"height": 392.0,
+		"height": 47.0,
 		"selected_items":
 		[
 			[
@@ -114,52 +132,65 @@
 	},
 	"file_history":
 	[
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Remix.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/ClipManager.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/PlayControls.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/Remix.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/Ruler.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/ClipManager.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/Clip.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/ClipInspector.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Clip.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/TimelineManager.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/VideoFinder.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/public/js/main.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/TimelineManager.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/Timeline.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/TimelineClip.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/AutomationData.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/shared.styl",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/clip-manager.styl",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/timeline.styl",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/automation-data.styl",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/View.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/Timeline.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/TimelineManager.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/AutomationData.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/Ruler.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/server.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/AutomationData.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/collections/VideoPlayers.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/PlayControls.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/VideoPlayer.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Timeline.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/css/main.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/timeline-clip.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/VideoPlayer.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/PlayControls.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/automation-data.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/TimelineClip.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/ClipPlayer.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Model.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/TimelineClip.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/constants.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/context-menu.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/main.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/shared.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/Remix.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/util.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/TimelineManager.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/collections/Timelines.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Remix.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/routers/Remix.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/collections/Clips.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/collections/TimelineClips.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Clip.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/modal-overlay",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/VideoFinder.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/ClipManager.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/ClipInspector.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/Clip.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/PlayerManager.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/View.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/public/css/jquery-ui-1.10.1.custom.css",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/remix.styl",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/ruler.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/video-player.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/clip.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/AutomationData.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/lib/lodash.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/public/main.html",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/PlayControls.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/ClipManager.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/public/js/main.js",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/clip-manager.styl",
+		"/Volumes/YTR/home/andrew/WebRemixer/client/js/collections/VideoPlayers.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/package.json",
 		"/Volumes/YTR/home/andrew/WebRemixer/Gruntfile.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/video.styl",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/remix.styl",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/css/video.styl",
 		"/Volumes/YTR/home/andrew/WebRemixer/public/main.css",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/constants.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/css/video-finder.styl",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/css/timeline.styl",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/namespaces.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/css/shared.styl",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/main.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/VideoPlayer.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/TimelineClip.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/play-controls.styl",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/video-finder.styl",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/main-menu.styl",
@@ -170,25 +201,16 @@
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/MainMenu.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/views/Video.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/public/main.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/PlayerManager.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Video.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/routers/Remix.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/Ruler.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/VideoFinder.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/models/MainMenu.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/lib/backbone.modifications.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/collections/Clips.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/collections/TimelineClips.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/js/collections/Timelines.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/collections/Videos.js",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/js/lib/jquery.single.js",
-		"/Volumes/YTR/home/andrew/WebRemixer/public/main.html",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/clip-inspector.styl",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/context-menu.styl",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/clip.styl",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/body.styl",
 		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/reset.styl",
-		"/Volumes/YTR/home/andrew/WebRemixer/client/css/imports/timeline-clip.styl",
 		"/Users/roxyfoxy/Library/Application Support/Sublime Text 2/Packages/User/SublimeLinter.sublime-settings"
 	],
 	"find":
@@ -197,9 +219,11 @@
 	},
 	"find_in_files":
 	{
-		"height": 123.0,
+		"height": 0.0,
 		"where_history":
 		[
+			"",
+			"selectedAutomation",
 			""
 		]
 	},
@@ -208,118 +232,134 @@
 		"case_sensitive": false,
 		"find_history":
 		[
-			"options.",
-			"appendTo(this.$el)",
-			"automation",
-			"sprintf",
-			"class\"",
-			"'class'",
-			"prop('class'",
-			"fill",
-			"document.createElementNS('http://www.w3.org/2000/svg', ",
-			"'http://www.w3.org/2000/svg'",
-			"grid",
-			"cx",
-			"ontimelines",
+			"ontimelinessort",
 			"timelineids",
-			"draggingpoint",
-			"order",
-			"timelineids",
-			"clipids",
-			"indexof",
-			"timeline",
-			"Timeline",
-			"onTimelineIdsChange",
-			"indexof",
-			"clipids",
-			"ids",
-			"sort",
-			"splice",
-			"sort",
-			"draggingPoint",
-			"this",
-			"draggingPoint",
-			"trigger",
-			"drawpath",
-			"draggingPoint",
-			"circle",
-			"pointpath",
-			"this",
-			"point",
-			"line",
-			"draggingPoint",
-			"point",
-			"point[0]",
-			"circle",
-			"rcle",
-			"path",
-			".x",
-			"coords",
-			"pagex",
-			"clientx",
-			"onRemixChange",
-			"trigger",
-			" == ",
-			"trigger",
-			"this",
-			"the",
-			"this",
-			"app",
-			"null",
-			"onremixplayingchange",
-			"set",
-			": \"latest\",\n			 \"stylus\" : \"latest\",\n					\"nib\" : \"latest\",\n		 \"mongoose\" : \"latest\",\n				\"grunt\" : \"latest\",\n		\"grunt-cli\" : \"latest\",\n\"contrib-concat\": \"latest\",\n				\"async\" :",
-			":",
-			"*",
-			" \"*\",",
-			"\"*\",",
-			"*",
-			"\"*\",",
-			"grunt",
-			"mongoose",
-			"onplaytimechange",
-			"bindall",
-			"model",
-			"bindall",
-			"onload",
-			"Backbone.View.extend",
-			"render",
-			"bindall",
-			"render",
-			"Backbone.Model.extend",
-			"contextmenu",
-			"timelines",
+			"ontimeline",
+			"motha",
+			"clik",
+			"onduplicate",
+			"onduplicate ",
+			"mouseup",
+			"onmouseup",
+			"onmousemove",
+			"mouseup",
+			"onmouseup",
+			"click",
+			"loop",
+			"onclick",
+			"loop",
+			"preventdefault",
+			"stoppropagation",
+			"event.stopprop",
+			"del :",
+			"del",
+			"toggleloop",
+			"dupe",
 			"mousedown",
+			"mousedown.",
+			"onmouseup",
+			"click",
+			"mouseup",
+			"mousedown",
+			"onmouseup",
+			"this.model",
+			"clone",
+			"model.clone",
+			"selection.startTime",
+			"selection.duration",
 			"selection",
-			"timeline",
-			"ontimelinesadd",
-			"timelines",
-			"orig",
-			"save",
-			"debounce",
-			"ontimelinessortupdate",
-			"fetchedchildren",
-			"onsortupdate",
-			"onclipidschange",
-			"ontimelineidschange",
-			"videofinder",
-			"onsortupdate",
-			"order",
-			"idattribute",
-			"order",
-			"autoplay",
-			"attrType",
-			"includeInJSON",
-			"idattribute",
-			"this.id",
-			"data-order",
-			"'",
-			"attr",
-			"delete",
-			".add",
-			"onclipschange",
-			"clips",
-			"timelineclips"
+			"onselectionchange",
+			"duplicate",
+			"remix",
+			"shiftse",
+			"this.$contextmenu",
+			"addclass",
+			"contextmenu",
+			"contains",
+			"$.contains",
+			"contextmenu",
+			"onmousedown",
+			"&:before",
+			"&:after",
+			"contextmenu",
+			"automations",
+			"volume",
+			"automationendpoint",
+			"volume",
+			"contextmenu",
+			"startingidx",
+			"getselectedclips",
+			"onautomationpointschange",
+			"trigger",
+			"selection",
+			"selection.",
+			"selection =",
+			"sortedindex",
+			"duplicateSelection",
+			"context",
+			"contextmenu",
+			"math.random",
+			"console.log",
+			"prevjson",
+			"prevJSON",
+			"clone",
+			"render",
+			".render",
+			"trigger",
+			"_.delay",
+			"_.defer",
+			"pointRangeY",
+			"pointMinY",
+			"pointminy",
+			"pointfromevent",
+			"pointtocoordstr",
+			"selection",
+			"alert",
+			"stoppropagation",
+			"preventdefault",
+			"event.preventDefault",
+			"mouseup",
+			"mousedownpoint",
+			"mousedown",
+			"drawpoint",
+			"redrawPoints",
+			"drawpoints",
+			"redrawPoints",
+			"drawpoints",
+			"draggingPoint",
+			"drawpoint",
+			"addpoint",
+			"firepoints",
+			"selectedautomationpoints",
+			"drawpoint",
+			".$point",
+			"selectedautomationpoints",
+			"onselectedautomation",
+			"selectedautomationpoints",
+			"selectedautomation",
+			"automationendpoint",
+			"curAutomation",
+			"automationValues",
+			"change:playtime",
+			"onremixduration",
+			"automation",
+			"automationName",
+			"automation",
+			"currentAutomation",
+			"selectedautomation",
+			"automationendpoint",
+			"sortedindex",
+			"pluck",
+			"sortedindex",
+			"height",
+			"var height =",
+			"r",
+			"selectedautoamtion",
+			"selectedautomationpoints",
+			"automationpoint",
+			"automationend",
+			"str",
+			"path"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -350,806 +390,8 @@
 	"groups":
 	[
 		{
-			"selected": 2,
 			"sheets":
 			[
-				{
-					"buffer": 0,
-					"file": "client/js/views/AutomationData.js",
-					"settings":
-					{
-						"buffer_size": 3865,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2275,
-								2275
-							]
-						],
-						"settings":
-						{
-							"annotations":
-							[
-								"TODO",
-								"README",
-								"FIXME"
-							],
-							"csslint_options":
-							{
-								"adjoining-classes": "warning",
-								"box-model": true,
-								"box-sizing": "warning",
-								"compatible-vendor-prefixes": "warning",
-								"display-property-grouping": true,
-								"duplicate-background-images": "warning",
-								"duplicate-properties": true,
-								"empty-rules": true,
-								"errors": true,
-								"fallback-colors": "warning",
-								"floats": "warning",
-								"font-faces": "warning",
-								"font-sizes": "warning",
-								"gradients": "warning",
-								"ids": "warning",
-								"import": "warning",
-								"important": "warning",
-								"known-properties": true,
-								"outline-none": "warning",
-								"overqualified-elements": "warning",
-								"qualified-headings": "warning",
-								"regex-selectors": "warning",
-								"rules-count": "warning",
-								"shorthand": "warning",
-								"star-property-hack": "warning",
-								"text-indent": "warning",
-								"underscore-property-hack": "warning",
-								"unique-headings": "warning",
-								"universal-selector": "warning",
-								"vendor-prefix": true,
-								"zero-units": "warning"
-							},
-							"gjslint_ignore":
-							[
-								110.0
-							],
-							"gjslint_options":
-							[
-							],
-							"javascript_linter": "jshint",
-							"jshint_options":
-							{
-								"browser": true,
-								"evil": true,
-								"regexdash": true,
-								"sub": true,
-								"trailing": true,
-								"wsh": true
-							},
-							"pep8": true,
-							"pep8_ignore":
-							[
-								"E501"
-							],
-							"perl_linter": "perlcritic",
-							"pyflakes_ignore":
-							[
-							],
-							"pyflakes_ignore_import_*": true,
-							"sublimelinter": true,
-							"sublimelinter_delay": 2.0,
-							"sublimelinter_disable":
-							[
-							],
-							"sublimelinter_executable_map":
-							{
-							},
-							"sublimelinter_fill_outlines": false,
-							"sublimelinter_gutter_marks": false,
-							"sublimelinter_mark_style": "outline",
-							"sublimelinter_notes": false,
-							"sublimelinter_objj_check_ascii": false,
-							"sublimelinter_popup_errors_on_save": false,
-							"sublimelinter_syntax_map":
-							{
-								"C++": "c",
-								"Python Django": "python",
-								"Ruby on Rails": "ruby"
-							},
-							"sublimelinter_wrap_find": true,
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "client/css/imports/automation-data.styl",
-					"settings":
-					{
-						"buffer_size": 588,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								16,
-								16
-							]
-						],
-						"settings":
-						{
-							"annotations":
-							[
-								"TODO",
-								"README",
-								"FIXME"
-							],
-							"csslint_options":
-							{
-								"adjoining-classes": "warning",
-								"box-model": true,
-								"box-sizing": "warning",
-								"compatible-vendor-prefixes": "warning",
-								"display-property-grouping": true,
-								"duplicate-background-images": "warning",
-								"duplicate-properties": true,
-								"empty-rules": true,
-								"errors": true,
-								"fallback-colors": "warning",
-								"floats": "warning",
-								"font-faces": "warning",
-								"font-sizes": "warning",
-								"gradients": "warning",
-								"ids": "warning",
-								"import": "warning",
-								"important": "warning",
-								"known-properties": true,
-								"outline-none": "warning",
-								"overqualified-elements": "warning",
-								"qualified-headings": "warning",
-								"regex-selectors": "warning",
-								"rules-count": "warning",
-								"shorthand": "warning",
-								"star-property-hack": "warning",
-								"text-indent": "warning",
-								"underscore-property-hack": "warning",
-								"unique-headings": "warning",
-								"universal-selector": "warning",
-								"vendor-prefix": true,
-								"zero-units": "warning"
-							},
-							"gjslint_ignore":
-							[
-								110.0
-							],
-							"gjslint_options":
-							[
-							],
-							"javascript_linter": "jshint",
-							"jshint_options":
-							{
-								"browser": true,
-								"evil": true,
-								"regexdash": true,
-								"sub": true,
-								"trailing": true,
-								"wsh": true
-							},
-							"pep8": true,
-							"pep8_ignore":
-							[
-								"E501"
-							],
-							"perl_linter": "perlcritic",
-							"pyflakes_ignore":
-							[
-							],
-							"pyflakes_ignore_import_*": true,
-							"sublimelinter": true,
-							"sublimelinter_delay": 2.0,
-							"sublimelinter_disable":
-							[
-							],
-							"sublimelinter_executable_map":
-							{
-							},
-							"sublimelinter_fill_outlines": false,
-							"sublimelinter_gutter_marks": false,
-							"sublimelinter_mark_style": "outline",
-							"sublimelinter_notes": false,
-							"sublimelinter_objj_check_ascii": false,
-							"sublimelinter_popup_errors_on_save": false,
-							"sublimelinter_syntax_map":
-							{
-								"C++": "c",
-								"Python Django": "python",
-								"Ruby on Rails": "ruby"
-							},
-							"sublimelinter_wrap_find": true,
-							"syntax": "Packages/Text/Plain text.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "client/css/imports/timeline.styl",
-					"settings":
-					{
-						"buffer_size": 1135,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1057,
-								1057
-							]
-						],
-						"settings":
-						{
-							"annotations":
-							[
-								"TODO",
-								"README",
-								"FIXME"
-							],
-							"csslint_options":
-							{
-								"adjoining-classes": "warning",
-								"box-model": true,
-								"box-sizing": "warning",
-								"compatible-vendor-prefixes": "warning",
-								"display-property-grouping": true,
-								"duplicate-background-images": "warning",
-								"duplicate-properties": true,
-								"empty-rules": true,
-								"errors": true,
-								"fallback-colors": "warning",
-								"floats": "warning",
-								"font-faces": "warning",
-								"font-sizes": "warning",
-								"gradients": "warning",
-								"ids": "warning",
-								"import": "warning",
-								"important": "warning",
-								"known-properties": true,
-								"outline-none": "warning",
-								"overqualified-elements": "warning",
-								"qualified-headings": "warning",
-								"regex-selectors": "warning",
-								"rules-count": "warning",
-								"shorthand": "warning",
-								"star-property-hack": "warning",
-								"text-indent": "warning",
-								"underscore-property-hack": "warning",
-								"unique-headings": "warning",
-								"universal-selector": "warning",
-								"vendor-prefix": true,
-								"zero-units": "warning"
-							},
-							"gjslint_ignore":
-							[
-								110.0
-							],
-							"gjslint_options":
-							[
-							],
-							"javascript_linter": "jshint",
-							"jshint_options":
-							{
-								"browser": true,
-								"evil": true,
-								"regexdash": true,
-								"sub": true,
-								"trailing": true,
-								"wsh": true
-							},
-							"pep8": true,
-							"pep8_ignore":
-							[
-								"E501"
-							],
-							"perl_linter": "perlcritic",
-							"pyflakes_ignore":
-							[
-							],
-							"pyflakes_ignore_import_*": true,
-							"sublimelinter": true,
-							"sublimelinter_delay": 2.0,
-							"sublimelinter_disable":
-							[
-							],
-							"sublimelinter_executable_map":
-							{
-							},
-							"sublimelinter_fill_outlines": false,
-							"sublimelinter_gutter_marks": false,
-							"sublimelinter_mark_style": "outline",
-							"sublimelinter_notes": false,
-							"sublimelinter_objj_check_ascii": false,
-							"sublimelinter_popup_errors_on_save": false,
-							"sublimelinter_syntax_map":
-							{
-								"C++": "c",
-								"Python Django": "python",
-								"Ruby on Rails": "ruby"
-							},
-							"sublimelinter_wrap_find": true,
-							"syntax": "Packages/Text/Plain text.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 482.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "client/js/views/Timeline.js",
-					"settings":
-					{
-						"buffer_size": 5109,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								620,
-								620
-							]
-						],
-						"settings":
-						{
-							"annotations":
-							[
-								"TODO",
-								"README",
-								"FIXME"
-							],
-							"csslint_options":
-							{
-								"adjoining-classes": "warning",
-								"box-model": true,
-								"box-sizing": "warning",
-								"compatible-vendor-prefixes": "warning",
-								"display-property-grouping": true,
-								"duplicate-background-images": "warning",
-								"duplicate-properties": true,
-								"empty-rules": true,
-								"errors": true,
-								"fallback-colors": "warning",
-								"floats": "warning",
-								"font-faces": "warning",
-								"font-sizes": "warning",
-								"gradients": "warning",
-								"ids": "warning",
-								"import": "warning",
-								"important": "warning",
-								"known-properties": true,
-								"outline-none": "warning",
-								"overqualified-elements": "warning",
-								"qualified-headings": "warning",
-								"regex-selectors": "warning",
-								"rules-count": "warning",
-								"shorthand": "warning",
-								"star-property-hack": "warning",
-								"text-indent": "warning",
-								"underscore-property-hack": "warning",
-								"unique-headings": "warning",
-								"universal-selector": "warning",
-								"vendor-prefix": true,
-								"zero-units": "warning"
-							},
-							"gjslint_ignore":
-							[
-								110.0
-							],
-							"gjslint_options":
-							[
-							],
-							"javascript_linter": "jshint",
-							"jshint_options":
-							{
-								"browser": true,
-								"evil": true,
-								"regexdash": true,
-								"sub": true,
-								"trailing": true,
-								"wsh": true
-							},
-							"pep8": true,
-							"pep8_ignore":
-							[
-								"E501"
-							],
-							"perl_linter": "perlcritic",
-							"pyflakes_ignore":
-							[
-							],
-							"pyflakes_ignore_import_*": true,
-							"sublimelinter": true,
-							"sublimelinter_delay": 2.0,
-							"sublimelinter_disable":
-							[
-							],
-							"sublimelinter_executable_map":
-							{
-							},
-							"sublimelinter_fill_outlines": false,
-							"sublimelinter_gutter_marks": false,
-							"sublimelinter_mark_style": "outline",
-							"sublimelinter_notes": false,
-							"sublimelinter_objj_check_ascii": false,
-							"sublimelinter_popup_errors_on_save": false,
-							"sublimelinter_syntax_map":
-							{
-								"C++": "c",
-								"Python Django": "python",
-								"Ruby on Rails": "ruby"
-							},
-							"sublimelinter_wrap_find": true,
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"settings":
-					{
-						"buffer_size": 4019,
-						"regions":
-						{
-							"match":
-							{
-								"flags": 112,
-								"regions":
-								[
-									[
-										227,
-										245
-									],
-									[
-										558,
-										566
-									],
-									[
-										901,
-										909
-									],
-									[
-										1116,
-										1124
-									],
-									[
-										1324,
-										1332
-									],
-									[
-										1412,
-										1420
-									],
-									[
-										1586,
-										1594
-									],
-									[
-										1797,
-										1805
-									],
-									[
-										2005,
-										2013
-									],
-									[
-										2050,
-										2058
-									],
-									[
-										2280,
-										2288
-									],
-									[
-										2638,
-										2646
-									],
-									[
-										2853,
-										2861
-									],
-									[
-										3044,
-										3052
-									],
-									[
-										3287,
-										3295
-									],
-									[
-										3559,
-										3567
-									],
-									[
-										3956,
-										3964
-									]
-								],
-								"scope": ""
-							}
-						},
-						"selection":
-						[
-							[
-								570,
-								570
-							]
-						],
-						"settings":
-						{
-							"detect_indentation": false,
-							"output_tag": 2,
-							"result_base_dir": "",
-							"result_file_regex": "^([A-Za-z\\\\/<].*):$",
-							"result_line_regex": "^ +([0-9]+):",
-							"scroll_past_end": true,
-							"syntax": "Packages/Default/Find Results.hidden-tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 319.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "client/css/imports/ruler.styl",
-					"settings":
-					{
-						"buffer_size": 1883,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1330,
-								1330
-							]
-						],
-						"settings":
-						{
-							"annotations":
-							[
-								"TODO",
-								"README",
-								"FIXME"
-							],
-							"csslint_options":
-							{
-								"adjoining-classes": "warning",
-								"box-model": true,
-								"box-sizing": "warning",
-								"compatible-vendor-prefixes": "warning",
-								"display-property-grouping": true,
-								"duplicate-background-images": "warning",
-								"duplicate-properties": true,
-								"empty-rules": true,
-								"errors": true,
-								"fallback-colors": "warning",
-								"floats": "warning",
-								"font-faces": "warning",
-								"font-sizes": "warning",
-								"gradients": "warning",
-								"ids": "warning",
-								"import": "warning",
-								"important": "warning",
-								"known-properties": true,
-								"outline-none": "warning",
-								"overqualified-elements": "warning",
-								"qualified-headings": "warning",
-								"regex-selectors": "warning",
-								"rules-count": "warning",
-								"shorthand": "warning",
-								"star-property-hack": "warning",
-								"text-indent": "warning",
-								"underscore-property-hack": "warning",
-								"unique-headings": "warning",
-								"universal-selector": "warning",
-								"vendor-prefix": true,
-								"zero-units": "warning"
-							},
-							"gjslint_ignore":
-							[
-								110.0
-							],
-							"gjslint_options":
-							[
-							],
-							"javascript_linter": "jshint",
-							"jshint_options":
-							{
-								"browser": true,
-								"evil": true,
-								"regexdash": true,
-								"sub": true,
-								"trailing": true,
-								"wsh": true
-							},
-							"pep8": true,
-							"pep8_ignore":
-							[
-								"E501"
-							],
-							"perl_linter": "perlcritic",
-							"pyflakes_ignore":
-							[
-							],
-							"pyflakes_ignore_import_*": true,
-							"sublimelinter": true,
-							"sublimelinter_delay": 2.0,
-							"sublimelinter_disable":
-							[
-							],
-							"sublimelinter_executable_map":
-							{
-							},
-							"sublimelinter_fill_outlines": false,
-							"sublimelinter_gutter_marks": false,
-							"sublimelinter_mark_style": "outline",
-							"sublimelinter_notes": false,
-							"sublimelinter_objj_check_ascii": false,
-							"sublimelinter_popup_errors_on_save": false,
-							"sublimelinter_syntax_map":
-							{
-								"C++": "c",
-								"Python Django": "python",
-								"Ruby on Rails": "ruby"
-							},
-							"sublimelinter_wrap_find": true,
-							"syntax": "Packages/Text/Plain text.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 1512.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "client/css/imports/shared.styl",
-					"settings":
-					{
-						"buffer_size": 654,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								221,
-								221
-							]
-						],
-						"settings":
-						{
-							"annotations":
-							[
-								"TODO",
-								"README",
-								"FIXME"
-							],
-							"csslint_options":
-							{
-								"adjoining-classes": "warning",
-								"box-model": true,
-								"box-sizing": "warning",
-								"compatible-vendor-prefixes": "warning",
-								"display-property-grouping": true,
-								"duplicate-background-images": "warning",
-								"duplicate-properties": true,
-								"empty-rules": true,
-								"errors": true,
-								"fallback-colors": "warning",
-								"floats": "warning",
-								"font-faces": "warning",
-								"font-sizes": "warning",
-								"gradients": "warning",
-								"ids": "warning",
-								"import": "warning",
-								"important": "warning",
-								"known-properties": true,
-								"outline-none": "warning",
-								"overqualified-elements": "warning",
-								"qualified-headings": "warning",
-								"regex-selectors": "warning",
-								"rules-count": "warning",
-								"shorthand": "warning",
-								"star-property-hack": "warning",
-								"text-indent": "warning",
-								"underscore-property-hack": "warning",
-								"unique-headings": "warning",
-								"universal-selector": "warning",
-								"vendor-prefix": true,
-								"zero-units": "warning"
-							},
-							"gjslint_ignore":
-							[
-								110.0
-							],
-							"gjslint_options":
-							[
-							],
-							"javascript_linter": "jshint",
-							"jshint_options":
-							{
-								"browser": true,
-								"evil": true,
-								"regexdash": true,
-								"sub": true,
-								"trailing": true,
-								"wsh": true
-							},
-							"pep8": true,
-							"pep8_ignore":
-							[
-								"E501"
-							],
-							"perl_linter": "perlcritic",
-							"pyflakes_ignore":
-							[
-							],
-							"pyflakes_ignore_import_*": true,
-							"sublimelinter": true,
-							"sublimelinter_delay": 2.0,
-							"sublimelinter_disable":
-							[
-							],
-							"sublimelinter_executable_map":
-							{
-							},
-							"sublimelinter_fill_outlines": false,
-							"sublimelinter_gutter_marks": false,
-							"sublimelinter_mark_style": "outline",
-							"sublimelinter_notes": false,
-							"sublimelinter_objj_check_ascii": false,
-							"sublimelinter_popup_errors_on_save": false,
-							"sublimelinter_syntax_map":
-							{
-								"C++": "c",
-								"Python Django": "python",
-								"Ruby on Rails": "ruby"
-							},
-							"sublimelinter_wrap_find": true,
-							"syntax": "Packages/Text/Plain text.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				}
 			]
 		}
 	],
@@ -1194,6 +436,10 @@
 		"height": 0.0,
 		"selected_items":
 		[
+			[
+				"ruler",
+				"client/js/views/Ruler.js"
+			],
 			[
 				"views/clip.j",
 				"client/js/views/Clip.js"

@@ -61,6 +61,8 @@ WebRemixer.Models.Remix = WebRemixer.Model.extend({
 	},
 	
 	onFetchedChildren: function(res){
+		WebRemixer.Models.Remix.createOrUpdate([res.remix]);
+
 		WebRemixer.Models.Clip.createOrUpdate(res.clips);
 		
 		WebRemixer.Models.Timeline.createOrUpdate(res.timelines);

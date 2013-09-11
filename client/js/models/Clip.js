@@ -38,6 +38,7 @@ WebRemixer.Models.Clip = WebRemixer.Model.extend({
 	
 		if (remix){
 			var clips = remix.get('clips');
+			this.set('order', _.indexOf(remix.get('clipIds'), this.id));
 
 			clips.add(this);
 

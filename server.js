@@ -112,6 +112,9 @@ app.get('/remixes/:id/children', function (req, res){
 	};
 	
 	async.parallel({
+		remix: function(callback){
+			Models.Remix.findById(query.remix, callback);
+		},
 		timelines: function (callback){
 			Models.Timeline.find(query, callback);
 		},

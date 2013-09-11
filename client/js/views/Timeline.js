@@ -67,6 +67,7 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 			remove: this.onTimelineClipsRemove
 		});
 
+		this.onOrderChange(this.model, this.model.get('order'));
 		this.onRemixChange(this.model, this.model.get('remix'));
 		this.onSelectedAutomationChange(this.model, this.model.get('selectedAutomation'));
 		this.onAutomationSelectorChange();
@@ -109,7 +110,8 @@ WebRemixer.Views.Timeline = WebRemixer.View.extend({
 			this.listenTo(remix, {
 				'change:selection': this.onSelectionChange,
 				'change:playTime': this.onPlayTimeChange,
-				'duplicate': this.duplicateSelection
+				'duplicate': this.duplicateSelection,
+				'delete': this.deleteSelection
 			});
 		}
 	},
