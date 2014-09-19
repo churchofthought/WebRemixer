@@ -5,6 +5,7 @@
 	"private": true,
 	"dependencies": {
 		"body-parser": "latest",
+		"server-static": "latest",
 							"express" : "latest",
 							 "stylus" : "latest",
 									"nib" : "latest",
