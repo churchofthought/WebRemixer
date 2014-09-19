@@ -74,9 +74,9 @@ db.once('open', function callback () {
  
 var app = express();
  
-app.use(express.bodyParser());
+app.use(require('body-parser').json());
 
-app.use(express.static('public'));
+app.use(require('serve-static')('public'));
 
 
 function addCRUDMethods(url, model){
