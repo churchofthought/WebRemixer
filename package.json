@@ -4,6 +4,7 @@
 	"version": "0.0.1",
 	"private": true,
 	"dependencies": {
+		"body-parser": "latest",
 							"express" : "latest",
 							 "stylus" : "latest",
 									"nib" : "latest",
